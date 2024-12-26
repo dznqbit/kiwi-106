@@ -1,7 +1,7 @@
 import "./App.css";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
-import { MidiContextProvider } from "./contexts/MidiContext";
+import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { ConfigPanel } from "./components/ConfigPanel";
 import { NoteTester } from "./components/NoteTester";
 

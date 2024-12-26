@@ -1,5 +1,6 @@
 import { Button, Group, Select } from "@mantine/core";
-import { MidiPortData, useMidiContext } from "../contexts/MidiContext";
+import { useMidiContext } from "../hooks/useMidiContext";
+import { MidiPortData } from "../contexts/MidiContext";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();

@@ -1,12 +1,18 @@
 import { createContext } from "react";
-import { MidiPortData } from "../types/MidiPortData";
-interface MidiContextEnableData {
+
+export interface MidiPortData {
+  id: string;
+  name?: string;
+  manufacturer?: string;
+}
+
+export interface MidiContextEnableData {
   enabled: boolean;
   enableSuccess: boolean | null;
   enableError: string | null;
 }
 
-interface MidiContext extends MidiContextEnableData {
+export interface MidiContext extends MidiContextEnableData {
   initialize: () => void;
 
   availableInputs: MidiPortData[];
