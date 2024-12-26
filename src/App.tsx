@@ -1,33 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
+import { WebMidi } from 'webmidi'
 import './App.css'
 
+
+function onEnabled() {
+  // Inputs
+  WebMidi.inputs.forEach(input => console.log(input.manufacturer, input.name));
+  
+  // Outputs
+  WebMidi.outputs.forEach(output => console.log(output.manufacturer, output.name));
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    WebMidi
+      .enable()
+      .then(onEnabled)
+      .catch(err => alert(err));
+  }, []);
+
+  const deviceName = "mioXC";
+
+  const noteOn = () => {
+    const myOutput = WebMidi.getOutputByName(deviceName);
+    let output = WebMidi.outputs[0];
+    let channel = output.channels[1];
+    channel.playNote("C3");
+  }
+
+  const noteOff = ()  => {
+    const myOutput = WebMidi.getOutputByName(deviceName);
+    // Panic
+    myOutput.sendAllSoundOff();
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      <h1>Kiwi 106 Programmer</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={noteOn}>
+          Note On
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button onClick={noteOff}>
+          Note Off
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
