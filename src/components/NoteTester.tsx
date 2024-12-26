@@ -1,11 +1,11 @@
 import { WebMidi } from "webmidi";
-import { useMidiContext } from "../contexts/MidiContext";
+import { useMidiContext } from "../hooks/useMidiContext";
 
 export const NoteTester = () => {
   const midiContext = useMidiContext();
 
   const noteOn = () => {
-    const outputId = midiContext.selectedOutput?.id
+    const outputId = midiContext.selectedOutput?.id;
     if (outputId == null) {
       return;
     }
@@ -18,7 +18,7 @@ export const NoteTester = () => {
   };
 
   const noteOff = () => {
-    const outputId = midiContext.selectedOutput?.id
+    const outputId = midiContext.selectedOutput?.id;
     if (outputId == null) {
       return;
     }

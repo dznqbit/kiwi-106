@@ -3,9 +3,12 @@ import { MidiPortData, useMidiContext } from "../contexts/MidiContext";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
-  const formatName = (i: MidiPortData | null) => i == null ? null : `${i.manufacturer} ${i.name}`
-  const findInputByFormattedName = (fn: string | null) => midiContext.availableInputs.find((i) => formatName(i) === fn) ?? null;
-  const findOutputByFormattedName = (fn: string | null) => midiContext.availableOutputs.find((o) => formatName(o) === fn) ?? null;
+  const formatName = (i: MidiPortData | null) =>
+    i == null ? null : `${i.manufacturer} ${i.name}`;
+  const findInputByFormattedName = (fn: string | null) =>
+    midiContext.availableInputs.find((i) => formatName(i) === fn) ?? null;
+  const findOutputByFormattedName = (fn: string | null) =>
+    midiContext.availableOutputs.find((o) => formatName(o) === fn) ?? null;
 
   return (
     <Group>
@@ -25,7 +28,9 @@ export const ConfigPanel = () => {
         data={midiContext.availableOutputs.map(
           (i) => `${i.manufacturer} ${i.name}`,
         )}
-        onChange={(fn) => midiContext.selectOutput(findOutputByFormattedName(fn))}
+        onChange={(fn) =>
+          midiContext.selectOutput(findOutputByFormattedName(fn))
+        }
       ></Select>
       <Button onClick={() => midiContext.initialize()}>Reset</Button>
     </Group>
