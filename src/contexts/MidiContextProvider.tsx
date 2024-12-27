@@ -1,6 +1,11 @@
 import { WebMidi } from "webmidi";
 import { PropsWithChildren, useState, useMemo, useEffect } from "react";
-import { MidiContext, MidiContextEnableData, MidiPortData } from "./MidiContext";
+import {
+  MidiChannel,
+  MidiContext,
+  MidiContextEnableData,
+  MidiPortData,
+} from "./MidiContext";
 
 export const MidiContextProvider = ({ children }: PropsWithChildren) => {
   const [enableData, setEnableData] = useState<MidiContextEnableData>({
@@ -8,11 +13,16 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
     enableSuccess: null,
     enableError: null,
   });
-  
+
   const [availableInputs, setAvailableInputs] = useState<MidiPortData[]>([]);
   const [selectedInput, setSelectedInput] = useState<MidiPortData | null>(null);
+  const [inputChannel, setInputChannel] = useState<MidiChannel>(1);
+
   const [availableOutputs, setAvailableOutputs] = useState<MidiPortData[]>([]);
-  const [selectedOutput, setSelectedOutput] = useState<MidiPortData | null>(null);
+  const [selectedOutput, setSelectedOutput] = useState<MidiPortData | null>(
+    null,
+  );
+  const [outputChannel, setOutputChannel] = useState<MidiChannel>(1);
 
   const initialize = () => {
     console.log("MidiContext Initialize");
@@ -24,8 +34,20 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
           enableSuccess: true,
           enableError: null,
         });
-        setAvailableInputs(WebMidi.inputs.map((i) => ({ id: i.id, name: i.name, manufacturer: i.manufacturer })));
-        setAvailableOutputs(WebMidi.outputs.map((o) => ({ id: o.id, name: o.name, manufacturer: o.manufacturer })));
+        setAvailableInputs(
+          WebMidi.inputs.map((i) => ({
+            id: i.id,
+            name: i.name,
+            manufacturer: i.manufacturer,
+          })),
+        );
+        setAvailableOutputs(
+          WebMidi.outputs.map((o) => ({
+            id: o.id,
+            name: o.name,
+            manufacturer: o.manufacturer,
+          })),
+        );
       })
       .catch((err) => {
         console.log("MidiContext Initialize Failure:", err);
@@ -39,19 +61,38 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
       });
   };
 
-  const midiContext = useMemo<MidiContext>(() => ({
-    ...enableData,
-    availableInputs,
-    selectedInput,
-    selectInput: setSelectedInput,
-    availableOutputs,
-    selectedOutput,
-    selectOutput: setSelectedOutput,
-    initialize,
-  }), [enableData, availableInputs, selectedInput, setSelectedInput, availableOutputs, selectedOutput, setSelectedOutput]);
+  const midiContext = useMemo<MidiContext>(
+    () => ({
+      ...enableData,
+      availableInputs,
+      selectedInput,
+      selectInput: setSelectedInput,
+      inputChannel,
+      setInputChannel,
+
+      availableOutputs,
+      selectedOutput,
+      selectOutput: setSelectedOutput,
+      initialize,
+      outputChannel,
+      setOutputChannel,
+    }),
+    [
+      enableData,
+      availableInputs,
+      selectedInput,
+      setSelectedInput,
+      inputChannel,
+      setInputChannel,
+      availableOutputs,
+      selectedOutput,
+      setSelectedOutput,
+      outputChannel,
+      setOutputChannel,
+    ],
+  );
 
   useEffect(() => {
-    console.log("Initilaizzz")
     initialize();
   }, []);
 
