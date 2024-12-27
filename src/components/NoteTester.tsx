@@ -1,5 +1,6 @@
 import { WebMidi } from "webmidi";
 import { useMidiContext } from "../hooks/useMidiContext";
+import { Button } from "@mantine/core";
 
 export const NoteTester = () => {
   const midiContext = useMidiContext();
@@ -33,8 +34,8 @@ export const NoteTester = () => {
 
   return (
     <div className="card">
-      <button onClick={noteOn}>Note On</button>
-      <button onClick={noteOff}>Note Off</button>
+      <Button onClick={noteOn}>Note On</Button>
+      <Button onClick={noteOff}>Note Off</Button>
     </div>
   );
 };

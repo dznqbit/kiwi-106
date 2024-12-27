@@ -1,8 +1,9 @@
 import { WebMidi } from "webmidi";
-import { Button, Fieldset, Group, Select } from "@mantine/core";
+import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
+import { IconRefresh, IconExclamationCircle } from "@tabler/icons-react";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
@@ -71,8 +72,10 @@ export const ConfigPanel = () => {
         </Group>
       </Fieldset>
 
-      <Button onClick={() => midiContext.initialize()}>Reset</Button>
-      <Button onClick={midiPanic}>Panic</Button>
+      <Stack>
+        <Button onClick={() => midiContext.initialize()} leftSection={<IconRefresh />}>Scan</Button>
+        <Button onClick={midiPanic} leftSection={<IconExclamationCircle />}>Panic</Button>
+      </Stack>
     </Group>
   );
 };
