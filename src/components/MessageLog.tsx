@@ -14,23 +14,31 @@ export const MessageLog = () => {
 
     const input = WebMidi.getInputById(midiContext.selectedInput.id);
     const logMessage = (e: MessageEvent) => {
-      console.log(e);
+      const messageType = e.message.type;
+
+      if (messageType === 'clock') {
+        return;
+      }
+
+      console.log(e.type, messageType, e);
     }
 
-    input.addListener("controlchange", logMessage);
-    input.addListener("noteoff", logMessage);
-    input.addListener("noteon", logMessage);
-    input.addListener("pitchbend", logMessage);
-    input.addListener("programchange", logMessage);
+    input.addListener("midimessage", logMessage);
+    // input.addListener("controlchange", logMessage);
+    // input.addListener("noteoff", logMessage);
+    // input.addListener("noteon", logMessage);
+    // input.addListener("pitchbend", logMessage);
+    // input.addListener("programchange", logMessage);
 
     console.log("MessageLog: now listening...");
-    
+
     return () => {
-      input.removeListener("controlchange", logMessage);
-      input.removeListener("noteoff", logMessage);
-      input.removeListener("noteon", logMessage);
-      input.removeListener("pitchbend", logMessage);
-      input.removeListener("programchange", logMessage);
+      input.addListener("midimessage", logMessage);
+      // input.removeListener("controlchange", logMessage);
+      // input.removeListener("noteoff", logMessage);
+      // input.removeListener("noteon", logMessage);
+      // input.removeListener("pitchbend", logMessage);
+      // input.removeListener("programchange", logMessage);
     }
   }, [midiContext.enabled, midiContext.selectedInput, midiContext.inputChannel]);
 

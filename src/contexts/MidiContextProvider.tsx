@@ -26,7 +26,9 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
 
   const initialize = () => {
     console.log("MidiContext Initialize");
-    WebMidi.enable()
+    WebMidi.enable({
+      sysex: true,
+    })
       .then(() => {
         console.log("MidiContext Initialize Successful");
         setEnableData({

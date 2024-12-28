@@ -3,7 +3,7 @@ import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
-import { IconRefresh, IconExclamationCircle } from "@tabler/icons-react";
+import { IconRefresh, IconExclamationCircle, IconBrain } from "@tabler/icons-react";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
@@ -19,6 +19,26 @@ export const ConfigPanel = () => {
       output.sendAllSoundOff();
     }
   };
+
+  const sendProgramChangeSysex = () => {
+    console.log("Send sysex message");
+    if (!midiContext.selectedOutput?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(midiContext.selectedOutput?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    // const identification = [0x00, 0x21, 0x16]; // Kiwitechnics manufacturer id
+    const identification = [0x7E];
+    const data: number[] = [0x7F, 0x06, 0x01];
+    
+    output.sendSysex(identification, data);
+  }
 
   return (
     <Group wrap="nowrap">
@@ -75,6 +95,7 @@ export const ConfigPanel = () => {
       <Stack>
         <Button onClick={() => midiContext.initialize()} leftSection={<IconRefresh />}>Scan</Button>
         <Button onClick={midiPanic} leftSection={<IconExclamationCircle />}>Panic</Button>
+        <Button onClick={sendProgramChangeSysex} leftSection={<IconBrain />}>Sysex</Button>
       </Stack>
     </Group>
   );

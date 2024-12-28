@@ -14,9 +14,7 @@ export const NoteTester = () => {
     if (output == null) {
       return;
     }
-    const myOutput = WebMidi.outputs[0];
-    const channel = myOutput.channels[midiContext.outputChannel];
-    console.log("playit sam", { channel, output, outputId, myOutput });
+    const channel = output.channels[midiContext.outputChannel];
     channel.playNote("C3");
   };
 
