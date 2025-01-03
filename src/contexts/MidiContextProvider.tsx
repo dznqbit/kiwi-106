@@ -1,7 +1,6 @@
 import { Input, Output, WebMidi } from "webmidi";
 import { PropsWithChildren, useState, useMemo, useCallback } from "react";
 import {
-  MidiChannel,
   MidiContext,
   MidiContextEnableData,
   MidiPortData,
@@ -22,13 +21,6 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
     enableSuccess: null,
     enableError: null,
   });
-
-  const [selectedInput, setSelectedInput] = useState<MidiPortData | null>(null);
-  const [inputChannel, setInputChannel] = useState<MidiChannel>(1);
-  const [selectedOutput, setSelectedOutput] = useState<MidiPortData | null>(
-    null,
-  );
-  const [outputChannel, setOutputChannel] = useState<MidiChannel>(1);
 
   const initialize = useCallback(() => {
     console.log("MidiContext Initialize");
@@ -60,35 +52,13 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
   const midiContext = useMemo<MidiContext>(
     () => ({
       ...enableData,
-      selectedInput,
-      selectInput: setSelectedInput,
-      inputChannel,
-      setInputChannel,
-
-      selectedOutput,
-      selectOutput: setSelectedOutput,
       initialize,
-      outputChannel,
-      setOutputChannel,
     }),
     [
       enableData,
-      selectedInput,
-      setSelectedInput,
-      inputChannel,
-      setInputChannel,
-      selectedOutput,
-      setSelectedOutput,
-      outputChannel,
-      setOutputChannel,
       initialize,
     ],
   );
-
-  // Temp commented out – was causing infinite loop?
-  // useEffect(() => {
-  //   initialize();
-  // });
 
   return (
     <MidiContext.Provider value={midiContext}>{children}</MidiContext.Provider>
