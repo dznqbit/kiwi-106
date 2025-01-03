@@ -1,11 +1,13 @@
 import { MessageEvent, WebMidi } from "webmidi";
-import { Stack, Title } from "@mantine/core";
+import { List, Stack, Title } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { useEffect } from "react";
 import { useConfigStore } from "../stores/configStore";
+import { useMidiMessageStore } from "../stores/midiMessageStore";
 
 export const MessageLog = () => {
   const configStore = useConfigStore();
+  const midiMessageStore = useMidiMessageStore();
   const midiContext = useMidiContext();
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export const MessageLog = () => {
       }
 
       console.log(e.type, messageType, e);
+      midiMessageStore.addMessageEvent(e);
     };
 
     input.addListener("midimessage", logMessage);
@@ -54,9 +57,15 @@ export const MessageLog = () => {
     };
   }, [midiContext.enabled, configStore.input, configStore.inputChannel]);
 
+  const { messageEvents } = midiMessageStore;
   return (
     <Stack>
-      <Title>Message Log</Title>
+      <Title>Message Log ({messageEvents.length})</Title>
+      <List>
+        {messageEvents.map((me) => 
+          <List.Item>{me.data.join(", ")}</List.Item>
+        )}
+      </List>
     </Stack>
   );
 };
