@@ -29,12 +29,12 @@ export const ConfigPanel = () => {
 
   const sendProgramChangeSysex = () => {
     console.log("Send sysex message");
-    if (!midiContext.selectedOutput?.id) {
+    if (!configStore.output?.id) {
       console.log("Send sysex message: no output");
       return;
     }
 
-    const output = WebMidi.getOutputById(midiContext.selectedOutput?.id);
+    const output = WebMidi.getOutputById(configStore.output?.id);
     if (!output) {
       console.log("Send sysex message: no output");
       return;
@@ -58,18 +58,18 @@ export const ConfigPanel = () => {
             placeholder={
               midiContext.enabled ? "Select an input" : "Not available"
             }
-            value={formatName(midiContext.selectedInput)}
+            value={formatName(configStore.input)}
             data={configStore.availableInputs.map(
               (i) => `${i.manufacturer} ${i.name}`,
             )}
             onChange={(fn) =>
-              midiContext.selectInput(findInputByFormattedName(fn))
+              configStore.setInput(findInputByFormattedName(fn))
             }
           ></Select>
           <SelectMidiChannel
             enabled={midiContext.enabled}
-            value={midiContext.inputChannel}
-            onChange={(c) => midiContext.setInputChannel(c)}
+            value={configStore.inputChannel}
+            onChange={(c) => configStore.setInputChannel(c)}
           />
         </Group>
       </Fieldset>
@@ -83,18 +83,18 @@ export const ConfigPanel = () => {
             placeholder={
               midiContext.enabled ? "Select an output" : "Not available"
             }
-            value={formatName(midiContext.selectedOutput)}
+            value={formatName(configStore.output)}
             data={configStore.availableOutputs.map(
               (i) => `${i.manufacturer} ${i.name}`,
             )}
             onChange={(fn) =>
-              midiContext.selectOutput(findOutputByFormattedName(fn))
+              configStore.setOutput(findOutputByFormattedName(fn))
             }
           ></Select>
           <SelectMidiChannel
             enabled={midiContext.enabled}
-            value={midiContext.outputChannel}
-            onChange={(c) => midiContext.setOutputChannel(c)}
+            value={configStore.outputChannel}
+            onChange={(c) => configStore.setOutputChannel(c)}
           />
         </Group>
       </Fieldset>

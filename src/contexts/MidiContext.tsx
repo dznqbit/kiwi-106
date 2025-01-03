@@ -16,16 +16,6 @@ export interface MidiContextEnableData {
 
 export interface MidiContext extends MidiContextEnableData {
   initialize: () => void;
-
-  selectedInput: MidiPortData | null;
-  selectInput: (i: MidiPortData | null) => void;
-  inputChannel: number;
-  setInputChannel: (c: number) => void;
-
-  selectedOutput: MidiPortData | null;
-  selectOutput: (o: MidiPortData | null) => void;
-  outputChannel: number;
-  setOutputChannel: (c: number) => void;
 }
 
 const defaultMidiContext: MidiContext = {
@@ -33,16 +23,6 @@ const defaultMidiContext: MidiContext = {
   enableSuccess: null,
   enableError: null,
   initialize: () => {},
-
-  selectedInput: null,
-  selectInput: () => {},
-  inputChannel: 1,
-  setInputChannel: () => {},
-
-  selectedOutput: null,
-  selectOutput: () => {},
-  outputChannel: 1,
-  setOutputChannel: () => {},
 };
 
 export const MidiContext = createContext(defaultMidiContext);

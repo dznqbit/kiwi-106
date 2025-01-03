@@ -1,12 +1,12 @@
 import { WebMidi } from "webmidi";
-import { useMidiContext } from "../hooks/useMidiContext";
 import { Button } from "@mantine/core";
+import { useConfigStore } from "../stores/configStore";
 
 export const NoteTester = () => {
-  const midiContext = useMidiContext();
+  const configStore = useConfigStore();
 
   const noteOn = () => {
-    const outputId = midiContext.selectedOutput?.id;
+    const outputId = configStore.output?.id;
     if (outputId == null) {
       return;
     }
@@ -14,12 +14,12 @@ export const NoteTester = () => {
     if (output == null) {
       return;
     }
-    const channel = output.channels[midiContext.outputChannel];
+    const channel = output.channels[configStore.outputChannel];
     channel.playNote("C3");
   };
 
   const noteOff = () => {
-    const outputId = midiContext.selectedOutput?.id;
+    const outputId = configStore.output?.id;
     if (outputId == null) {
       return;
     }
