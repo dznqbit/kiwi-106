@@ -1,55 +1,51 @@
-import { WebMidi } from "webmidi";
-import { PropsWithChildren, useState, useMemo, useEffect } from "react";
+import { Input, Output, WebMidi } from "webmidi";
+import { PropsWithChildren, useState, useMemo, useCallback } from "react";
 import {
   MidiChannel,
   MidiContext,
   MidiContextEnableData,
   MidiPortData,
 } from "./MidiContext";
+import { useConfigStore } from "../stores/configStore";
+
+const mapWebmidiPort = (p: Input | Output): MidiPortData => ({
+  id: p.id,
+  name: p.name,
+  manufacturer: p.manufacturer,
+});
 
 export const MidiContextProvider = ({ children }: PropsWithChildren) => {
+  const configStore = useConfigStore();
+
   const [enableData, setEnableData] = useState<MidiContextEnableData>({
     enabled: false,
     enableSuccess: null,
     enableError: null,
   });
 
-  const [availableInputs, setAvailableInputs] = useState<MidiPortData[]>([]);
   const [selectedInput, setSelectedInput] = useState<MidiPortData | null>(null);
   const [inputChannel, setInputChannel] = useState<MidiChannel>(1);
-
-  const [availableOutputs, setAvailableOutputs] = useState<MidiPortData[]>([]);
   const [selectedOutput, setSelectedOutput] = useState<MidiPortData | null>(
     null,
   );
   const [outputChannel, setOutputChannel] = useState<MidiChannel>(1);
 
-  const initialize = () => {
+  const initialize = useCallback(() => {
     console.log("MidiContext Initialize");
     WebMidi.enable({
       sysex: true,
     })
       .then(() => {
         console.log("MidiContext Initialize Successful");
+        const inputs = WebMidi.inputs.map(mapWebmidiPort);
+        const outputs = WebMidi.outputs.map(mapWebmidiPort);
+        configStore.setAvailablePorts(inputs, outputs);
+
         setEnableData({
           enabled: true,
           enableSuccess: true,
           enableError: null,
         });
-        setAvailableInputs(
-          WebMidi.inputs.map((i) => ({
-            id: i.id,
-            name: i.name,
-            manufacturer: i.manufacturer,
-          })),
-        );
-        setAvailableOutputs(
-          WebMidi.outputs.map((o) => ({
-            id: o.id,
-            name: o.name,
-            manufacturer: o.manufacturer,
-          })),
-        );
       })
       .catch((err) => {
         console.log("MidiContext Initialize Failure:", err);
@@ -58,21 +54,17 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
           enableSuccess: false,
           enableError: err,
         });
-        setAvailableInputs([]);
-        setAvailableOutputs([]);
       });
-  };
+  }, [configStore]);
 
   const midiContext = useMemo<MidiContext>(
     () => ({
       ...enableData,
-      availableInputs,
       selectedInput,
       selectInput: setSelectedInput,
       inputChannel,
       setInputChannel,
 
-      availableOutputs,
       selectedOutput,
       selectOutput: setSelectedOutput,
       initialize,
@@ -81,22 +73,22 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
     }),
     [
       enableData,
-      availableInputs,
       selectedInput,
       setSelectedInput,
       inputChannel,
       setInputChannel,
-      availableOutputs,
       selectedOutput,
       setSelectedOutput,
       outputChannel,
       setOutputChannel,
+      initialize,
     ],
   );
 
-  useEffect(() => {
-    initialize();
-  }, []);
+  // Temp commented out – was causing infinite loop?
+  // useEffect(() => {
+  //   initialize();
+  // });
 
   return (
     <MidiContext.Provider value={midiContext}>{children}</MidiContext.Provider>

@@ -15,11 +15,19 @@ export const HexCalculator = () => {
             leftSection="0x"
             value={hexValue.toString(16)}
             onChange={(e) => {
-              const inputValue = e.currentTarget.value === "" ? "0" : e.currentTarget.value.substring(0, 2);
-              setHexValue(Number.parseInt(inputValue, 16))
+              const inputValue =
+                e.currentTarget.value === ""
+                  ? "0"
+                  : e.currentTarget.value.substring(0, 2);
+              setHexValue(Number.parseInt(inputValue, 16));
             }}
           />
-          <Input name="Decimal" readOnly placeholder="127" value={hexValue.toString(10)} />
+          <Input
+            name="Decimal"
+            readOnly
+            placeholder="127"
+            value={hexValue.toString(10)}
+          />
         </Group>
       </Fieldset>
       <Fieldset legend="Decimal to Hex">
@@ -29,13 +37,22 @@ export const HexCalculator = () => {
             placeholder="127"
             value={decimalValue}
             onChange={(e) => {
-              const inputValue = e.currentTarget.value === "" ? "0" : e.currentTarget.value.substring(0, 3);
-              setDecimalValue(Number.parseInt(inputValue))
+              const inputValue =
+                e.currentTarget.value === ""
+                  ? "0"
+                  : e.currentTarget.value.substring(0, 3);
+              setDecimalValue(Number.parseInt(inputValue));
             }}
           />
-          <Input name="Hex" readOnly placeholder="0xFF" value={decimalValue.toString(16)} leftSection="0x" />
+          <Input
+            name="Hex"
+            readOnly
+            placeholder="0xFF"
+            value={decimalValue.toString(16)}
+            leftSection="0x"
+          />
         </Group>
       </Fieldset>
     </Group>
   );
-}
+};

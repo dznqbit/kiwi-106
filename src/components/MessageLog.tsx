@@ -1,11 +1,11 @@
 import { MessageEvent, WebMidi } from "webmidi";
-import { Stack, Title } from "@mantine/core"
-import { useMidiContext } from "../hooks/useMidiContext"
+import { Stack, Title } from "@mantine/core";
+import { useMidiContext } from "../hooks/useMidiContext";
 import { useEffect } from "react";
 
 export const MessageLog = () => {
   const midiContext = useMidiContext();
-  
+
   useEffect(() => {
     if (!midiContext.enabled || midiContext.selectedInput == null) {
       console.log("MessageLog: cannot listen, dropping out");
@@ -16,12 +16,12 @@ export const MessageLog = () => {
     const logMessage = (e: MessageEvent) => {
       const messageType = e.message.type;
 
-      if (messageType === 'clock') {
+      if (messageType === "clock") {
         return;
       }
 
       console.log(e.type, messageType, e);
-    }
+    };
 
     input.addListener("midimessage", logMessage);
     // input.addListener("controlchange", logMessage);
@@ -39,10 +39,16 @@ export const MessageLog = () => {
       // input.removeListener("noteon", logMessage);
       // input.removeListener("pitchbend", logMessage);
       // input.removeListener("programchange", logMessage);
-    }
-  }, [midiContext.enabled, midiContext.selectedInput, midiContext.inputChannel]);
+    };
+  }, [
+    midiContext.enabled,
+    midiContext.selectedInput,
+    midiContext.inputChannel,
+  ]);
 
-  return <Stack>
-    <Title>Message Log</Title>
-  </Stack>
-}
+  return (
+    <Stack>
+      <Title>Message Log</Title>
+    </Stack>
+  );
+};
