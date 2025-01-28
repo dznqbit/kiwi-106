@@ -68,7 +68,7 @@ export const MidiMessageTable = () => {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {messageEvents.map((me) => (
+            {messageEvents.slice(0, 20).map((me) => (
               <MidiMessageRow messageEvent={me} />
             ))}
           </Table.Tbody>
