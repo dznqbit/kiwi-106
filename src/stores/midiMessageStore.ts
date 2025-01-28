@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { MessageEvent } from "webmidi";
 
 interface MidiMessageState {
@@ -8,21 +7,19 @@ interface MidiMessageState {
 
 interface MidiMessageActions {
   addMessageEvent: (m: MessageEvent) => void;
+  clear: () => void;
 }
 
 type MidiMessageStore = MidiMessageState & MidiMessageActions;
 
 export const useMidiMessageStore = create<MidiMessageStore>()(
-  // persist(
-    (set) => ({
-      messageEvents: [],
+  (set) => ({
+    messageEvents: [],
 
-      addMessageEvent: (m: MessageEvent) => set(
-        ({ messageEvents, ...rest }) => ({ ...rest, messageEvents: [...messageEvents, m] })
-    )
-    }),
-  //   {
-  //     name: "midiMessages"
-  //   }
-  // ),
+    addMessageEvent: (m: MessageEvent) => set(
+      ({ messageEvents, ...rest }) => ({ ...rest, messageEvents: [m, ...messageEvents] })
+    ),
+
+    clear: () => set(() => ({ messageEvents: []})),
+  }),
 );
