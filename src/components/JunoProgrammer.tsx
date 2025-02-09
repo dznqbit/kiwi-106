@@ -8,16 +8,50 @@ import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { kiwiPatchDiff } from "../utils/kiwiPatchDiff";
 import { useEffect } from "react";
-import { WebMidi } from "webmidi";
+import { ControlChangeMessageEvent, WebMidi } from "webmidi";
 import { useConfigStore } from "../stores/configStore";
 import { objectKeys } from "../utils/objectKeys";
-import { kiwiCcValue } from "../utils/kiwiCcValue";
+import { kiwiCcController } from "../utils/kiwiCcController";
 
 export const JunoProgrammer = () => {
+  const midiContext = useMidiContext();
   const configStore = useConfigStore();
+  // const kiwiPatchStore = useKiwiPatchStore();
 
   useEffect(() => {
-    return useKiwiPatchStore.subscribe((state, oldState) => {
+    if (!midiContext.enabled) {
+      console.log("MessageLog: WebMidi not enabled, dropping");
+      return;
+    }
+
+    if (configStore.input == null) {
+      console.log("MessageLog: No input selected, dropping");
+      return;
+    }
+
+    const input = WebMidi.getInputById(configStore.input.id);
+    if (!input) {
+      console.log("MessageLog: cannot listen, dropping out");
+      return;
+    }
+
+    const updateKiwiPatch = (e: ControlChangeMessageEvent) => {
+      console.log(e);
+      // TODO: Map incoming CC to KiwiPatch
+      // e.controller.number
+      // (e.value);
+    };
+
+    input.addListener("controlchange", updateKiwiPatch);
+    console.log("MessageLog: now listening...");
+
+    return () => {
+      input.removeListener("controlchange", updateKiwiPatch);
+    };
+  }, [midiContext.enabled, configStore.input, configStore.inputChannel]);
+
+  useEffect(() => {
+    const unsubscribeKiwiSyncer = useKiwiPatchStore.subscribe((state, oldState) => {
       const diff = kiwiPatchDiff(state.kiwiPatch, oldState.kiwiPatch);
 
       if (Object.keys(diff).length > 0) {
@@ -39,11 +73,13 @@ export const JunoProgrammer = () => {
         for(const k of objectKeys(diff)) {
           if (diff[k] !== undefined) {
             console.log("SEND :D", k, diff[k]);
-            channel.sendControlChange(kiwiCcValue(k), diff[k]);
+            channel.sendControlChange(kiwiCcController(k), diff[k]);
           }
         }
       }
     });
+
+    return unsubscribeKiwiSyncer;
   }, []);
 
   return (

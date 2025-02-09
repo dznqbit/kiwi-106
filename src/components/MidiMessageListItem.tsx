@@ -6,15 +6,15 @@ interface MidiMessageListItemParams {
   messageEvent: MessageEvent;
 }
 
-const midiMessageLabels: Record<number, string | undefined> = {
-  [Enumerations.CHANNEL_MESSAGES.noteon]: 'NoteOn',
-  [Enumerations.CHANNEL_MESSAGES.noteoff]: 'NoteOff',
-  [Enumerations.CHANNEL_MESSAGES.pitchbend]: 'PitchBend',
-  [Enumerations.CHANNEL_MESSAGES.controlchange]: 'ControlChange',
-  [Enumerations.CHANNEL_MESSAGES.programchange]: 'ProgramChange',
-  [Enumerations.CHANNEL_MESSAGES.channelaftertouch]: 'ChannelAftertouch',
-  [Enumerations.CHANNEL_MESSAGES.keyaftertouch]: 'KeyAftertouch',
-}
+// const midiMessageLabels: Record<number, string | undefined> = {
+//   [Enumerations.CHANNEL_MESSAGES.noteon]: 'NoteOn',
+//   [Enumerations.CHANNEL_MESSAGES.noteoff]: 'NoteOff',
+//   [Enumerations.CHANNEL_MESSAGES.pitchbend]: 'PitchBend',
+//   [Enumerations.CHANNEL_MESSAGES.controlchange]: 'ControlChange',
+//   [Enumerations.CHANNEL_MESSAGES.programchange]: 'ProgramChange',
+//   [Enumerations.CHANNEL_MESSAGES.channelaftertouch]: 'ChannelAftertouch',
+//   [Enumerations.CHANNEL_MESSAGES.keyaftertouch]: 'KeyAftertouch',
+// }
 
 const X = List.Item;
 
@@ -80,8 +80,8 @@ export const MidiMessageListItem = ({ messageEvent }: MidiMessageListItemParams)
 
   const firstByte = messageData[0];
   const messageType = firstByte >> 4;
-  const channel = firstByte & 0b00001111 + 1;
-  const messageLabel = midiMessageLabels[messageType] ?? messageType;
+  // const channel = firstByte & 0b00001111 + 1;
+  // const messageLabel = midiMessageLabels[messageType] ?? messageType;
 
   switch (messageType) {
     case Enumerations.CHANNEL_MESSAGES.noteon:
