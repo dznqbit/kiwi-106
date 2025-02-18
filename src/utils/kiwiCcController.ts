@@ -61,3 +61,7 @@ const kiwiControllerValues: Record<keyof KiwiPatch, number> = {
 export const kiwiCcController = (k: keyof KiwiPatch): number => {
   return kiwiControllerValues[k];
 }
+
+export const kiwiPatchKey = (cc: number): keyof KiwiPatch | undefined => {
+  return Object.keys(kiwiControllerValues).find(k => kiwiControllerValues[k as keyof KiwiPatch] === cc) as keyof KiwiPatch | undefined;
+}

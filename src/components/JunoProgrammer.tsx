@@ -11,14 +11,19 @@ import { useEffect } from "react";
 import { ControlChangeMessageEvent, WebMidi } from "webmidi";
 import { useConfigStore } from "../stores/configStore";
 import { objectKeys } from "../utils/objectKeys";
-import { kiwiCcController } from "../utils/kiwiCcController";
+import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
+import { kiwiCcLabel } from "../utils/kiwiCcLabel";
+import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
-  // const kiwiPatchStore = useKiwiPatchStore();
+  const {
+    setPatchProperty,
+  } = useKiwiPatchStore();
 
   useEffect(() => {
+    // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
     if (!midiContext.enabled) {
       console.log("MessageLog: WebMidi not enabled, dropping");
       return;
@@ -36,10 +41,16 @@ export const JunoProgrammer = () => {
     }
 
     const updateKiwiPatch = (e: ControlChangeMessageEvent) => {
-      console.log(e);
-      // TODO: Map incoming CC to KiwiPatch
-      // e.controller.number
-      // (e.value);
+      const [_, b1, b2] = e.data;
+
+      const patchKey = kiwiPatchKey(b1)
+      const ccData = trimMidiCcValue(b2)
+
+      if (patchKey) {
+        setPatchProperty(patchKey, ccData);
+      } else {
+        console.log("Received unknown", kiwiCcLabel(b1))
+      }
     };
 
     input.addListener("controlchange", updateKiwiPatch);
@@ -48,15 +59,14 @@ export const JunoProgrammer = () => {
     return () => {
       input.removeListener("controlchange", updateKiwiPatch);
     };
-  }, [midiContext.enabled, configStore.input, configStore.inputChannel]);
+  }, [midiContext.enabled, configStore.input, configStore.inputChannel, setPatchProperty]);
 
   useEffect(() => {
+    // Wire up updates to the KiwiStore to the  (ie SEND MIDI OUT)
     const unsubscribeKiwiSyncer = useKiwiPatchStore.subscribe((state, oldState) => {
       const diff = kiwiPatchDiff(state.kiwiPatch, oldState.kiwiPatch);
 
       if (Object.keys(diff).length > 0) {
-        console.log(":o, state change!", { diff });
-
         const outputId = configStore.output?.id;
         if (outputId == null) {
           console.log("incomplete (no outputId)");
@@ -72,7 +82,6 @@ export const JunoProgrammer = () => {
 
         for(const k of objectKeys(diff)) {
           if (diff[k] !== undefined) {
-            console.log("SEND :D", k, diff[k]);
             channel.sendControlChange(kiwiCcController(k), diff[k]);
           }
         }
@@ -80,7 +89,7 @@ export const JunoProgrammer = () => {
     });
 
     return unsubscribeKiwiSyncer;
-  }, []);
+  }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
     <Container size="lg">

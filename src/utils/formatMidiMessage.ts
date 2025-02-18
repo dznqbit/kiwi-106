@@ -1,5 +1,5 @@
 import { MessageEvent } from "webmidi";
-import { MidiMessageType } from "../types/Midi";
+import { isMidiMessageType, MidiMessageType } from "../types/Midi";
 
 interface FormattedMidiMessage {
   messageType: MidiMessageType;
@@ -18,11 +18,19 @@ interface FormattedMidiMessage {
 //   [Enumerations.CHANNEL_MESSAGES.keyaftertouch]: 'KeyAftertouch',
 // }
 
+const midiMessageType = (messageType: string): MidiMessageType => {
+  if (isMidiMessageType(messageType)) {
+    return messageType;
+  } else {
+    throw new Error(`Unknown messageType: ${messageType}`);
+  }
+}
+
 // format MessageEvent for our message log
 export const formatMidiMessage = (messageEvent: MessageEvent): FormattedMidiMessage => {
   const message = messageEvent.message;
   // const messageData = messageEvent.message.data;
-  // const messageType = message.type;
+  const messageType = midiMessageType(message.type);
 
   // const firstByte = messageData[0];
   // const firstFourBits = firstByte >> 4;
@@ -31,7 +39,7 @@ export const formatMidiMessage = (messageEvent: MessageEvent): FormattedMidiMess
   // const messageLabel = midiMessageLabels[messageType] ?? messageType;
   
   return {
-    messageType: 'noteon',
+    messageType,
     messageData: 'TODO',
     channel,
     label: 'TODO'

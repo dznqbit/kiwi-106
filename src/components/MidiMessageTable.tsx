@@ -84,8 +84,6 @@ interface MidiMessageRowParams {
 
 const MidiMessageRow = ({ messageEvent }: MidiMessageRowParams) => {
   const { messageType, channel } = formatMidiMessage(messageEvent);
-  // const channel = firstByte & 0b00001111 + 1;
-  // const messageLabel = midiMessageLabels[messageType] ?? messageType;
 
   return (<Table.Tr>
     <Table.Td>{messageType}</Table.Td>
