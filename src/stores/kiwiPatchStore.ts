@@ -11,7 +11,7 @@ interface KiwiPatchState {
 interface KiwiPatchActions {
   setPortamentoTime: SetMidiCcValue;
   setVolume: SetMidiCcValue;
-  setPatchProperty: (key: keyof KiwiPatchState['kiwiPatch'], value: MidiCcValue) => void;
+  setKiwiPatchProperty: (key: keyof KiwiPatch, value: MidiCcValue) => void;
 }
 
 type KiwiPatchStore = KiwiPatchState & KiwiPatchActions;
@@ -79,7 +79,7 @@ export const useKiwiPatchStore = create<KiwiPatchStore>()(
   (set) => ({
     ...blankKiwiPatchState,
 
-    setPatchProperty: (key, value) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, [key]: value }})),
+    setKiwiPatchProperty: (key, value) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, [key]: value }})),
     setPortamentoTime: (v) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, portamentoTime: trimMidiCcValue(v) }})),
     setVolume: (v) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, volume: trimMidiCcValue(v) }})),
   }),

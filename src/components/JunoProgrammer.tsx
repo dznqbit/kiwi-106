@@ -19,7 +19,7 @@ export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
   const {
-    setPatchProperty,
+    setKiwiPatchProperty: setPatchProperty,
   } = useKiwiPatchStore();
 
   useEffect(() => {

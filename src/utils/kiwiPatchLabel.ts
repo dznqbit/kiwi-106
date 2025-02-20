@@ -53,4 +53,9 @@ export const labelMapping: Record<keyof KiwiPatch, string> = {
   keyMode: 'Key Mode',
   keyAssignDetune: 'Key Assign Detune',
   keyAssignDetuneMode: 'Key Assign Detune Mode'
-};
+}
+
+export const kiwiPatchLabel = (k: keyof KiwiPatch) => {
+  console.log("hmm", k, labelMapping[k])
+  return labelMapping[k]
+}
