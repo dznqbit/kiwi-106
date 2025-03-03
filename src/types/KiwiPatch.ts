@@ -39,6 +39,7 @@ export interface KiwiPatch {
   env1Decay: MidiCcValue;
   env1Sustain: MidiCcValue;
   env1Release: MidiCcValue;
+  
   chorusMode: MidiCcValue;
   vcaLfoModAmount: MidiCcValue;
   vcaLfoSource: MidiCcValue;

@@ -40,11 +40,15 @@ export const ConfigPanel = () => {
       return;
     }
 
-    // const identification = [0x00, 0x21, 0x16]; // Kiwitechnics manufacturer id
-    const identification = [0x7e];
-    const data: number[] = [0x7f, 0x06, 0x01];
+    // Universal
+    const universalNonRealtimeIdentification = [0x7e];
+    const universalData: number[] = [
+      0x7f, // ALL devices
+      0x06, // General information
+      0x01  // Device Inquiry request
+    ];
 
-    output.sendSysex(identification, data);
+    output.sendSysex(universalNonRealtimeIdentification, universalData);
   };
 
   return (

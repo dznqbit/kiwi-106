@@ -4,10 +4,8 @@ import { useMidiContext } from "../hooks/useMidiContext";
 import { useEffect } from "react";
 import { useConfigStore } from "../stores/configStore";
 import { useMidiMessageStore } from "../stores/midiMessageStore";
-import { formatMidiMessage } from "../utils/formatMidiMessage";
+import { formatMidiMessage, FormattedMidiMessage, isControlChangeMidiMessage, isNoteMidiMessage } from "../utils/formatMidiMessage";
 import { IconTrash } from "@tabler/icons-react";
-import { noteLabel } from "../utils/noteLabel";
-import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 
 export const MidiMessageTable = () => {
   const configStore = useConfigStore();
@@ -83,79 +81,34 @@ interface MidiMessageRowParams {
 }
 
 const MidiMessageRow = ({ messageEvent }: MidiMessageRowParams) => {
-  const { messageType, channel } = formatMidiMessage(messageEvent);
+  const formattedMessage = formatMidiMessage(messageEvent);
 
   return (<Table.Tr>
-    <Table.Td>{messageType}</Table.Td>
-    <Table.Td>{channel ?? 'ALL'}</Table.Td>
-    <Table.Td><MessageData messageEvent={messageEvent} /></Table.Td>
+    <Table.Td>{formattedMessage.label}</Table.Td>
+    <Table.Td>{formattedMessage.channel ?? 'ALL'}</Table.Td>
+    <Table.Td><MessageData messageEvent={messageEvent} formattedMessage={formattedMessage} /></Table.Td>
   </Table.Tr>);
 }
 
-const MessageData = ({ messageEvent }: MidiMessageRowParams) => {
-  switch (messageEvent.message.type) {
-    case 'noteon':
-      return <NoteOn messageEvent={messageEvent} />;
-    case 'noteoff':
-      return <NoteOff messageEvent={messageEvent} />;
-    case 'controlchange':
-      return <ControlChange messageEvent={messageEvent} />;
-    case 'programchange':
-      return <ProgramChange messageEvent={messageEvent} />;
-    default:
-      return <GenericMessage messageEvent={messageEvent} />;
+interface MessageDataParams {
+  messageEvent: MessageEvent
+  formattedMessage: FormattedMidiMessage
+}
+
+const MessageData = ({ messageEvent, formattedMessage }: MessageDataParams) => {
+  if (isControlChangeMidiMessage(formattedMessage)) {
+    return <Group>
+      <Text>{formattedMessage.controllerName}</Text>
+      <Text>{formattedMessage.controllerValue}</Text>
+    </Group>
   }
-}
 
-const NoteOn = ({ messageEvent }: MidiMessageRowParams) => {
-  const [_, note, velocity] = messageEvent.message.data;
-
-  return (
-    <Group>
-      <Text>{noteLabel(note)}</Text>
-      <Text>{velocity}</Text>
+  if (isNoteMidiMessage(formattedMessage)) {
+    return <Group>
+      <Text>{formattedMessage.noteLabel}</Text>
+      <Text>{formattedMessage.velocity}</Text>
     </Group>
-  )
-}
+  }
 
-const NoteOff = ({ messageEvent }: MidiMessageRowParams) => {
-  const [_, note, velocity] = messageEvent.message.data;
-
-  return (
-    <Group>
-      <Text>{noteLabel(note)}</Text>
-      <Text>{velocity}</Text>
-    </Group>
-  )
-}
-
-const ControlChange = ({ messageEvent }: MidiMessageRowParams) => {
-  const [_, b1, b2] = messageEvent.message.data;
-
-  return (
-    <Group>
-      <Text>{kiwiCcLabel(b1)}</Text>
-      <Text>{b2}</Text>
-    </Group>
-  )
-}
-
-const ProgramChange = ({ messageEvent }: MidiMessageRowParams) => {
-  const [_, b1, b2] = messageEvent.message.data;
-
-  return (
-    <Group>
-      <Text>{b1}</Text>
-      <Text>{b2}</Text>
-    </Group>
-  )
-}
-
-const GenericMessage = ({ messageEvent }: MidiMessageRowParams) => {
-  const messageData = messageEvent.message.data;
-  return (
-    <Text>
-      {messageData.map(b => b.toString(16).toUpperCase()).join(", ")}
-    </Text>
-  )
+  return <Text>{messageEvent.data.map(b => b.toString(16).toUpperCase()).join(", ")}</Text>
 }
