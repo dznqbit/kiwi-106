@@ -1,7 +1,5 @@
 import { createContext } from "react";
 
-export type MidiChannel = number;
-
 export interface MidiPortData {
   id: string;
   name: string | null;

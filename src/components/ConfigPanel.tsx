@@ -9,6 +9,7 @@ import {
   IconBrain,
 } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
+import { kiwiTechnicsSysexId } from "../utils/sysexUtils";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
@@ -27,8 +28,7 @@ export const ConfigPanel = () => {
     }
   };
 
-  const sendProgramChangeSysex = () => {
-    console.log("Send sysex message");
+  const sendDeviceEnquirySysex = () => {
     if (!configStore.output?.id) {
       console.log("Send sysex message: no output");
       return;
@@ -49,6 +49,42 @@ export const ConfigPanel = () => {
     ];
 
     output.sendSysex(universalNonRealtimeIdentification, universalData);
+  };
+
+  const requestGlobalDumpSysex = () => {
+    if (!configStore.output?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(configStore.output?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00]
+    const requestGlobalDump = 0x01
+
+    output.sendSysex(kiwiTechnicsSysexId, [...additionalKiwiIdentifiers, requestGlobalDump])
+  };
+
+  const requestPatchDumpSysex = () => {
+    if (!configStore.output?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(configStore.output?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00]
+    const requestPatchDump = 0x03
+
+    output.sendSysex(kiwiTechnicsSysexId, [...additionalKiwiIdentifiers, requestPatchDump])
   };
 
   return (
@@ -113,8 +149,14 @@ export const ConfigPanel = () => {
         <Button onClick={midiPanic} leftSection={<IconExclamationCircle />}>
           Panic
         </Button>
-        <Button onClick={sendProgramChangeSysex} leftSection={<IconBrain />}>
-          Sysex
+        <Button onClick={sendDeviceEnquirySysex} leftSection={<IconBrain />}>
+          Device Enquiry
+        </Button>
+        <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
+          Request Global Dump
+        </Button>
+        <Button onClick={requestPatchDumpSysex} leftSection={<IconBrain />}>
+          Request Patch Dump
         </Button>
       </Stack>
     </Group>
