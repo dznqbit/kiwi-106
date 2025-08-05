@@ -28,7 +28,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     dcoLfoSource: 0,
     dcoEnvelopeModAmount: 0,
     dcoEnvelopeSource: 0,
-  
+
     lfoMode: 0,
     lfo1Wave: 0,
     lfo1Rate: 0,
@@ -38,10 +38,10 @@ const blankKiwiPatchState: KiwiPatchState = {
     lfo2Delay: 0,
     lfo1Mode: 0,
     lfo2Mode: 0,
-  
+
     subLevel: 0,
     noiseLevel: 0,
-  
+
     vcfLowPassCutoff: 0,
     vcfLowPassResonance: 0,
     vcfPitchFollow: 0,
@@ -50,7 +50,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     vcfLfoSource: 0,
     vcfEnvelopeModAmount: 0,
     vcfEnvelopeSource: 0,
-  
+
     env1Attack: 0,
     env1Decay: 0,
     env1Sustain: 0,
@@ -59,28 +59,38 @@ const blankKiwiPatchState: KiwiPatchState = {
     vcaLfoModAmount: 0,
     vcaLfoSource: 0,
     vcaMode: 0,
-  
+
     env2Attack: 0,
     env2Decay: 0,
     env2Sustain: 0,
     env2Release: 0,
-  
+
     dcoBendAmount: 0,
     vcfBendAmount: 0,
     lfoModWheelAmount: 0,
-  
+
     keyMode: 0,
     keyAssignDetune: 0,
     keyAssignDetuneMode: 0,
-  }
-}
+  },
+};
 
-export const useKiwiPatchStore = create<KiwiPatchStore>()(
-  (set) => ({
-    ...blankKiwiPatchState,
+export const useKiwiPatchStore = create<KiwiPatchStore>()((set) => ({
+  ...blankKiwiPatchState,
 
-    setKiwiPatchProperty: (key, value) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, [key]: value }})),
-    setPortamentoTime: (v) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, portamentoTime: trimMidiCcValue(v) }})),
-    setVolume: (v) => set(({ kiwiPatch, ...rest }) => ({ ...rest, kiwiPatch: { ...kiwiPatch, volume: trimMidiCcValue(v) }})),
-  }),
-);
+  setKiwiPatchProperty: (key, value) =>
+    set(({ kiwiPatch, ...rest }) => ({
+      ...rest,
+      kiwiPatch: { ...kiwiPatch, [key]: value },
+    })),
+  setPortamentoTime: (v) =>
+    set(({ kiwiPatch, ...rest }) => ({
+      ...rest,
+      kiwiPatch: { ...kiwiPatch, portamentoTime: trimMidiCcValue(v) },
+    })),
+  setVolume: (v) =>
+    set(({ kiwiPatch, ...rest }) => ({
+      ...rest,
+      kiwiPatch: { ...kiwiPatch, volume: trimMidiCcValue(v) },
+    })),
+}));

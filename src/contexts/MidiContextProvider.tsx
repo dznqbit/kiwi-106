@@ -54,10 +54,7 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
       ...enableData,
       initialize,
     }),
-    [
-      enableData,
-      initialize,
-    ],
+    [enableData, initialize],
   );
 
   return (

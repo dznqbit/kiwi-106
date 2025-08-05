@@ -4,9 +4,14 @@ import { useMidiContext } from "../hooks/useMidiContext";
 import { useEffect } from "react";
 import { useConfigStore } from "../stores/configStore";
 import { useMidiMessageStore } from "../stores/midiMessageStore";
-import { formatMidiMessage, FormattedMidiMessage, isControlChangeMidiMessage, isNoteMidiMessage } from "../utils/formatMidiMessage";
+import {
+  formatMidiMessage,
+  FormattedMidiMessage,
+  isControlChangeMidiMessage,
+  isNoteMidiMessage,
+} from "../utils/formatMidiMessage";
 import { IconTrash } from "@tabler/icons-react";
-import * as _ from 'lodash'
+import * as _ from "lodash";
 
 export const MidiMessageTable = () => {
   const configStore = useConfigStore();
@@ -54,9 +59,11 @@ export const MidiMessageTable = () => {
     <Stack>
       <Group>
         <Title>Message Log ({messageEvents.length})</Title>
-        <Button onClick={() => clearMidiMessages()} leftSection={<IconTrash />}>Clear</Button>
+        <Button onClick={() => clearMidiMessages()} leftSection={<IconTrash />}>
+          Clear
+        </Button>
       </Group>
-      
+
       <Table.ScrollContainer h={256} minWidth={512}>
         <Table>
           <Table.Thead>
@@ -84,54 +91,69 @@ interface MidiMessageRowParams {
 const MidiMessageRow = ({ messageEvent }: MidiMessageRowParams) => {
   const formattedMessage = formatMidiMessage(messageEvent);
 
-  return (<Table.Tr>
-    <Table.Td>{formattedMessage.label}</Table.Td>
-    <Table.Td>{formattedMessage.channel ?? 'ALL'}</Table.Td>
-    <Table.Td>
-      <MessageData messageEvent={messageEvent} formattedMessage={formattedMessage} />
-      <MessageSparkline messageEvent={messageEvent} />
-    </Table.Td>
-  </Table.Tr>);
-}
+  return (
+    <Table.Tr>
+      <Table.Td>{formattedMessage.label}</Table.Td>
+      <Table.Td>{formattedMessage.channel ?? "ALL"}</Table.Td>
+      <Table.Td>
+        <MessageData
+          messageEvent={messageEvent}
+          formattedMessage={formattedMessage}
+        />
+        <MessageSparkline messageEvent={messageEvent} />
+      </Table.Td>
+    </Table.Tr>
+  );
+};
 
 interface MessageDataParams {
-  messageEvent: MessageEvent
-  formattedMessage: FormattedMidiMessage
+  messageEvent: MessageEvent;
+  formattedMessage: FormattedMidiMessage;
 }
 
 const formatHex = (num: number) => {
-  return `0x${num.toString(16).toUpperCase().padStart(2, '0')}`;
+  return `0x${num.toString(16).toUpperCase().padStart(2, "0")}`;
 };
 
 const MessageData = ({ messageEvent, formattedMessage }: MessageDataParams) => {
   if (isControlChangeMidiMessage(formattedMessage)) {
-    return <Group>
-      <Text>{formattedMessage.controllerName}</Text>
-      <Text>{formattedMessage.controllerValue}</Text>
-    </Group>
+    return (
+      <Group>
+        <Text>{formattedMessage.controllerName}</Text>
+        <Text>{formattedMessage.controllerValue}</Text>
+      </Group>
+    );
   }
 
   if (isNoteMidiMessage(formattedMessage)) {
-    return <Group>
-      <Text>{formattedMessage.noteLabel}</Text>
-      <Text>{formattedMessage.velocity}</Text>
-    </Group>
+    return (
+      <Group>
+        <Text>{formattedMessage.noteLabel}</Text>
+        <Text>{formattedMessage.velocity}</Text>
+      </Group>
+    );
   }
 
-  return <Text>{_.map(messageEvent.data, formatHex).map((d) => <Code mx={2}>{d}</Code>)}</Text>
-}
+  return (
+    <Text>
+      {_.map(messageEvent.data, formatHex).map((d) => (
+        <Code mx={2}>{d}</Code>
+      ))}
+    </Text>
+  );
+};
 
 const mapColor = (byte: number) => {
   // Convert byte to HSL (hue, saturation, lightness)
   const hue = Math.floor((byte / 255) * 360); // 0-360 degrees around color wheel
   const saturation = 100; // Full saturation
   const lightness = 50; // Medium lightness
-  
+
   // Convert HSL to RGB
-  const c = (1 - Math.abs(2 * lightness / 100 - 1)) * saturation / 100;
-  const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+  const c = ((1 - Math.abs((2 * lightness) / 100 - 1)) * saturation) / 100;
+  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
   const m = lightness / 100 - c / 2;
-  
+
   let r, g, b;
   if (hue < 60) {
     [r, g, b] = [c, x, 0];
@@ -146,41 +168,45 @@ const mapColor = (byte: number) => {
   } else {
     [r, g, b] = [c, 0, x];
   }
-  
+
   // Convert RGB to hex
-  const toHex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  const toHex = (v: number) =>
+    Math.round((v + m) * 255)
+      .toString(16)
+      .padStart(2, "0");
   return `${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
 
 interface MessageSparklineParams {
-  messageEvent: MessageEvent
+  messageEvent: MessageEvent;
 }
 
 const MessageSparkline = ({ messageEvent }: MessageSparklineParams) => {
   // Typescript is mad at messageEvent.data.map for some reason
-  const data = [...(messageEvent.data)]
-  const bytesPerRow = 64
-  const cellSize = 10
+  const data = [...messageEvent.data];
+  const bytesPerRow = 64;
+  const cellSize = 10;
 
   const width = bytesPerRow * cellSize;
   const height = Math.ceil(data.length / bytesPerRow) * cellSize;
 
-  
-  return <svg width={width} height={height}>
-    {data.map((d, i) => {
-      const x = (i % bytesPerRow) * cellSize;
-      const y = Math.floor(i / bytesPerRow) * cellSize;
+  return (
+    <svg width={width} height={height}>
+      {data.map((d, i) => {
+        const x = (i % bytesPerRow) * cellSize;
+        const y = Math.floor(i / bytesPerRow) * cellSize;
 
-      return (
-        <rect
-          key={`sparkline-${i}`}
-          x={x}
-          y={y}
-          width={cellSize}
-          height={cellSize}
-          fill={`#${mapColor(d)}`}
-        />
-      )
-    })}
-  </svg>
-}
+        return (
+          <rect
+            key={`sparkline-${i}`}
+            x={x}
+            y={y}
+            width={cellSize}
+            height={cellSize}
+            fill={`#${mapColor(d)}`}
+          />
+        );
+      })}
+    </svg>
+  );
+};

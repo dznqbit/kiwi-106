@@ -12,14 +12,14 @@ interface MidiMessageActions {
 
 type MidiMessageStore = MidiMessageState & MidiMessageActions;
 
-export const useMidiMessageStore = create<MidiMessageStore>()(
-  (set) => ({
-    messageEvents: [],
+export const useMidiMessageStore = create<MidiMessageStore>()((set) => ({
+  messageEvents: [],
 
-    addMessageEvent: (m: MessageEvent) => set(
-      ({ messageEvents, ...rest }) => ({ ...rest, messageEvents: [m, ...messageEvents] })
-    ),
+  addMessageEvent: (m: MessageEvent) =>
+    set(({ messageEvents, ...rest }) => ({
+      ...rest,
+      messageEvents: [m, ...messageEvents],
+    })),
 
-    clear: () => set(() => ({ messageEvents: []})),
-  }),
-);
+  clear: () => set(() => ({ messageEvents: [] })),
+}));

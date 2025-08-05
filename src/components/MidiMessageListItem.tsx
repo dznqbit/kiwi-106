@@ -1,5 +1,5 @@
 import { MessageEvent, Enumerations } from "webmidi";
-import { Group, List , Text } from "@mantine/core";
+import { Group, List, Text } from "@mantine/core";
 import { noteLabel } from "../utils/noteLabel";
 
 interface MidiMessageListItemParams {
@@ -21,61 +21,73 @@ const X = List.Item;
 const NoteOn = ({ messageEvent }: MidiMessageListItemParams) => {
   const [_, note, velocity] = messageEvent.message.data;
 
-  return <X>
-    <Group>
-      <Text>NoteOn</Text>
-      <Text>{noteLabel(note)}</Text>
-      <Text>{velocity}</Text>
-    </Group>
-  </X>
-}
+  return (
+    <X>
+      <Group>
+        <Text>NoteOn</Text>
+        <Text>{noteLabel(note)}</Text>
+        <Text>{velocity}</Text>
+      </Group>
+    </X>
+  );
+};
 
 const NoteOff = ({ messageEvent }: MidiMessageListItemParams) => {
   const [_, note, velocity] = messageEvent.message.data;
 
-  return <X>
-    <Group>
-      <Text>NoteOff</Text>
-      <Text>{noteLabel(note)}</Text>
-      <Text>{velocity}</Text>
-    </Group>
-  </X>
-}
+  return (
+    <X>
+      <Group>
+        <Text>NoteOff</Text>
+        <Text>{noteLabel(note)}</Text>
+        <Text>{velocity}</Text>
+      </Group>
+    </X>
+  );
+};
 
 const ControlChange = ({ messageEvent }: MidiMessageListItemParams) => {
   const [_, b1, b2] = messageEvent.message.data;
 
-  return <X>
-    <Group>
-      <Text>CC</Text>
-      <Text>{b1}</Text>
-      <Text>{b2}</Text>
-    </Group>
-  </X>
-}
+  return (
+    <X>
+      <Group>
+        <Text>CC</Text>
+        <Text>{b1}</Text>
+        <Text>{b2}</Text>
+      </Group>
+    </X>
+  );
+};
 
 const ProgramChange = ({ messageEvent }: MidiMessageListItemParams) => {
   const [_, b1, b2] = messageEvent.message.data;
 
-  return <X>
-    <Group>
-      <Text>PC</Text>
-      <Text>{b1}</Text>
-      <Text>{b2}</Text>
-    </Group>
-  </X>
-}
+  return (
+    <X>
+      <Group>
+        <Text>PC</Text>
+        <Text>{b1}</Text>
+        <Text>{b2}</Text>
+      </Group>
+    </X>
+  );
+};
 
 const GenericMessage = ({ messageEvent }: MidiMessageListItemParams) => {
   const messageData = messageEvent.message.data;
-  return <X>
-    <Text>
-      {messageData.map(b => b.toString(16).toUpperCase()).join(", ")}
-    </Text>
-  </X>
-}
+  return (
+    <X>
+      <Text>
+        {messageData.map((b) => b.toString(16).toUpperCase()).join(", ")}
+      </Text>
+    </X>
+  );
+};
 
-export const MidiMessageListItem = ({ messageEvent }: MidiMessageListItemParams) => {
+export const MidiMessageListItem = ({
+  messageEvent,
+}: MidiMessageListItemParams) => {
   const messageData = messageEvent.message.data;
 
   const firstByte = messageData[0];
@@ -91,8 +103,8 @@ export const MidiMessageListItem = ({ messageEvent }: MidiMessageListItemParams)
     case Enumerations.CHANNEL_MESSAGES.controlchange:
       return ControlChange({ messageEvent });
     case Enumerations.CHANNEL_MESSAGES.programchange:
-        return ProgramChange({ messageEvent });
+      return ProgramChange({ messageEvent });
     default:
       return GenericMessage({ messageEvent });
   }
-}
+};
