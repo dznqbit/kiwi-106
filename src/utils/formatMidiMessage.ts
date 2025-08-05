@@ -1,9 +1,10 @@
 import { MessageEvent } from "webmidi";
-import { isMidiMessageType, MidiMessageType } from "../types/Midi";
+import { isMidiMessageType, MidiChannel, MidiMessageType } from "../types/Midi";
 import { kiwiCcLabel } from "./kiwiCcLabel";
 import { noteLabel } from "./noteLabel";
-import { isSysexDeviceEnquiryReply, kiwiTechnicsSysexId } from "./sysexUtils";
+import { isKiwi106GlobalDumpSysexMessage, isSysexDeviceEnquiryReply, kiwiTechnicsSysexId } from "./sysexUtils";
 import * as _ from 'lodash'
+import { trimMidiChannel } from "./trimMidiCcValue";
 
 interface BaseFormattedMidiMessage {
   messageType: MidiMessageType;
@@ -47,7 +48,65 @@ interface DeviceEnquirySysexMidiMessage extends BaseSysexMidiMessage {
   decideId: number; // Global Parameter 3 ???
 }
 
-type SysexMidiMessage = BaseSysexMidiMessage;
+interface Kiwi106GlobalDumpSysexMidiMessage extends BaseSysexMidiMessage {
+   midiChannelIn: MidiChannel;
+   midiChannelOut: MidiChannel;
+   sequencerMidiChannelOut: MidiChannel;
+   deviceId: number;
+   enableMidiCc: number;
+   enableSysex: number;
+   enableProgramChange: number;
+   midiSoftThrough: number;
+   enableMidiClockGen: number;
+   internalVelocity: number;
+   masterClockSource: number;
+
+   patternLevelHi: number;
+   patternLevelLo: number;
+   patternControl: number;
+
+   clockRateHi: number;
+   clockRateLo: number;
+
+   mwLevel: number;
+   atLevel: number;
+   keyTransposeDisable: number;
+   displayMode: number;
+   memoryProtect: number;
+   internalTune: number;
+   externalPedalPolarity: number;
+}
+
+interface Kiwi106PatchDumpSysexMidiMessage extends BaseSysexMidiMessage {
+  midiChannelIn: MidiChannel;
+  midiChannelOut: MidiChannel;
+  sequencerMidiChannelOut: MidiChannel;
+  deviceId: number;
+  enableMidiCc: number;
+  enableSysex: number;
+  enableProgramChange: number;
+  midiSoftThrough: number;
+  enableMidiClockGen: number;
+  internalVelocity: number;
+  masterClockSource: number;
+
+  patternLevelHi: number;
+  patternLevelLo: number;
+  patternControl: number;
+
+  clockRateHi: number;
+  clockRateLo: number;
+
+  mwLevel: number;
+  atLevel: number;
+  keyTransposeDisable: number;
+  displayMode: number;
+  memoryProtect: number;
+  internalTune: number;
+  externalPedalPolarity: number;
+}
+
+type SysexMidiMessage = DeviceEnquirySysexMidiMessage | Kiwi106GlobalDumpSysexMidiMessage;
 export type FormattedMidiMessage = BaseFormattedMidiMessage | ControlChangeMidiMessage | NoteMidiMessage | SysexMidiMessage;
 
 const midiMessageLabels: Record<MidiMessageType, string | undefined> = {
@@ -74,12 +133,7 @@ export const formatMidiMessage = (messageEvent: MessageEvent): FormattedMidiMess
   const message = messageEvent.message;
   const messageData = messageEvent.message.data;
   const messageType = midiMessageType(message.type);
-
-  // const firstByte = messageData[0];
-  // const firstFourBits = firstByte >> 4;
-  // const channel = firstByte & 0b00001111 + 1;
   const channel = message.isChannelMessage ? message.channel : null;
-  // const messageLabel = midiMessageLabels[messageType] ?? messageType;
 
   const baseMessageData = {
     messageType,
@@ -100,8 +154,8 @@ export const formatMidiMessage = (messageEvent: MessageEvent): FormattedMidiMess
       return {
         ...baseMessageData,
         note: messageData[0],
-        noteLabel: noteLabel(messageData[0]),
-        velocity: messageData[1]
+        noteLabel: noteLabel(messageData[1]),
+        velocity: messageData[2]
       };
     case 'sysex':
       if (isSysexDeviceEnquiryReply(message)) {
@@ -124,13 +178,43 @@ export const formatMidiMessage = (messageEvent: MessageEvent): FormattedMidiMess
         } else {
           throw new Error("Received unexpected Sysex")
         }
-        return {
+      }
+
+      if (isKiwi106GlobalDumpSysexMessage(message)) {
+        const kiwi106GlobalDump: Kiwi106GlobalDumpSysexMidiMessage = {
           ...baseMessageData,
+          messageType,
+          midiChannelIn: trimMidiChannel(messageData[8]),
+          midiChannelOut: trimMidiChannel(messageData[9]),
+          sequencerMidiChannelOut: trimMidiChannel(messageData[10]),
+          deviceId: messageData[11],
+          enableMidiCc: messageData[12],
+          enableSysex: messageData[13],
+          enableProgramChange: messageData[14],
+          midiSoftThrough: messageData[15],
+          enableMidiClockGen: messageData[16],
+          internalVelocity: messageData[17],
+          masterClockSource: messageData[18],
+          patternLevelHi: messageData[22],
+          patternLevelLo: messageData[23],
+          patternControl: messageData[24],
+          clockRateHi: messageData[25],
+          clockRateLo: messageData[26],
+          mwLevel: messageData[27],
+          atLevel: messageData[28],
+          keyTransposeDisable: messageData[29],
+          displayMode: messageData[30],
+          memoryProtect: messageData[31],
+          internalTune: messageData[33],
+          externalPedalPolarity: messageData[34]
         }
-      } else {
-        return {
-          ...baseMessageData,
-        }
+
+        console.log(kiwi106GlobalDump)
+        return kiwi106GlobalDump
+      }
+
+      return {
+        ...baseMessageData,
       }
     default:
       return baseMessageData
