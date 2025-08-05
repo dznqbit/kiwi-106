@@ -52,7 +52,7 @@ export const MidiMessageTable = () => {
     return () => {
       input.removeListener("midimessage", logMessage);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [midiContext.enabled, configStore.input, configStore.inputChannel]);
 
   const { messageEvents, clear: clearMidiMessages } = midiMessageStore;
