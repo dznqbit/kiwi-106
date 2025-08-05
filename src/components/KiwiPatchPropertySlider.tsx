@@ -1,22 +1,23 @@
-import { Slider } from "@mantine/core"
-import { KiwiPatch } from "../types/KiwiPatch"
+import { Slider } from "@mantine/core";
+import { KiwiPatch } from "../types/KiwiPatch";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 
 interface KiwiPatchPropertySlider {
-  property: keyof KiwiPatch
+  property: keyof KiwiPatch;
 }
-export const KiwiPatchPropertySlider = ({ property }: KiwiPatchPropertySlider) => {
-  const {
-    kiwiPatch,
-    setKiwiPatchProperty
-    } = useKiwiPatchStore();
-    
-  return <Slider
-    labelAlwaysOn
-    value={kiwiPatch[property]}
-    onChange={(v) => setKiwiPatchProperty(property, trimMidiCcValue(v))}
-    min={0}
-    max={127}
-  />
-}
+export const KiwiPatchPropertySlider = ({
+  property,
+}: KiwiPatchPropertySlider) => {
+  const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
+
+  return (
+    <Slider
+      labelAlwaysOn
+      value={kiwiPatch[property]}
+      onChange={(v) => setKiwiPatchProperty(property, trimMidiCcValue(v))}
+      min={0}
+      max={127}
+    />
+  );
+};

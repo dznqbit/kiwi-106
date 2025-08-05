@@ -45,7 +45,7 @@ export const ConfigPanel = () => {
     const universalData: number[] = [
       0x7f, // ALL devices
       0x06, // General information
-      0x01  // Device Inquiry request
+      0x01, // Device Inquiry request
     ];
 
     output.sendSysex(universalNonRealtimeIdentification, universalData);
@@ -63,10 +63,13 @@ export const ConfigPanel = () => {
       return;
     }
 
-    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00]
-    const requestGlobalDump = 0x01
+    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00];
+    const requestGlobalDump = 0x01;
 
-    output.sendSysex(kiwiTechnicsSysexId, [...additionalKiwiIdentifiers, requestGlobalDump])
+    output.sendSysex(kiwiTechnicsSysexId, [
+      ...additionalKiwiIdentifiers,
+      requestGlobalDump,
+    ]);
   };
 
   const requestPatchDumpSysex = () => {
@@ -81,10 +84,13 @@ export const ConfigPanel = () => {
       return;
     }
 
-    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00]
-    const requestPatchDump = 0x03
+    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00];
+    const requestPatchDump = 0x03;
 
-    output.sendSysex(kiwiTechnicsSysexId, [...additionalKiwiIdentifiers, requestPatchDump])
+    output.sendSysex(kiwiTechnicsSysexId, [
+      ...additionalKiwiIdentifiers,
+      requestPatchDump,
+    ]);
   };
 
   return (

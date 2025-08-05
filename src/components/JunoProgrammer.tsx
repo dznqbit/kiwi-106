@@ -18,9 +18,7 @@ import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
-  const {
-    setKiwiPatchProperty: setPatchProperty,
-  } = useKiwiPatchStore();
+  const { setKiwiPatchProperty: setPatchProperty } = useKiwiPatchStore();
 
   useEffect(() => {
     // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
@@ -43,13 +41,13 @@ export const JunoProgrammer = () => {
     const updateKiwiPatch = (e: ControlChangeMessageEvent) => {
       const [_, b1, b2] = e.data;
 
-      const patchKey = kiwiPatchKey(b1)
-      const ccData = trimMidiCcValue(b2)
+      const patchKey = kiwiPatchKey(b1);
+      const ccData = trimMidiCcValue(b2);
 
       if (patchKey) {
         setPatchProperty(patchKey, ccData);
       } else {
-        console.log("Received unknown", kiwiCcLabel(b1))
+        console.log("Received unknown", kiwiCcLabel(b1));
       }
     };
 
@@ -59,34 +57,41 @@ export const JunoProgrammer = () => {
     return () => {
       input.removeListener("controlchange", updateKiwiPatch);
     };
-  }, [midiContext.enabled, configStore.input, configStore.inputChannel, setPatchProperty]);
+  }, [
+    midiContext.enabled,
+    configStore.input,
+    configStore.inputChannel,
+    setPatchProperty,
+  ]);
 
   useEffect(() => {
     // Wire up updates to the KiwiStore to the  (ie SEND MIDI OUT)
-    const unsubscribeKiwiSyncer = useKiwiPatchStore.subscribe((state, oldState) => {
-      const diff = kiwiPatchDiff(state.kiwiPatch, oldState.kiwiPatch);
+    const unsubscribeKiwiSyncer = useKiwiPatchStore.subscribe(
+      (state, oldState) => {
+        const diff = kiwiPatchDiff(state.kiwiPatch, oldState.kiwiPatch);
 
-      if (Object.keys(diff).length > 0) {
-        const outputId = configStore.output?.id;
-        if (outputId == null) {
-          console.log("incomplete (no outputId)");
-          return;
-        }    
-        
-        const output = WebMidi.getOutputById(outputId);
-        if (output == null) {
-          console.log("incomplete (no output)");
-          return;
-        }
-        const channel = output.channels[configStore.outputChannel];
+        if (Object.keys(diff).length > 0) {
+          const outputId = configStore.output?.id;
+          if (outputId == null) {
+            console.log("incomplete (no outputId)");
+            return;
+          }
 
-        for(const k of objectKeys(diff)) {
-          if (diff[k] !== undefined) {
-            channel.sendControlChange(kiwiCcController(k), diff[k]);
+          const output = WebMidi.getOutputById(outputId);
+          if (output == null) {
+            console.log("incomplete (no output)");
+            return;
+          }
+          const channel = output.channels[configStore.outputChannel];
+
+          for (const k of objectKeys(diff)) {
+            if (diff[k] !== undefined) {
+              channel.sendControlChange(kiwiCcController(k), diff[k]);
+            }
           }
         }
-      }
-    });
+      },
+    );
 
     return unsubscribeKiwiSyncer;
   }, [configStore.output?.id, configStore.outputChannel]);
