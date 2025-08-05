@@ -85,34 +85,35 @@ interface Kiwi106GlobalDumpSysexMidiMessage extends BaseSysexMidiMessage {
   externalPedalPolarity: number;
 }
 
-interface Kiwi106PatchDumpSysexMidiMessage extends BaseSysexMidiMessage {
-  midiChannelIn: MidiChannel;
-  midiChannelOut: MidiChannel;
-  sequencerMidiChannelOut: MidiChannel;
-  deviceId: number;
-  enableMidiCc: number;
-  enableSysex: number;
-  enableProgramChange: number;
-  midiSoftThrough: number;
-  enableMidiClockGen: number;
-  internalVelocity: number;
-  masterClockSource: number;
+// Not sure if we need this yet, but Prettier is now pissy about it
+// interface Kiwi106PatchDumpSysexMidiMessage extends BaseSysexMidiMessage {
+//   midiChannelIn: MidiChannel;
+//   midiChannelOut: MidiChannel;
+//   sequencerMidiChannelOut: MidiChannel;
+//   deviceId: number;
+//   enableMidiCc: number;
+//   enableSysex: number;
+//   enableProgramChange: number;
+//   midiSoftThrough: number;
+//   enableMidiClockGen: number;
+//   internalVelocity: number;
+//   masterClockSource: number;
 
-  patternLevelHi: number;
-  patternLevelLo: number;
-  patternControl: number;
+//   patternLevelHi: number;
+//   patternLevelLo: number;
+//   patternControl: number;
 
-  clockRateHi: number;
-  clockRateLo: number;
+//   clockRateHi: number;
+//   clockRateLo: number;
 
-  mwLevel: number;
-  atLevel: number;
-  keyTransposeDisable: number;
-  displayMode: number;
-  memoryProtect: number;
-  internalTune: number;
-  externalPedalPolarity: number;
-}
+//   mwLevel: number;
+//   atLevel: number;
+//   keyTransposeDisable: number;
+//   displayMode: number;
+//   memoryProtect: number;
+//   internalTune: number;
+//   externalPedalPolarity: number;
+// }
 
 type SysexMidiMessage =
   | DeviceEnquirySysexMidiMessage
