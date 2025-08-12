@@ -26,24 +26,22 @@ export const SysexMessageData = ({
   const [sysexFooter] = sysexData.slice(-1);
 
   return (
-    <Stack>
-      <Group>
-        <LabeledMidiData label="Sysex Header" data={[sysexHeader]} />
-        <LabeledMidiData
-          label="KiwiTechnics Manufacturer Id"
-          data={[mfId1, mfId2, mfId3]}
-        />
-        <LabeledMidiData label="KiwiTechnics Id" data={[kiwiId]} />
-        <LabeledMidiData label="KiwiTechnics Juno-106 Id" data={[kiwi106Id]} />
-        <LabeledMidiData label="Device Id" data={[deviceId]} />
-        <LabeledMidiData label="Command Id" data={[commandId]} />
+    <Group gap="xs" wrap="wrap">
+      <LabeledMidiData label="Sysex Header" data={[sysexHeader]} />
+      <LabeledMidiData
+        label="KiwiTechnics Manufacturer Id"
+        data={[mfId1, mfId2, mfId3]}
+      />
+      <LabeledMidiData label="KiwiTechnics Id" data={[kiwiId]} />
+      <LabeledMidiData label="KiwiTechnics Juno-106 Id" data={[kiwi106Id]} />
+      <LabeledMidiData label="Device Id" data={[deviceId]} />
+      <LabeledMidiData label="Command Id" data={[commandId]} />
 
-        {rest.map((d) => (
-          <LabeledMidiData label="Test" data={[d]} />
-        ))}
-        <LabeledMidiData label="Sysex Footer" data={[sysexFooter]} />
-      </Group>
-    </Stack>
+      {rest.map((d, i) => (
+        <LabeledMidiData key={i} label="Data" data={[d]} />
+      ))}
+      <LabeledMidiData label="Sysex Footer" data={[sysexFooter]} />
+    </Group>
   );
 };
 
@@ -55,16 +53,22 @@ const LabeledMidiData = ({
   data: number[];
 }) => {
   return (
-    <Box>
-      <Tooltip label={label}>
-        <Group gap="xs">
-          {_.map(data, formatHex).map((d, i) => (
-            <Code key={i} mx={2}>
-              {d}
-            </Code>
-          ))}
-        </Group>
-      </Tooltip>
-    </Box>
+    <Tooltip label={label}>
+      <Group
+        gap={2}
+        p={2}
+        style={{
+          borderRadius: 4,
+          backgroundColor: "var(--mantine-color-dark-6)",
+          border: "1px solid var(--mantine-color-dark-4)",
+        }}
+      >
+        {_.map(data, formatHex).map((d, i) => (
+          <Code key={i} size="xs" p={2}>
+            {d}
+          </Code>
+        ))}
+      </Group>
+    </Tooltip>
   );
 };
