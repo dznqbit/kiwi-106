@@ -17,7 +17,7 @@ interface BaseFormattedMidiMessage {
   data: number[];
 }
 
-interface ControlChangeMidiMessage extends BaseFormattedMidiMessage {
+export interface ControlChangeMidiMessage extends BaseFormattedMidiMessage {
   messageType: "controlchange";
   controllerName: string; // Formatted name
   controllerValue: string; // Formatted value label
@@ -29,7 +29,7 @@ export const isControlChangeMidiMessage = (
   return x.messageType === "controlchange";
 };
 
-interface NoteMidiMessage extends BaseFormattedMidiMessage {
+export interface NoteMidiMessage extends BaseFormattedMidiMessage {
   messageType: "noteon" | "noteoff";
   note: number;
   noteLabel: string;
@@ -46,6 +46,11 @@ interface BaseSysexMidiMessage extends BaseFormattedMidiMessage {
   messageType: "sysex";
 }
 
+export const isSysexMidiMessage = (
+  x: FormattedMidiMessage,
+): x is SysexMidiMessage => {
+  return x.messageType === "sysex";
+};
 interface DeviceEnquirySysexMidiMessage extends BaseSysexMidiMessage {
   manufacturer: string;
   productFamilyId: number;
@@ -115,9 +120,10 @@ interface Kiwi106GlobalDumpSysexMidiMessage extends BaseSysexMidiMessage {
 //   externalPedalPolarity: number;
 // }
 
-type SysexMidiMessage =
+export type SysexMidiMessage =
   | DeviceEnquirySysexMidiMessage
   | Kiwi106GlobalDumpSysexMidiMessage;
+
 export type FormattedMidiMessage =
   | BaseFormattedMidiMessage
   | ControlChangeMidiMessage

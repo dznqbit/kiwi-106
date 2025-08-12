@@ -9,9 +9,14 @@ import {
   FormattedMidiMessage,
   isControlChangeMidiMessage,
   isNoteMidiMessage,
+  isSysexMidiMessage,
 } from "../utils/formatMidiMessage";
 import { IconTrash } from "@tabler/icons-react";
 import * as _ from "lodash";
+import { SysexMessageData } from "./MidiMessageData/SysexMidiMessageData";
+import { formatHex } from "../utils/formatHex";
+import { ControlChangeMidiMessageData } from "./MidiMessageData/ControlChangeMidiMessageData";
+import { NoteMidiMessageData } from "./MidiMessageData/NoteMidiMessageData";
 
 export const MidiMessageTable = () => {
   const configStore = useConfigStore();
@@ -113,27 +118,22 @@ interface MessageDataParams {
   formattedMessage: FormattedMidiMessage;
 }
 
-const formatHex = (num: number) => {
-  return `0x${num.toString(16).toUpperCase().padStart(2, "0")}`;
-};
-
 const MessageData = ({ messageEvent, formattedMessage }: MessageDataParams) => {
-  if (isControlChangeMidiMessage(formattedMessage)) {
+  if (isSysexMidiMessage(formattedMessage)) {
     return (
-      <Group>
-        <Text>{formattedMessage.controllerName}</Text>
-        <Text>{formattedMessage.controllerValue}</Text>
-      </Group>
+      <SysexMessageData
+        messageEvent={messageEvent}
+        formattedMessage={formattedMessage}
+      />
     );
   }
 
+  if (isControlChangeMidiMessage(formattedMessage)) {
+    return <ControlChangeMidiMessageData formattedMessage={formattedMessage} />;
+  }
+
   if (isNoteMidiMessage(formattedMessage)) {
-    return (
-      <Group>
-        <Text>{formattedMessage.noteLabel}</Text>
-        <Text>{formattedMessage.velocity}</Text>
-      </Group>
-    );
+    return <NoteMidiMessageData formattedMessage={formattedMessage} />;
   }
 
   return (
