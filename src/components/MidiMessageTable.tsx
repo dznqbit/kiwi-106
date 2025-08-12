@@ -76,7 +76,7 @@ export const MidiMessageTable = () => {
           </Table.Thead>
           <Table.Tbody>
             {messageEvents.slice(0, 20).map((me) => (
-              <MidiMessageRow messageEvent={me} />
+              <MidiMessageRow key={me.timestamp} messageEvent={me} />
             ))}
           </Table.Tbody>
         </Table>
@@ -98,6 +98,7 @@ const MidiMessageRow = ({ messageEvent }: MidiMessageRowParams) => {
       <Table.Td>{formattedMessage.channel ?? "ALL"}</Table.Td>
       <Table.Td>
         <MessageData
+          key={`${messageEvent.timestamp}-data`}
           messageEvent={messageEvent}
           formattedMessage={formattedMessage}
         />
@@ -137,8 +138,12 @@ const MessageData = ({ messageEvent, formattedMessage }: MessageDataParams) => {
 
   return (
     <Text>
-      {_.map(messageEvent.data, formatHex).map((d) => (
-        <Code mx={2}>{d}</Code>
+      ({messageEvent.rawData.length} bytes)
+      <br />
+      {_.map(messageEvent.data, formatHex).map((d, i) => (
+        <Code key={[messageEvent.timestamp, "data", i].join("")} mx={2}>
+          {d}
+        </Code>
       ))}
     </Text>
   );

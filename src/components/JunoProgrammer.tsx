@@ -8,12 +8,21 @@ import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { kiwiPatchDiff } from "../utils/kiwiPatchDiff";
 import { useEffect } from "react";
-import { ControlChangeMessageEvent, WebMidi } from "webmidi";
+import { ControlChangeMessageEvent, MessageEvent, WebMidi } from "webmidi";
 import { useConfigStore } from "../stores/configStore";
 import { objectKeys } from "../utils/objectKeys";
 import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
 import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
+import { PatchNameEditor } from "./PatchNameEditor";
+import { isMidiCcValue } from "../types/Midi";
+import {
+  isKiwi106UpdatePatchNameSysexMessage,
+  isKiwi106SysexMessage,
+  kiwi106Identifier,
+  kiwiTechnicsSysexId,
+  isKiwi106BufferDumpSysexMessage,
+} from "../utils/sysexUtils";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -38,7 +47,7 @@ export const JunoProgrammer = () => {
       return;
     }
 
-    const updateKiwiPatch = (e: ControlChangeMessageEvent) => {
+    const updatePatchFromControlChange = (e: ControlChangeMessageEvent) => {
       const [_, b1, b2] = e.data;
 
       const patchKey = kiwiPatchKey(b1);
@@ -51,11 +60,38 @@ export const JunoProgrammer = () => {
       }
     };
 
-    input.addListener("controlchange", updateKiwiPatch);
+    input.addListener("controlchange", updatePatchFromControlChange);
+
+    const sysexListener = (e: MessageEvent) => {
+      const message = e.message;
+
+      if (!isKiwi106SysexMessage(message)) {
+        console.log("Ignoring non-Kiwi message");
+      }
+
+      if (isKiwi106UpdatePatchNameSysexMessage(message)) {
+        const patchName = message.data
+          .slice(8, -1)
+          .map((x) => String.fromCharCode(x))
+          .join("");
+        console.log("Time to update patch name with", patchName);
+      }
+
+      if (isKiwi106BufferDumpSysexMessage(message)) {
+        const patchName = message.data
+          .slice(10, 30)
+          .map((x) => String.fromCharCode(x))
+          .join("");
+        setPatchProperty("patchName", patchName);
+      }
+    };
+
+    input.addListener("sysex", sysexListener);
+
     console.log("MessageLog: now listening...");
 
     return () => {
-      input.removeListener("controlchange", updateKiwiPatch);
+      input.removeListener("controlchange", updatePatchFromControlChange);
     };
   }, [
     midiContext.enabled,
@@ -86,7 +122,24 @@ export const JunoProgrammer = () => {
 
           for (const k of objectKeys(diff)) {
             if (diff[k] !== undefined) {
-              channel.sendControlChange(kiwiCcController(k), diff[k]);
+              if (isMidiCcValue(diff[k])) {
+                channel.sendControlChange(kiwiCcController(k), diff[k]);
+              } else {
+                const s = diff[k];
+
+                const updatePatchName = 0x0c;
+                const patchNameBytes = Array.from(s).map(
+                  (char) => char.charCodeAt(0) & 0x7f,
+                );
+
+                console.log("Sending patch name", patchNameBytes);
+                output.sendSysex(kiwiTechnicsSysexId, [
+                  ...kiwi106Identifier,
+                  0x00,
+                  updatePatchName,
+                  ...patchNameBytes,
+                ]);
+              }
             }
           }
         }
@@ -102,6 +155,7 @@ export const JunoProgrammer = () => {
       <MidiMessageTable />
       <HexCalculator />
       <NoteTester />
+      <PatchNameEditor />
       <JunoSliders />
     </Container>
   );

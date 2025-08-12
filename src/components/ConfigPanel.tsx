@@ -9,7 +9,7 @@ import {
   IconBrain,
 } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
-import { kiwiTechnicsSysexId } from "../utils/sysexUtils";
+import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
@@ -63,12 +63,10 @@ export const ConfigPanel = () => {
       return;
     }
 
-    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00];
-    const requestGlobalDump = 0x01;
-
     output.sendSysex(kiwiTechnicsSysexId, [
-      ...additionalKiwiIdentifiers,
-      requestGlobalDump,
+      ...kiwi106Identifier,
+      0x00, // Required "Device ID"
+      0x01, // Request Global Dump
     ]);
   };
 
@@ -84,13 +82,185 @@ export const ConfigPanel = () => {
       return;
     }
 
-    const additionalKiwiIdentifiers = [0x60, 0x03, 0x00];
-    const requestPatchDump = 0x03;
+    output.sendSysex(kiwiTechnicsSysexId, [
+      ...kiwi106Identifier,
+      0x00, // Required "Device ID"
+      0x03, // Request Buffer Dump
+    ]);
+  };
+
+  const sendPatchBufferDumpSysex = () => {
+    if (!configStore.output?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(configStore.output?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
 
     output.sendSysex(kiwiTechnicsSysexId, [
-      ...additionalKiwiIdentifiers,
-      requestPatchDump,
+      ...kiwi106Identifier,
+      0x00, // Required "Device ID"
+      0x04, // Transmit Patch Buffer Dump
+
+      0x00, // Per docs, 2 x null bytes followed by 128 bytes of data in following format
+      0x00,
+
+      // "yahoo"
+      121,
+      97,
+      104,
+      111,
+      111,
+
+      0x73,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x20,
+      0x0c,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x1f,
+      0x68,
+      0x00,
+      0x00,
+      0x1a,
+      0x22,
+      0x00,
+      0x00,
+      0x00,
+      0x02,
+      0x30,
+      0x00,
+      0x12,
+      0x34,
+      0x00,
+      0x00,
+      0x03,
+      0x6c,
+      0x00,
+      0x00,
+      0x01,
+      0x70,
+      0x00,
+      0x20,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x54,
+      0x1f,
+      0x63,
+      0x00,
+      0x00,
+      0x00,
+      0x14,
+      0x03,
+      0x44,
+      0x13,
+      0x6f,
+      0x00,
+      0x00,
+      0x00,
+      0x02,
+      0x14,
+      0x2c,
+      0x17,
+      0x3c,
+      0x00,
+      0x0d,
+      0x41,
+      0x11,
+      0x44,
+      0x00,
+      0x00,
+      0x1c,
+      0x24,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
     ]);
+  };
+
+  const requestPatchNameSysex = () => {
+    if (!configStore.output?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(configStore.output?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    output.sendSysex(kiwiTechnicsSysexId, [
+      ...kiwi106Identifier,
+      0x00, // Required "Device ID"
+      0x0b, // Request patch name
+    ]);
+
+    console.log("Requested patch name");
   };
 
   return (
@@ -163,6 +333,12 @@ export const ConfigPanel = () => {
         </Button>
         <Button onClick={requestPatchDumpSysex} leftSection={<IconBrain />}>
           Request Patch Dump
+        </Button>
+        <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>
+          Send Patch Dump
+        </Button>
+        <Button onClick={requestPatchNameSysex} leftSection={<IconBrain />}>
+          Request Patch Name
         </Button>
       </Stack>
     </Group>

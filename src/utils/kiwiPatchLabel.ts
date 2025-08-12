@@ -56,6 +56,5 @@ export const labelMapping: Record<keyof KiwiPatch, string> = {
 };
 
 export const kiwiPatchLabel = (k: keyof KiwiPatch) => {
-  console.log("hmm", k, labelMapping[k]);
   return labelMapping[k];
 };

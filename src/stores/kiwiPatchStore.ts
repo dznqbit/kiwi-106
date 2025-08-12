@@ -1,23 +1,24 @@
 import { create } from "zustand";
 import { KiwiPatch } from "../types/KiwiPatch";
-import { trimMidiCcValue } from "../utils/trimMidiCcValue";
-import { MidiCcValue } from "../types/Midi";
 
-type SetMidiCcValue = (v: number) => void;
 interface KiwiPatchState {
   kiwiPatch: KiwiPatch;
 }
 
 interface KiwiPatchActions {
-  setPortamentoTime: SetMidiCcValue;
-  setVolume: SetMidiCcValue;
-  setKiwiPatchProperty: (key: keyof KiwiPatch, value: MidiCcValue) => void;
+  setKiwiPatchName: (value: string) => void;
+  setKiwiPatchProperty: (
+    key: keyof KiwiPatch,
+    value: KiwiPatch[keyof KiwiPatch],
+  ) => void;
 }
 
 type KiwiPatchStore = KiwiPatchState & KiwiPatchActions;
 
 const blankKiwiPatchState: KiwiPatchState = {
   kiwiPatch: {
+    patchName: "Default",
+
     portamentoTime: 0,
     volume: 0,
     dcoRange: 0,
@@ -78,19 +79,16 @@ const blankKiwiPatchState: KiwiPatchState = {
 export const useKiwiPatchStore = create<KiwiPatchStore>()((set) => ({
   ...blankKiwiPatchState,
 
+  setKiwiPatchName: (patchName) => {
+    set(({ kiwiPatch, ...rest }) => ({
+      ...rest,
+      kiwiPatch: { ...kiwiPatch, patchName },
+    }));
+  },
+
   setKiwiPatchProperty: (key, value) =>
     set(({ kiwiPatch, ...rest }) => ({
       ...rest,
       kiwiPatch: { ...kiwiPatch, [key]: value },
-    })),
-  setPortamentoTime: (v) =>
-    set(({ kiwiPatch, ...rest }) => ({
-      ...rest,
-      kiwiPatch: { ...kiwiPatch, portamentoTime: trimMidiCcValue(v) },
-    })),
-  setVolume: (v) =>
-    set(({ kiwiPatch, ...rest }) => ({
-      ...rest,
-      kiwiPatch: { ...kiwiPatch, volume: trimMidiCcValue(v) },
     })),
 }));

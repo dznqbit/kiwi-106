@@ -1,6 +1,8 @@
 import { MidiCcValue } from "./Midi";
 
 export interface KiwiPatch {
+  patchName: string;
+
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
