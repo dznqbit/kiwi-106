@@ -6,6 +6,7 @@ interface KiwiPatchState {
 }
 
 interface KiwiPatchActions {
+  setKiwiPatch: (kiwiPatch: KiwiPatch) => void;
   setKiwiPatchName: (value: string) => void;
   setKiwiPatchProperty: (
     key: keyof KiwiPatch,
@@ -78,6 +79,13 @@ const blankKiwiPatchState: KiwiPatchState = {
 
 export const useKiwiPatchStore = create<KiwiPatchStore>()((set) => ({
   ...blankKiwiPatchState,
+
+  setKiwiPatch: (kiwiPatch) => {
+    set((store) => ({
+      ...store,
+      kiwiPatch,
+    }));
+  },
 
   setKiwiPatchName: (patchName) => {
     set(({ kiwiPatch, ...rest }) => ({

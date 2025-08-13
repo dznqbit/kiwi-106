@@ -1,7 +1,9 @@
 // Local convenience types
-
+import { Message } from "webmidi";
 import { IntRange } from "./IntRange";
 
+// TODO: swap all messages over to MidiMessage typeo
+export type MidiMessage = Message;
 export type MidiMessageType =
   | "noteon"
   | "noteoff"

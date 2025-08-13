@@ -132,17 +132,17 @@ xx                 Command ID (see Command Table)
 | 0x57 | Load Sequence | 0000xxxx | Seq number to load (0-8) |
 | 0x58 | Load Pattern | 0000xxxx | Pattern number to load (0-8) |
 | 0x59 | Voice Mode | 00000xxx | Voice mode selection |
-| 0x5a-0x5b | Voice Detune Amount | Hi/Lo | Combined to make 12 bit command |
-| 0x5c | Detune Control | 0000000x | Detune mode |
+| 0x5a-0x5b | Voice Detune Amount | Hi/Lo | Combined to make 12 bit command Hi & Lo are combined to make single 12 bit command. 000xxxxx + 0yyyyyyy = 0000xxxx xyyyyyyy |
+| 0x5c | Detune Control | 0000000x | x = 0=unison only,1=All modes except Mono |
 | 0x5d | Arp Control | 00yyy0zz | Arp settings |
 | 0x5e | AT Control | 00000xyz | Aftertouch control |
 | 0x5f | MW Control | 00000xyz | Mod wheel control |
 | 0x60 | Midi Control | 0000wxyz | MIDI control settings |
-| 0x61 | Patch Clock Tempo | Complex | Clock tempo override |
+| 0x61 | Patch Clock Tempo | Complex | If this is nonzero it will replace the internal Clock speed with this value. If this value is zero the internal clock will remain unchanged. This byte is sent as two nibbles which are combined to make single 8 bit command. 0000xxxx + 0000yyyy = xxxxyyyy |
 | 0x63 | Arp Clock Divide | 0000yyyy | Arp clock divider |
-| 0x64 | Seq Control | 000vwxyz | Sequence control bits |
-| 0x65 | Seq Transpose | 0-36 | Sequence transpose |
-| 0x66 | Dynamics Control | 0000yyzz | Dynamics settings |
+| 0x64 | Seq Control | 000vwxyz | z = Reserved; y = KeyDownPlay (0=Seq always plays when enabled, 1=Seq only plays when enabled AND a Key is being held down); x = AutoTranspose (0=actual seq notes,1=transpose last played); w = AutoTransposeReset (0=continue seq in new transpose, 1=reset seq to step 1 on new transpose value); v = Reserved |
+| 0x65 | Seq Transpose | 0-36 | 2 set 0-36 (-1 oct -> +2 Octs) - only used if SeqControl Bit |
+| 0x66 | Dynamics Control | 0000yyzz | zz = yy = VCF Cutoff Enable(0-3); VCA Amount Enable(0-3) 0=off,1=30%,2=60%,3=100% |
 | 0x67 | LFO2 Control | 00xxxxxz | LFO2 control similar to LFO1 |
 | 0x68 | Seq Clock Divide | 0000yyyy | Seq clock divider |
 | 0x69-0x7f | Not used | 0x00 | All set to 0x00 |

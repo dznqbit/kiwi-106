@@ -64,7 +64,7 @@ const LabeledMidiData = ({
         }}
       >
         {_.map(data, formatHex).map((d, i) => (
-          <Code key={i} size="xs" p={2}>
+          <Code key={i} p={2}>
             {d}
           </Code>
         ))}

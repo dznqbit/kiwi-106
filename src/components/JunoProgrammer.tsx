@@ -22,12 +22,14 @@ import {
   kiwi106Identifier,
   kiwiTechnicsSysexId,
   isKiwi106BufferDumpSysexMessage,
+  parseKiwi106PatchEditBufferDumpCommand,
 } from "../utils/sysexUtils";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
-  const { setKiwiPatchProperty: setPatchProperty } = useKiwiPatchStore();
+  const { setKiwiPatch, setKiwiPatchProperty: setPatchProperty } =
+    useKiwiPatchStore();
 
   useEffect(() => {
     // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
@@ -70,19 +72,20 @@ export const JunoProgrammer = () => {
       }
 
       if (isKiwi106UpdatePatchNameSysexMessage(message)) {
-        const patchName = message.data
-          .slice(8, -1)
-          .map((x) => String.fromCharCode(x))
-          .join("");
-        console.log("Time to update patch name with", patchName);
+        // These messages seem to be complete borked – we can revisit.
+
+        // const patchName = message.data
+        //   .slice(8, -1)
+        //   .map((x) => String.fromCharCode(x))
+        //   .join("");
+        // console.log("Time to update patch name with", patchName);
+        return;
       }
 
       if (isKiwi106BufferDumpSysexMessage(message)) {
-        const patchName = message.data
-          .slice(10, 30)
-          .map((x) => String.fromCharCode(x))
-          .join("");
-        setPatchProperty("patchName", patchName);
+        const command = parseKiwi106PatchEditBufferDumpCommand(message);
+        setKiwiPatch(command.kiwiPatch);
+        return;
       }
     };
 
@@ -132,7 +135,6 @@ export const JunoProgrammer = () => {
                   (char) => char.charCodeAt(0) & 0x7f,
                 );
 
-                console.log("Sending patch name", patchNameBytes);
                 output.sendSysex(kiwiTechnicsSysexId, [
                   ...kiwi106Identifier,
                   0x00,
