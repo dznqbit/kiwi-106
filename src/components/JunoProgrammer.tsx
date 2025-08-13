@@ -56,7 +56,7 @@ export const JunoProgrammer = () => {
       const ccData = trimMidiCcValue(b2);
 
       if (patchKey) {
-        setPatchProperty(patchKey, ccData);
+        setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
       } else {
         console.log("Received unknown", kiwiCcLabel(b1));
       }
@@ -84,7 +84,7 @@ export const JunoProgrammer = () => {
 
       if (isKiwi106BufferDumpSysexMessage(message)) {
         const command = parseKiwi106PatchEditBufferDumpCommand(message);
-        setKiwiPatch(command.kiwiPatch);
+        setKiwiPatch(command.kiwiPatch, { updatedBy: "Sysex Dump" });
         return;
       }
     };
@@ -101,15 +101,20 @@ export const JunoProgrammer = () => {
     configStore.input,
     configStore.inputChannel,
     setPatchProperty,
+    setKiwiPatch,
   ]);
 
   useEffect(() => {
-    // Wire up updates to the KiwiStore to the  (ie SEND MIDI OUT)
+    // Wire up updates to the KiwiStore to the (ie SEND MIDI OUT)
     const unsubscribeKiwiSyncer = useKiwiPatchStore.subscribe(
       (state, oldState) => {
         const diff = kiwiPatchDiff(state.kiwiPatch, oldState.kiwiPatch);
 
-        if (Object.keys(diff).length > 0) {
+        if (
+          Object.keys(diff).length > 0 &&
+          state.updatedBy != "Control Change" &&
+          state.updatedBy != "Sysex Dump"
+        ) {
           const outputId = configStore.output?.id;
           if (outputId == null) {
             console.log("incomplete (no outputId)");

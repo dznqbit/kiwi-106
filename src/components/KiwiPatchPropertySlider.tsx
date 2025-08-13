@@ -15,7 +15,11 @@ export const KiwiPatchPropertySlider = ({
     <Slider
       labelAlwaysOn
       value={kiwiPatch[property]}
-      onChange={(v) => setKiwiPatchProperty(property, trimMidiCcValue(v))}
+      onChange={(v) =>
+        setKiwiPatchProperty(property, trimMidiCcValue(v), {
+          updatedBy: "Editor Change",
+        })
+      }
       min={0}
       max={127}
     />

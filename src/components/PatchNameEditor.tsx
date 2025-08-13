@@ -17,7 +17,11 @@ export const PatchNameEditor = () => {
         label="Patch Name"
         value={patchName}
         onChange={(e) => setPatchName(e.currentTarget.value)}
-        onBlur={() => setKiwiPatchProperty("patchName", patchName)}
+        onBlur={() =>
+          setKiwiPatchProperty("patchName", patchName, {
+            updatedBy: "Editor Change",
+          })
+        }
         onKeyUp={(e) => {
           if (e.key === "Enter") {
             e.currentTarget.blur();

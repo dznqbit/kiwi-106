@@ -1,22 +1,30 @@
 import { create } from "zustand";
 import { KiwiPatch } from "../types/KiwiPatch";
 
+// How state was most recently updated
+type UpdatedBy = undefined | "Sysex Dump" | "Control Change" | "Editor Change";
+
 interface KiwiPatchState {
+  updatedBy: UpdatedBy;
   kiwiPatch: KiwiPatch;
 }
 
 interface KiwiPatchActions {
-  setKiwiPatch: (kiwiPatch: KiwiPatch) => void;
-  setKiwiPatchName: (value: string) => void;
+  setKiwiPatch: (
+    kiwiPatch: KiwiPatch,
+    options: { updatedBy: UpdatedBy },
+  ) => void;
   setKiwiPatchProperty: (
     key: keyof KiwiPatch,
     value: KiwiPatch[keyof KiwiPatch],
+    options: { updatedBy: UpdatedBy },
   ) => void;
 }
 
 type KiwiPatchStore = KiwiPatchState & KiwiPatchActions;
 
 const blankKiwiPatchState: KiwiPatchState = {
+  updatedBy: undefined,
   kiwiPatch: {
     patchName: "Default",
 
@@ -80,23 +88,18 @@ const blankKiwiPatchState: KiwiPatchState = {
 export const useKiwiPatchStore = create<KiwiPatchStore>()((set) => ({
   ...blankKiwiPatchState,
 
-  setKiwiPatch: (kiwiPatch) => {
+  setKiwiPatch: (kiwiPatch, { updatedBy }) => {
     set((store) => ({
       ...store,
+      updatedBy,
       kiwiPatch,
     }));
   },
 
-  setKiwiPatchName: (patchName) => {
+  setKiwiPatchProperty: (key, value, { updatedBy }) =>
     set(({ kiwiPatch, ...rest }) => ({
       ...rest,
-      kiwiPatch: { ...kiwiPatch, patchName },
-    }));
-  },
-
-  setKiwiPatchProperty: (key, value) =>
-    set(({ kiwiPatch, ...rest }) => ({
-      ...rest,
+      updatedBy,
       kiwiPatch: { ...kiwiPatch, [key]: value },
     })),
 }));
