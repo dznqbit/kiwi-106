@@ -196,7 +196,6 @@ export const formatMidiMessage = (
             decideId: messageData[16],
           };
 
-          console.log({ deviceEnquiryReply });
           return deviceEnquiryReply;
         } else {
           throw new Error("Received unexpected Sysex");
