@@ -2,6 +2,7 @@ import { Fieldset, Group, Stack, Text } from "@mantine/core";
 import { KiwiPatchPropertySlider } from "./KiwiPatchPropertySlider";
 import { KiwiPatch } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
+import { WaveformSelector } from "./WaveformSelector";
 
 interface KiwiSliderProps {
   property: keyof KiwiPatch;
@@ -10,8 +11,8 @@ interface KiwiSliderProps {
 
 const KiwiSlider = ({ property, label }: KiwiSliderProps) => {
   return (
-    <Stack>
-      <Text size="sm" mt="xl">
+    <Stack align="center">
+      <Text size="sm" fw="bold">
         {label ?? kiwiPatchLabel(property)}
       </Text>
       <KiwiPatchPropertySlider property={property} />
@@ -25,10 +26,10 @@ export const JunoSliders = () => {
       <Group>
         <KiwiSlider property="portamentoTime" />
         <Fieldset legend="LFO1">
-          <Group>
-            <KiwiSlider property="lfo1Wave" />
-            <KiwiSlider property="lfo1Rate" />
-            <KiwiSlider property="lfo1Delay" />
+          <Group align="flex-start">
+            <WaveformSelector label="WAVE" property="lfo1Wave" />
+            <KiwiSlider label="RATE" property="lfo1Rate" />
+            <KiwiSlider label="DELAY TIME" property="lfo1Delay" />
           </Group>
         </Fieldset>
 
@@ -58,7 +59,6 @@ export const JunoSliders = () => {
         </Fieldset>
       </Group>
 
-
       <Fieldset legend="Filter">
         <Group>
           <KiwiSlider property="vcfLowPassCutoff" />
@@ -68,7 +68,6 @@ export const JunoSliders = () => {
           <KiwiSlider property="vcfPitchFollow" />
         </Group>
       </Fieldset>
-
 
       <Group>
         <KiwiSlider property="volume" />

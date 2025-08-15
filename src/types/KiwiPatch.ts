@@ -1,5 +1,12 @@
 import { MidiCcValue } from "./Midi";
 
+export type Kiwi106Waveform =
+  | "sine"
+  | "square"
+  | "sawtooth"
+  | "triangle"
+  | "reverse-sawtooth"
+  | "random";
 export interface KiwiPatch {
   patchName: string;
 

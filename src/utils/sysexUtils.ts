@@ -143,6 +143,46 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
     .replace(/\0/g, "")
     .trim();
 
+  const parseLfoWave = (n: number) => {
+    // Sysex bits
+    // 000=Sine
+    // 001=Triangle
+    // 010=Square
+    // 011=Saw
+    // 100=Reverse Saw
+    // 101=Random
+
+    // CC bits yy
+    // 'sine': [0, 15],
+    // 'triangle': [16, 31],
+    // 'sawtooth': [32, 63],
+    // 'reverse-sawtooth': [64, 95],
+    // 'square': [96, 111],
+    // 'random': [112, 127],
+
+    console.log("Incoming LFO wave", { n });
+
+    // Map sysex bits to CC bits
+    switch (
+      n & 0x07 // Extract lower 3 bits
+    ) {
+      case 0:
+        return 0; // Sine -> mid-range of 0-15
+      case 1:
+        return 16; // Triangle -> mid-range of 16-31
+      case 3:
+        return 32; // Saw -> mid-range of 32-47
+      case 4:
+        return 64; // Reverse Saw -> mid-range of 48-63
+      case 2:
+        return 96; // Square -> mid-range of 64-79
+      case 5:
+        return 112; // Random -> mid-range of 80-127
+    }
+
+    return 0;
+  };
+
   // Create KiwiPatch object mapping SysEx data to patch parameters
   const kiwiPatch: KiwiPatch = {
     patchName,
@@ -159,10 +199,10 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
     dcoEnvelopeSource: byteToMidi(76), // Env Control
 
     lfoMode: byteToMidi(87), // LFO1 Control
-    lfo1Wave: byteToMidi(77),
+    lfo1Wave: parseLfoWave(byteToMidi(77)),
     lfo1Rate: combine12BitToMidi(78, 79),
     lfo1Delay: combine12BitToMidi(80, 81),
-    lfo2Wave: byteToMidi(82),
+    lfo2Wave: parseLfoWave(byteToMidi(82)),
     lfo2Rate: combine12BitToMidi(83, 84),
     lfo2Delay: combine12BitToMidi(85, 86),
     lfo1Mode: byteToMidi(87), // LFO1 Control

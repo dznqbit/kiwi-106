@@ -29,7 +29,7 @@ export const VerticalSlider = ({
   });
 
   const trackWidth = 32;
-  const trackHeight = 200;
+  const trackHeight = 224;
   const trackTickPadding = 10;
 
   const sliderWidth = 44;
@@ -54,10 +54,16 @@ export const VerticalSlider = ({
           height: trackHeight,
         }}
       >
-        <svg style={{ position: "absolute" }} width={trackWidth} height={trackHeight}>
+        <svg
+          style={{ position: "absolute" }}
+          width={trackWidth}
+          height={trackHeight}
+        >
           {/* White ticks */}
           {Array.from({ length: 11 }, (_, i) => {
-            const y = trackTickPadding + (i / 10) * (trackHeight - 2 * trackTickPadding);
+            const y =
+              trackTickPadding +
+              (i / 10) * (trackHeight - 2 * trackTickPadding);
             const strokeWidth = [0, 5, 10].includes(i) ? 2 : 1;
             return (
               <line
@@ -100,7 +106,6 @@ export const VerticalSlider = ({
           <line
             y1={sliderNotchY}
             y2={sliderNotchY}
-
             x1={0}
             x2={sliderWidth / 4}
             stroke="var(--mantine-color-gray-2)"
@@ -110,7 +115,6 @@ export const VerticalSlider = ({
           <line
             y1={sliderNotchY}
             y2={sliderNotchY}
-
             x1={3 * (sliderWidth / 4)}
             x2={sliderWidth}
             stroke="var(--mantine-color-gray-2)"
