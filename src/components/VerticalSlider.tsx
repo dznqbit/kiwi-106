@@ -30,6 +30,7 @@ export const VerticalSlider = ({
 
   const trackWidth = 32;
   const trackHeight = 200;
+  const trackTickPadding = 10;
 
   const sliderWidth = 44;
   const sliderHeight = 20;
@@ -56,7 +57,7 @@ export const VerticalSlider = ({
         <svg style={{ position: "absolute" }} width={trackWidth} height={trackHeight}>
           {/* White ticks */}
           {Array.from({ length: 11 }, (_, i) => {
-            const y = (i / 10) * trackHeight;
+            const y = trackTickPadding + (i / 10) * (trackHeight - 2 * trackTickPadding);
             const strokeWidth = [0, 5, 10].includes(i) ? 2 : 1;
             return (
               <line
@@ -87,7 +88,8 @@ export const VerticalSlider = ({
       <Box
         style={{
           position: "absolute",
-          bottom: `calc(${normalizedValue * 100}%)`,
+          // This 90% is gross, sorry.
+          bottom: `${normalizedValue * 90}%`,
           left: (trackWidth - sliderWidth) / 2,
           width: sliderWidth,
           height: sliderHeight,
