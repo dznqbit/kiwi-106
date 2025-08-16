@@ -1,6 +1,5 @@
-import { Group, Stack, Text } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 import { DcoWave, KiwiPatch } from "../types/KiwiPatch";
-import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import { JunoButton } from "./JunoButton";
@@ -8,7 +7,6 @@ import { WaveformIcon } from "./WaveformIcon";
 
 interface DcoWaveSelectorProps {
   property: keyof KiwiPatch;
-  label?: string;
 }
 
 // Based on SysEx docs: 0000zyxx where y=Saw(Ramp) On/Off, z=Pulse(PWM) On/Off
@@ -20,7 +18,7 @@ const dcoWaveRanges: Record<DcoWave, MidiCcValue[]> = {
   "ramp-and-pulse": [96, 127], // PWM=1, Ramp=1 (zy=11)
 };
 
-export const DcoWaveSelector = ({ property, label }: DcoWaveSelectorProps) => {
+export const DcoWaveSelector = ({ property }: DcoWaveSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
   const dcoWaveValue = kiwiPatch[property];
 

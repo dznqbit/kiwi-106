@@ -72,7 +72,7 @@ export const JunoProgrammer = () => {
       }
 
       if (isKiwi106UpdatePatchNameSysexMessage(message)) {
-        // These messages seem to be complete borked – we can revisit.
+        // These messages seem to be complete borked: we can revisit.
 
         // const patchName = message.data
         //   .slice(8, -1)

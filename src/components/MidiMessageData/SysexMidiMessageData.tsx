@@ -11,7 +11,6 @@ import _ from "lodash";
 
 export const SysexMessageData = ({
   messageEvent,
-  formattedMessage,
 }: {
   messageEvent: MessageEvent;
   formattedMessage: SysexMidiMessage;
