@@ -1,7 +1,7 @@
 import { Box } from "@mantine/core";
 import { useMove } from "@mantine/hooks";
 
-interface VerticalSliderProps {
+export interface VerticalSliderProps {
   value: number;
   onChange: (value: number) => void;
   min?: number;
