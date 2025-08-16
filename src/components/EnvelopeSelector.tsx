@@ -11,10 +11,10 @@ interface EnvelopeSelectorButtonProps {
 }
 
 const envelopeSelectRanges: Record<EnvelopeSource, MidiCcValue[]> = {
-  "env1": [0, 31],
-  "env2": [64, 95],
+  env1: [0, 31],
+  env2: [64, 95],
   "env1-inverted": [32, 63],
-  "env2-inverted": [96, 127]
+  "env2-inverted": [96, 127],
 };
 
 export const EnvelopeSelector = ({
@@ -29,7 +29,9 @@ export const EnvelopeSelector = ({
   }
 
   const ccValueToEnvelopeSource = (ccValue: MidiCcValue): EnvelopeSource => {
-    for (const [envSelectValue, [min, max]] of Object.entries(envelopeSelectRanges)) {
+    for (const [envSelectValue, [min, max]] of Object.entries(
+      envelopeSelectRanges,
+    )) {
       if (ccValue >= min && ccValue <= max) {
         return envSelectValue as EnvelopeSource;
       }
@@ -37,7 +39,8 @@ export const EnvelopeSelector = ({
     return "env1"; // Default fallback
   };
 
-  const envelopeSource: EnvelopeSource = ccValueToEnvelopeSource(envSelectValue);
+  const envelopeSource: EnvelopeSource =
+    ccValueToEnvelopeSource(envSelectValue);
 
   const setEnvelopeSource = (waveform: EnvelopeSource) => {
     const waveformToCcValue = (waveform: EnvelopeSource): MidiCcValue => {
@@ -99,8 +102,14 @@ interface EnvelopeButtonProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
-const EnvelopeButton = ({ envelope, isSelected, onClick, size, label }: EnvelopeButtonProps) => {
-return (
+const EnvelopeButton = ({
+  envelope,
+  isSelected,
+  onClick,
+  size,
+  label,
+}: EnvelopeButtonProps) => {
+  return (
     <Button
       radius={0}
       variant={isSelected ? "filled" : "outline"}
@@ -114,4 +123,4 @@ return (
       {label ?? envelope}
     </Button>
   );
-}
+};

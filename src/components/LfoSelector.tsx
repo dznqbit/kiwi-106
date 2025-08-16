@@ -12,14 +12,11 @@ interface LfoSelectorButtonProps {
 }
 
 const lfoSelectRanges: Record<LfoSource, MidiCcValue[]> = {
-  "lfo1": [0, 63],
-  "lfo2": [64, 127]
+  lfo1: [0, 63],
+  lfo2: [64, 127],
 };
 
-export const LfoSelector = ({
-  property,
-  label,
-}: LfoSelectorButtonProps) => {
+export const LfoSelector = ({ property, label }: LfoSelectorButtonProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
   const lfoSelectValue = kiwiPatch[property];
 
@@ -28,7 +25,9 @@ export const LfoSelector = ({
   }
 
   const ccValueToLfoSource = (ccValue: MidiCcValue): LfoSource => {
-    for (const [lfoSelectValue, [min, max]] of Object.entries(lfoSelectRanges)) {
+    for (const [lfoSelectValue, [min, max]] of Object.entries(
+      lfoSelectRanges,
+    )) {
       if (ccValue >= min && ccValue <= max) {
         return lfoSelectValue as LfoSource;
       }
@@ -86,8 +85,14 @@ interface LfoButtonProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
-const LfoButton = ({ lfoSource, isSelected, onClick, size, label }: LfoButtonProps) => {
-return (
+const LfoButton = ({
+  lfoSource,
+  isSelected,
+  onClick,
+  size,
+  label,
+}: LfoButtonProps) => {
+  return (
     <Button
       radius={0}
       variant={isSelected ? "filled" : "outline"}
@@ -101,4 +106,4 @@ return (
       {label ?? lfoSource}
     </Button>
   );
-}
+};

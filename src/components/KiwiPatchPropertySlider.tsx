@@ -23,7 +23,7 @@ export const KiwiPatchPropertySlider = ({
   }
 
   const value = kiwiPatch[property];
-  
+
   return (
     <Stack align="center">
       <Title order={6}>{label ?? kiwiPatchLabel(property)}</Title>

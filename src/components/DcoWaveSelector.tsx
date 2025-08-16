@@ -14,16 +14,13 @@ interface DcoWaveSelectorProps {
 // Based on SysEx docs: 0000zyxx where y=Saw(Ramp) On/Off, z=Pulse(PWM) On/Off
 // Mapping DcoWave types to MIDI CC ranges
 const dcoWaveRanges: Record<DcoWave, MidiCcValue[]> = {
-  "off": [0, 31],                    // PWM=0, Ramp=0 (zy=00)
-  "ramp": [32, 63],                  // PWM=0, Ramp=1 (zy=01)  
-  "pulse": [64, 95],                 // PWM=1, Ramp=0 (zy=10)
-  "ramp-and-pulse": [96, 127],       // PWM=1, Ramp=1 (zy=11)
+  off: [0, 31], // PWM=0, Ramp=0 (zy=00)
+  ramp: [32, 63], // PWM=0, Ramp=1 (zy=01)
+  pulse: [64, 95], // PWM=1, Ramp=0 (zy=10)
+  "ramp-and-pulse": [96, 127], // PWM=1, Ramp=1 (zy=11)
 };
 
-export const DcoWaveSelector = ({
-  property,
-  label,
-}: DcoWaveSelectorProps) => {
+export const DcoWaveSelector = ({ property, label }: DcoWaveSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
   const dcoWaveValue = kiwiPatch[property];
 
@@ -87,12 +84,28 @@ export const DcoWaveSelector = ({
     <Stack gap="0" pr="sm" align="center" justify="flex-start">
       <Group gap="0">
         <JunoButton
-          label={<WaveformIcon type="pwm" width={24} height={24} stroke="var(--mantine-color-gray-4)" strokeWidth={2} />}
+          label={
+            <WaveformIcon
+              type="pwm"
+              width={24}
+              height={24}
+              stroke="var(--mantine-color-gray-4)"
+              strokeWidth={2}
+            />
+          }
           isSelected={isPwmOn}
           onClick={togglePwm}
         />
         <JunoButton
-          label={<WaveformIcon type="sawtooth" width={24} height={24} stroke="var(--mantine-color-gray-4)" strokeWidth={2} />}
+          label={
+            <WaveformIcon
+              type="sawtooth"
+              width={24}
+              height={24}
+              stroke="var(--mantine-color-gray-4)"
+              strokeWidth={2}
+            />
+          }
           isSelected={isRampOn}
           onClick={toggleRamp}
         />

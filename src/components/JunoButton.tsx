@@ -33,9 +33,7 @@ export const JunoButton = ({
           {label}
         </Text>
       ) : (
-        <Box style={{ fontSize: "12px", fontWeight: "bold" }}>
-          {label}
-        </Box>
+        <Box style={{ fontSize: "12px", fontWeight: "bold" }}>{label}</Box>
       )}
 
       <Box

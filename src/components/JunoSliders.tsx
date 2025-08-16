@@ -52,16 +52,25 @@ export const JunoSliders = () => {
             <KiwiPatchPropertySlider label="SUB" property="subLevel" />
             <KiwiPatchPropertySlider label="NOISE" property="noiseLevel" />
             <EnvelopeSelector label="ENV Source" property="dcoEnvelopeSource" />
-            <KiwiPatchPropertySlider label="ENV" property="dcoEnvelopeModAmount" />
+            <KiwiPatchPropertySlider
+              label="ENV"
+              property="dcoEnvelopeModAmount"
+            />
           </Group>
         </Kiwi106Fieldset>
 
         <Kiwi106Fieldset legend="VCF">
           <Group align="flex-start">
             <KiwiPatchPropertySlider label="FREQ" property="vcfLowPassCutoff" />
-            <KiwiPatchPropertySlider label="RES" property="vcfLowPassResonance" />
+            <KiwiPatchPropertySlider
+              label="RES"
+              property="vcfLowPassResonance"
+            />
             <EnvelopeSelector label="ENV Source" property="vcfEnvelopeSource" />
-            <KiwiPatchPropertySlider label="ENV" property="vcfEnvelopeModAmount" />
+            <KiwiPatchPropertySlider
+              label="ENV"
+              property="vcfEnvelopeModAmount"
+            />
             <LfoSelector label="LFO Source" property="vcfLfoSource" />
             <KiwiPatchPropertySlider label="LFO" property="vcfLfoModAmount" />
             <KiwiPatchPropertySlider label="KYBD" property="vcfPitchFollow" />

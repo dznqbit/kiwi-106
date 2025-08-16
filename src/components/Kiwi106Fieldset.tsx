@@ -13,20 +13,20 @@ export const Kiwi106Fieldset = ({ legend, children }: Kiwi106FieldsetProps) => {
         size="sm"
         fw="bold"
         style={{
-          backgroundColor: '#d53d49',
-          color: 'white',
-          padding: '4px 8px',
-          width: '100%',
-          display: 'block',
+          backgroundColor: "#d53d49",
+          color: "white",
+          padding: "4px 8px",
+          width: "100%",
+          display: "block",
           margin: 0,
-          textAlign: 'center'
+          textAlign: "center",
         }}
       >
         {legend}
       </Text>
       <Box
         style={{
-          padding: '8px',
+          padding: "8px",
         }}
       >
         {children}

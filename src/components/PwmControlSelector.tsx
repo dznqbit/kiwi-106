@@ -10,11 +10,11 @@ interface PwmControlSelectorProps {
 }
 
 const pwmControlRanges: Record<PwmControlSource, MidiCcValue[]> = {
-  "manual": [0, 18],
-  "lfo1": [19, 36],
-  "lfo2": [37, 54],
-  "env1": [55, 72],
-  "env2": [73, 90],
+  manual: [0, 18],
+  lfo1: [19, 36],
+  lfo2: [37, 54],
+  env1: [55, 72],
+  env2: [73, 90],
   "env1-inverted": [91, 108],
   "env2-inverted": [109, 127],
 };
@@ -119,8 +119,14 @@ interface PwmControlButtonProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
-const PwmControlButton = ({ pwmControl, isSelected, onClick, size, label }: PwmControlButtonProps) => {
-return (
+const PwmControlButton = ({
+  pwmControl,
+  isSelected,
+  onClick,
+  size,
+  label,
+}: PwmControlButtonProps) => {
+  return (
     <Button
       radius={0}
       variant={isSelected ? "filled" : "outline"}
@@ -134,4 +140,4 @@ return (
       {label ?? pwmControl}
     </Button>
   );
-}
+};

@@ -40,7 +40,7 @@ export const JunoToggleSwitch = ({
     const newValue = isOption1 ? option2Range[0] : option1Range[0];
     console.log(
       `Toggling ${property} to ${isOption1 ? option2 : option1}`,
-      newValue
+      newValue,
     );
     setKiwiPatchProperty(property, newValue, {
       updatedBy: "Editor Change",
@@ -58,7 +58,7 @@ export const JunoToggleSwitch = ({
 
         {/* Switch Track */}
         <Box
-          onClick={toggleSwitch}  
+          onClick={toggleSwitch}
           style={{
             cursor: "pointer",
             position: "relative",
