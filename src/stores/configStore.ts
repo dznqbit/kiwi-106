@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { MidiChannel, MidiPortData } from "../contexts/MidiContext";
-
+import { MidiPortData } from "../contexts/MidiContext";
+import { type MidiChannel } from "../types/Midi";
 interface ConfigState {
   availableInputs: MidiPortData[];
   input: MidiPortData | null;

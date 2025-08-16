@@ -1,23 +1,33 @@
 import { create } from "zustand";
 import { KiwiPatch } from "../types/KiwiPatch";
-import { trimMidiCcValue } from "../utils/trimMidiCcValue";
-import { MidiCcValue } from "../types/Midi";
 
-type SetMidiCcValue = (v: number) => void;
+// How state was most recently updated
+type UpdatedBy = undefined | "Sysex Dump" | "Control Change" | "Editor Change";
+
 interface KiwiPatchState {
+  updatedBy: UpdatedBy;
   kiwiPatch: KiwiPatch;
 }
 
 interface KiwiPatchActions {
-  setPortamentoTime: SetMidiCcValue;
-  setVolume: SetMidiCcValue;
-  setKiwiPatchProperty: (key: keyof KiwiPatch, value: MidiCcValue) => void;
+  setKiwiPatch: (
+    kiwiPatch: KiwiPatch,
+    options: { updatedBy: UpdatedBy },
+  ) => void;
+  setKiwiPatchProperty: (
+    key: keyof KiwiPatch,
+    value: KiwiPatch[keyof KiwiPatch],
+    options: { updatedBy: UpdatedBy },
+  ) => void;
 }
 
 type KiwiPatchStore = KiwiPatchState & KiwiPatchActions;
 
 const blankKiwiPatchState: KiwiPatchState = {
+  updatedBy: undefined,
   kiwiPatch: {
+    patchName: "Default",
+
     portamentoTime: 0,
     volume: 0,
     dcoRange: 0,
@@ -78,19 +88,18 @@ const blankKiwiPatchState: KiwiPatchState = {
 export const useKiwiPatchStore = create<KiwiPatchStore>()((set) => ({
   ...blankKiwiPatchState,
 
-  setKiwiPatchProperty: (key, value) =>
+  setKiwiPatch: (kiwiPatch, { updatedBy }) => {
+    set((store) => ({
+      ...store,
+      updatedBy,
+      kiwiPatch,
+    }));
+  },
+
+  setKiwiPatchProperty: (key, value, { updatedBy }) =>
     set(({ kiwiPatch, ...rest }) => ({
       ...rest,
+      updatedBy,
       kiwiPatch: { ...kiwiPatch, [key]: value },
-    })),
-  setPortamentoTime: (v) =>
-    set(({ kiwiPatch, ...rest }) => ({
-      ...rest,
-      kiwiPatch: { ...kiwiPatch, portamentoTime: trimMidiCcValue(v) },
-    })),
-  setVolume: (v) =>
-    set(({ kiwiPatch, ...rest }) => ({
-      ...rest,
-      kiwiPatch: { ...kiwiPatch, volume: trimMidiCcValue(v) },
     })),
 }));

@@ -1,0 +1,18 @@
+.root {
+  &[data-variant='beige'] {
+    border-radius: 0;
+    background-color: #e6e2c6;
+    border-top: 2px solid #f0f0d0;
+    border-right: 2px solid #c6c2b6;
+  }
+
+  &[data-variant='blue'] {
+    border-radius: 0;
+    background-color: #78b9d9;
+  }
+
+  &[data-variant='orange'] {
+    border-radius: 0;
+    background-color: #ffbb53;
+  }
+}

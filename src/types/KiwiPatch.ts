@@ -1,6 +1,30 @@
 import { MidiCcValue } from "./Midi";
 
+export type DcoRange = "16" | "8" | "4";
+export type DcoWave = "off" | "ramp" | "pulse" | "ramp-and-pulse";
+export type PwmControlSource =
+  | "manual"
+  | "lfo1"
+  | "lfo2"
+  | "env1"
+  | "env2"
+  | "env1-inverted"
+  | "env2-inverted";
+export type EnvelopeSource =
+  | "env1"
+  | "env2"
+  | "env1-inverted"
+  | "env2-inverted";
+export type LfoWaveform =
+  | "sine"
+  | "square"
+  | "sawtooth"
+  | "triangle"
+  | "reverse-sawtooth"
+  | "random";
 export interface KiwiPatch {
+  patchName: string;
+
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
