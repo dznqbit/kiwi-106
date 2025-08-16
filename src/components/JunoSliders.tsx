@@ -6,6 +6,7 @@ import { WaveformSelector } from "./WaveformSelector";
 import { Kiwi106Fieldset } from "./Kiwi106Fieldset";
 import { EnvelopeSelector } from "./EnvelopeSelector";
 import { LfoSelector } from "./LfoSelector";
+import { DcoRangeSelector } from "./DcoRangeSelector";
 
 interface KiwiSliderProps {
   property: keyof KiwiPatch;
@@ -54,6 +55,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="DCO">
           <Group align="flex-start">
+            <DcoRangeSelector label="RANGE" property="dcoRange" />
             <LfoSelector label="LFO Source" property="dcoLfoSource" />
             <KiwiSlider label="LFO" property="dcoLfoModAmount" />
             <KiwiSlider label="PWM" property="dcoPwmModAmount" />
