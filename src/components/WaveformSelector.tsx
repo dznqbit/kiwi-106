@@ -1,5 +1,5 @@
 import { Stack, Text } from "@mantine/core";
-import { Kiwi106Waveform, KiwiPatch } from "../types/KiwiPatch";
+import { LfoWaveform, KiwiPatch } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { WaveformButton } from "./WaveformButton";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
@@ -11,7 +11,7 @@ interface WaveformSelectorProps {
   label?: string;
 }
 
-const waveformRanges: Record<Kiwi106Waveform, MidiCcValue[]> = {
+const waveformRanges: Record<LfoWaveform, MidiCcValue[]> = {
   sine: [0, 15],
   triangle: [16, 31],
   sawtooth: [32, 63],
@@ -31,19 +31,19 @@ export const WaveformSelector = ({
     throw new Error("Woah! can't set string from WaveformSelector");
   }
 
-  const ccValueToWaveform = (ccValue: MidiCcValue): Kiwi106Waveform => {
+  const ccValueToWaveform = (ccValue: MidiCcValue): LfoWaveform => {
     for (const [waveform, [min, max]] of Object.entries(waveformRanges)) {
       if (ccValue >= min && ccValue <= max) {
-        return waveform as Kiwi106Waveform;
+        return waveform as LfoWaveform;
       }
     }
     return "sine"; // Default fallback
   };
 
-  const waveform: Kiwi106Waveform = ccValueToWaveform(waveformCcValue);
+  const waveform: LfoWaveform = ccValueToWaveform(waveformCcValue);
 
-  const setWaveform = (waveform: Kiwi106Waveform) => {
-    const waveformToCcValue = (waveform: Kiwi106Waveform): MidiCcValue => {
+  const setWaveform = (waveform: LfoWaveform) => {
+    const waveformToCcValue = (waveform: LfoWaveform): MidiCcValue => {
       const [min, _] = waveformRanges[waveform];
       const midiCcValue = min;
       if (!isMidiCcValue(midiCcValue)) {

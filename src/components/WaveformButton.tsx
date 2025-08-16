@@ -1,9 +1,9 @@
 import { Button } from "@mantine/core";
 import { WaveformIcon } from "./WaveformIcon";
-import { Kiwi106Waveform } from "../types/KiwiPatch";
+import { LfoWaveform } from "../types/KiwiPatch";
 
 interface WaveformButtonProps {
-  waveform: Kiwi106Waveform;
+  waveform: LfoWaveform;
   isSelected?: boolean;
   onClick: () => void;
   size?: "xs" | "sm" | "md" | "lg" | "xl";

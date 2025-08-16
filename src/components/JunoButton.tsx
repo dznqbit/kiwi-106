@@ -1,7 +1,8 @@
 import { Box, Button, Stack, Text } from "@mantine/core";
+import { ReactNode } from "react";
 
 interface JunoButtonProps {
-  label: string;
+  label: string | ReactNode;
   isSelected?: boolean;
   onClick: () => void;
   size?: "sm" | "md" | "lg";
@@ -27,9 +28,15 @@ export const JunoButton = ({
 
   return (
     <Stack gap={4} align="center">
-      <Text size="sm" fw="bold">
-        {label}
-      </Text>
+      {typeof label === "string" ? (
+        <Text size="sm" fw="bold">
+          {label}
+        </Text>
+      ) : (
+        <Box style={{ fontSize: "12px", fontWeight: "bold" }}>
+          {label}
+        </Box>
+      )}
 
       <Box
         style={{

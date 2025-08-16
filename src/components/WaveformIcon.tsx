@@ -1,7 +1,7 @@
-import { Kiwi106Waveform } from "../types/KiwiPatch";
+import { LfoWaveform } from "../types/KiwiPatch";
 
 interface WaveformIconProps {
-  type: Kiwi106Waveform;
+  type: LfoWaveform | "pwm";
   width?: number;
   height?: number;
   stroke?: string;
@@ -39,6 +39,11 @@ export const WaveformIcon = ({
 
       case "random":
         return `M 0,${2 * qY} L ${qW * 0.6},${2 * qY} L ${qW * 0.6},${1.2 * qY} L ${qW * 1.3},${1.2 * qY} L ${qW * 1.3},${3.1 * qY} L ${qW * 2.1},${3.1 * qY} L ${qW * 2.1},${1.8 * qY} L ${qW * 2.7},${1.8 * qY} L ${qW * 2.7},${2.9 * qY} L ${qW * 3.4},${2.9 * qY} L ${qW * 3.4},${1.1 * qY} L ${width},${1.1 * qY}`;
+
+      case "pwm":
+        return `M ${strokeWidth},${3 * qY} L ${strokeWidth},${1 * qY} L ${0.25 * width},${1 * qY} L ${0.25 * width},${3 * qY} L ${width - strokeWidth},${3 * qY} L ${width - strokeWidth},${1 * qY}
+                M ${0.4 * width},${1 * qY} L ${0.5 * width},${1 * qY} L ${0.5 * width},${1.4 * qY} M ${0.5 * width},${2 * qY} L ${0.5 * width},${2.4 * qY}
+        `;
     }
   };
 

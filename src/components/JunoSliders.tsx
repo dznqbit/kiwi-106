@@ -1,13 +1,12 @@
-import { Code, Group, Stack, Text, Title } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 import { KiwiPatchPropertySlider } from "./KiwiPatchPropertySlider";
-import { KiwiPatch } from "../types/KiwiPatch";
-import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { WaveformSelector } from "./WaveformSelector";
 import { Kiwi106Fieldset } from "./Kiwi106Fieldset";
 import { EnvelopeSelector } from "./EnvelopeSelector";
 import { LfoSelector } from "./LfoSelector";
 import { DcoRangeSelector } from "./DcoRangeSelector";
 import { PwmControlSelector } from "./PwmControlSelector";
+import { DcoWaveSelector } from "./DcoWaveSelector";
 
 export const JunoSliders = () => {
   return (
@@ -31,7 +30,7 @@ export const JunoSliders = () => {
         </Kiwi106Fieldset>
 
         <Kiwi106Fieldset legend="LFO2">
-          <Group>
+          <Group align="flex-start">
             <WaveformSelector label="WAVE" property="lfo2Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo2Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo2Delay" />
@@ -49,6 +48,7 @@ export const JunoSliders = () => {
               sliderProps={{ min: 0, max: 100 }}
             />
             <PwmControlSelector label="PWM MOD SRC" property="dcoPwmControl" />
+            <DcoWaveSelector property="dcoWave" />
             <KiwiPatchPropertySlider label="SUB" property="subLevel" />
             <KiwiPatchPropertySlider label="NOISE" property="noiseLevel" />
             <EnvelopeSelector label="ENV Source" property="dcoEnvelopeSource" />
