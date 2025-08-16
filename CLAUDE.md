@@ -8,5 +8,11 @@ Create a web interface for the Kiwi-106 synthesizer upgrade to:
 ## Key Reference Files
 - `docs/kiwi-106-sysex-reference.md` - Complete MIDI SysEx command reference
 
-## Project Layout
+## Project Dependencies
 Frontend is built in React + Mantine.
+
+## Claude Instructions
+- Don't be a syncophant.
+- Be succinct when summarizing changes.
+- Do not write useless comments in code.
+- Include descriptive comments for components in JSX.
