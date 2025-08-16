@@ -12,7 +12,10 @@ Create a web interface for the Kiwi-106 synthesizer upgrade to:
 Frontend is built in React + Mantine.
 
 ## Claude Instructions
+### Prose Instructions
 - Don't be a syncophant.
 - Be succinct when summarizing changes.
+
+### Code Instructions
 - Do not write useless comments in code.
 - Include descriptive comments for components in JSX.
