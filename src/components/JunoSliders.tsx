@@ -1,17 +1,22 @@
-import { Fieldset, Stack, Text } from "@mantine/core";
+import { Fieldset, Group, Stack, Text } from "@mantine/core";
 import { KiwiPatchPropertySlider } from "./KiwiPatchPropertySlider";
 import { KiwiPatch } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
+import { WaveformSelector } from "./WaveformSelector";
+import { Kiwi106Fieldset } from "./Kiwi106Fieldset";
+import { EnvelopeSelector } from "./EnvelopeSelector";
+import { LfoSelector } from "./LfoSelector";
 
 interface KiwiSliderProps {
   property: keyof KiwiPatch;
+  label?: string;
 }
 
-const KiwiSlider = ({ property }: KiwiSliderProps) => {
+const KiwiSlider = ({ property, label }: KiwiSliderProps) => {
   return (
-    <Stack>
-      <Text size="sm" mt="xl">
-        {kiwiPatchLabel(property)}
+    <Stack align="center">
+      <Text size="sm" fw="bold">
+        {label ?? kiwiPatchLabel(property)}
       </Text>
       <KiwiPatchPropertySlider property={property} />
     </Stack>
@@ -21,50 +26,82 @@ const KiwiSlider = ({ property }: KiwiSliderProps) => {
 export const JunoSliders = () => {
   return (
     <Stack>
-      <KiwiSlider property="portamentoTime" />
+      <Group>
+        <Kiwi106Fieldset legend="BEND">
+          <Group>
+            <KiwiSlider label="DCO" property="dcoBendAmount" />
+            <KiwiSlider label="VCF" property="vcfBendAmount" />
+            <KiwiSlider label="LFO" property="lfoModWheelAmount" />
+            <KiwiSlider property="portamentoTime" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <Fieldset legend="LFO1">
-        <KiwiSlider property="lfo1Wave" />
-        <KiwiSlider property="lfo1Rate" />
-        <KiwiSlider property="lfo1Delay" />
-      </Fieldset>
+        <Kiwi106Fieldset legend="LFO1">
+          <Group align="flex-start">
+            <WaveformSelector label="WAVE" property="lfo1Wave" />
+            <KiwiSlider label="RATE" property="lfo1Rate" />
+            <KiwiSlider label="DELAY TIME" property="lfo1Delay" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <Fieldset legend="LFO2">
-        <KiwiSlider property="lfo2Wave" />
-        <KiwiSlider property="lfo2Rate" />
-        <KiwiSlider property="lfo2Delay" />
-      </Fieldset>
+        <Kiwi106Fieldset legend="LFO2">
+          <Group>
+            <WaveformSelector label="WAVE" property="lfo2Wave" />
+            <KiwiSlider label="RATE" property="lfo2Rate" />
+            <KiwiSlider label="DELAY TIME" property="lfo2Delay" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <KiwiSlider property="dcoLfoModAmount" />
-      <KiwiSlider property="dcoPwmModAmount" />
-      <KiwiSlider property="dcoEnvelopeModAmount" />
+        <Kiwi106Fieldset legend="DCO">
+          <Group align="flex-start">
+            <LfoSelector label="LFO Source" property="dcoLfoSource" />
+            <KiwiSlider label="LFO" property="dcoLfoModAmount" />
+            <KiwiSlider label="PWM" property="dcoPwmModAmount" />
+            <KiwiSlider label="SUB" property="subLevel" />
+            <KiwiSlider label="NOISE" property="noiseLevel" />
+            <EnvelopeSelector label="ENV Source" property="dcoEnvelopeSource" />
+            <KiwiSlider label="ENV" property="dcoEnvelopeModAmount" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <KiwiSlider property="subLevel" />
-      <KiwiSlider property="noiseLevel" />
+        <Kiwi106Fieldset legend="VCF">
+          <Group align="flex-start">
+            <KiwiSlider label="FREQ" property="vcfLowPassCutoff" />
+            <KiwiSlider label="RES" property="vcfLowPassResonance" />
+            <EnvelopeSelector label="ENV Source" property="vcfEnvelopeSource" />
+            <KiwiSlider label="ENV" property="vcfEnvelopeModAmount" />
+            <LfoSelector label="LFO Source" property="vcfLfoSource" />
+            <KiwiSlider label="LFO" property="vcfLfoModAmount" />
+            <KiwiSlider label="KYBD" property="vcfPitchFollow" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <Fieldset legend="Filter">
-        <KiwiSlider property="vcfLowPassCutoff" />
-        <KiwiSlider property="vcfLowPassResonance" />
-        <KiwiSlider property="vcfEnvelopeModAmount" />
-        <KiwiSlider property="vcfLfoModAmount" />
-        <KiwiSlider property="vcfPitchFollow" />
-      </Fieldset>
+        <Kiwi106Fieldset legend="VCA">
+          <Group align="flex-start">
+            <LfoSelector label="LFO Source" property="vcaLfoSource" />
+            <KiwiSlider label="LFO" property="vcaLfoModAmount" />
+            <KiwiSlider label="LEVEL" property="volume" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <KiwiSlider property="volume" />
+        <Kiwi106Fieldset legend="ENV1">
+          <Group>
+            <KiwiSlider label="A" property="env1Attack" />
+            <KiwiSlider label="D" property="env1Decay" />
+            <KiwiSlider label="S" property="env1Sustain" />
+            <KiwiSlider label="R" property="env1Release" />
+          </Group>
+        </Kiwi106Fieldset>
 
-      <Fieldset legend="ENV1">
-        <KiwiSlider property="env1Attack" />
-        <KiwiSlider property="env1Decay" />
-        <KiwiSlider property="env1Sustain" />
-        <KiwiSlider property="env1Release" />
-      </Fieldset>
-
-      <Fieldset legend="ENV2">
-        <KiwiSlider property="env2Attack" />
-        <KiwiSlider property="env2Decay" />
-        <KiwiSlider property="env2Sustain" />
-        <KiwiSlider property="env2Release" />
-      </Fieldset>
+        <Kiwi106Fieldset legend="ENV2">
+          <Group>
+            <KiwiSlider label="A" property="env2Attack" />
+            <KiwiSlider label="D" property="env2Decay" />
+            <KiwiSlider label="S" property="env2Sustain" />
+            <KiwiSlider label="R" property="env2Release" />
+          </Group>
+        </Kiwi106Fieldset>
+      </Group>
     </Stack>
   );
 };

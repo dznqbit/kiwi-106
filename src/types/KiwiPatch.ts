@@ -1,6 +1,17 @@
 import { MidiCcValue } from "./Midi";
 
+export type EnvelopeSource = "env1" | "env2" | "env1-inverted" | "env2-inverted";
+
+export type Kiwi106Waveform =
+  | "sine"
+  | "square"
+  | "sawtooth"
+  | "triangle"
+  | "reverse-sawtooth"
+  | "random";
 export interface KiwiPatch {
+  patchName: string;
+
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
