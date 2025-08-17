@@ -22,6 +22,14 @@ export const isMidiCcValue = (x: unknown): x is MidiCcValue => {
   );
 };
 
+export const isMidiChannel = (x: unknown): x is MidiChannel => {
+  return (
+    typeof x === "number" && !x.toString().includes(".") && x >= 0 && x < 16
+  );
+};
+
+
+
 export const isMidiMessageType = (
   messageType: string,
 ): messageType is MidiMessageType => {
