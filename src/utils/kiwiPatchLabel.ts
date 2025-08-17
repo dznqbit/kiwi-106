@@ -2,7 +2,7 @@ import { KiwiPatch } from "../types/KiwiPatch";
 
 export const labelMapping: Record<keyof KiwiPatch, string> = {
   patchName: "Patch Name",
-  
+
   portamentoTime: "Portamento Time",
   volume: "Volume",
   dcoRange: "DCO Range",

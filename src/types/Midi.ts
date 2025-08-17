@@ -28,8 +28,6 @@ export const isMidiChannel = (x: unknown): x is MidiChannel => {
   );
 };
 
-
-
 export const isMidiMessageType = (
   messageType: string,
 ): messageType is MidiMessageType => {
