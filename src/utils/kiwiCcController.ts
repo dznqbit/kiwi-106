@@ -2,6 +2,9 @@ import { KiwiPatch } from "../types/KiwiPatch";
 
 // Return a machine-readable value for a given Kiwi106 param
 const kiwiControllerValues: Record<keyof KiwiPatch, number> = {
+  // THIS IS A TYPESCRIPT HACK AND DOES NOT WORK, FIX ME
+  patchName: 0x00,
+
   portamentoTime: 0x05,
   volume: 0x07,
 

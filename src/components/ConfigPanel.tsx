@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
+import { isMidiChannel } from "../types/Midi";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
@@ -285,7 +286,11 @@ export const ConfigPanel = () => {
           <SelectMidiChannel
             enabled={midiContext.enabled}
             value={configStore.inputChannel}
-            onChange={(c) => configStore.setInputChannel(c)}
+            onChange={(c) => {
+              if (isMidiChannel(c)) {
+                configStore.setInputChannel(c);
+              }
+            }}
           />
         </Group>
       </Fieldset>
@@ -310,7 +315,11 @@ export const ConfigPanel = () => {
           <SelectMidiChannel
             enabled={midiContext.enabled}
             value={configStore.outputChannel}
-            onChange={(c) => configStore.setOutputChannel(c)}
+            onChange={(c) => {
+              if (isMidiChannel(c)) {
+                configStore.setOutputChannel(c);
+              }
+            }}
           />
         </Group>
       </Fieldset>
