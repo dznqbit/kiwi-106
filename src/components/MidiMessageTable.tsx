@@ -17,6 +17,7 @@ import { SysexMessageData } from "./MidiMessageData/SysexMidiMessageData";
 import { formatHex } from "../utils/formatHex";
 import { ControlChangeMidiMessageData } from "./MidiMessageData/ControlChangeMidiMessageData";
 import { NoteMidiMessageData } from "./MidiMessageData/NoteMidiMessageData";
+import { isSysexDeviceEnquiryReply } from "../utils/sysexUtils";
 
 export const MidiMessageTable = () => {
   const configStore = useConfigStore();
@@ -43,7 +44,7 @@ export const MidiMessageTable = () => {
     const logMessage = (e: MessageEvent) => {
       const messageType = e.message.type;
 
-      if (messageType === "clock") {
+      if (messageType === "clock" || isSysexDeviceEnquiryReply(e.message)) {
         return;
       }
 
