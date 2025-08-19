@@ -18,6 +18,7 @@ import { formatHex } from "../utils/formatHex";
 import { ControlChangeMidiMessageData } from "./MidiMessageData/ControlChangeMidiMessageData";
 import { NoteMidiMessageData } from "./MidiMessageData/NoteMidiMessageData";
 import { isSysexDeviceEnquiryReply } from "../utils/sysexUtils";
+import { H1 } from "./H1";
 
 export const MidiMessageTable = () => {
   const configStore = useConfigStore();
@@ -64,7 +65,7 @@ export const MidiMessageTable = () => {
   return (
     <Stack>
       <Group>
-        <Title>Message Log ({messageEvents.length})</Title>
+        <H1>MESSAGE LOG</H1>
         <Button onClick={() => clearMidiMessages()} leftSection={<IconTrash />}>
           Clear
         </Button>
@@ -188,7 +189,6 @@ interface MessageSparklineParams {
 }
 
 const MessageSparkline = ({ messageEvent }: MessageSparklineParams) => {
-  // Typescript is mad at messageEvent.data.map for some reason
   const data = [...messageEvent.data];
   const bytesPerRow = 64;
   const cellSize = 10;

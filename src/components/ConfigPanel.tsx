@@ -5,7 +5,6 @@ import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
 import {
   IconRefresh,
-  IconExclamationCircle,
   IconBrain,
 } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
@@ -22,35 +21,6 @@ export const ConfigPanel = () => {
     configStore.availableInputs.find((i) => formatName(i) === fn) ?? null;
   const findOutputByFormattedName = (fn: string | null) =>
     configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
-
-  const midiPanic = () => {
-    for (const output of WebMidi.outputs) {
-      output.sendAllSoundOff();
-    }
-  };
-
-  const sendDeviceEnquirySysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    // Universal
-    const universalNonRealtimeIdentification = [0x7e];
-    const universalData: number[] = [
-      0x7f, // ALL devices
-      0x06, // General information
-      0x01, // Device Inquiry request
-    ];
-
-    output.sendSysex(universalNonRealtimeIdentification, universalData);
-  };
 
   const requestGlobalDumpSysex = () => {
     if (!configStore.output?.id) {
@@ -265,7 +235,7 @@ export const ConfigPanel = () => {
   };
 
   return (
-    <Group wrap="nowrap">
+    <Stack>
       <Fieldset legend="Input">
         <Group wrap="nowrap">
           <Select
@@ -277,7 +247,7 @@ export const ConfigPanel = () => {
             }
             value={formatName(configStore.input)}
             data={configStore.availableInputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
+              (i) => `${i.manufacturer} ${i.name}`
             )}
             onChange={(fn) =>
               configStore.setInput(findInputByFormattedName(fn))
@@ -306,7 +276,7 @@ export const ConfigPanel = () => {
             }
             value={formatName(configStore.output)}
             data={configStore.availableOutputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
+              (i) => `${i.manufacturer} ${i.name}`
             )}
             onChange={(fn) =>
               configStore.setOutput(findOutputByFormattedName(fn))
@@ -331,12 +301,6 @@ export const ConfigPanel = () => {
         >
           Scan
         </Button>
-        <Button onClick={midiPanic} leftSection={<IconExclamationCircle />}>
-          Panic
-        </Button>
-        <Button onClick={sendDeviceEnquirySysex} leftSection={<IconBrain />}>
-          Device Enquiry
-        </Button>
         <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
           Request Global Dump
         </Button>
@@ -350,6 +314,6 @@ export const ConfigPanel = () => {
           Request Patch Name
         </Button>
       </Stack>
-    </Group>
+    </Stack>
   );
 };

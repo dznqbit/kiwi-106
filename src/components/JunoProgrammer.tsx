@@ -1,4 +1,4 @@
-import { Container, Overlay } from "@mantine/core";
+import { Box, Center, Container, Overlay, Paper, Text } from "@mantine/core";
 import { NoteTester } from "./NoteTester";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
@@ -173,5 +173,7 @@ function DisconnectedOverlay() {
     return <></>;
   }
 
-  return <Overlay backgroundOpacity={0.5} blur={7} />;
+  return (
+    <Overlay backgroundOpacity={0.5} blur={3} />
+  );
 }

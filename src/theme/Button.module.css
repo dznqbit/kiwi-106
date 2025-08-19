@@ -1,18 +1,26 @@
 .root {
+  border-radius: 0;
+
+  &[data-variant='juno'] {
+    border-top: 2px solid #d0d0d060;
+    border-right: 2px solid #66666680;
+
+    &:active {
+      transform: translateX(1px);
+    }
+  }
+
   &[data-variant='beige'] {
-    border-radius: 0;
     background-color: #e6e2c6;
     border-top: 2px solid #f0f0d0;
     border-right: 2px solid #c6c2b6;
   }
 
   &[data-variant='blue'] {
-    border-radius: 0;
     background-color: #78b9d9;
   }
 
   &[data-variant='orange'] {
-    border-radius: 0;
     background-color: #ffbb53;
   }
 }
