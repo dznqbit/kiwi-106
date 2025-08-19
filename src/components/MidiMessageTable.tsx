@@ -52,7 +52,6 @@ export const MidiMessageTable = () => {
     };
 
     input.addListener("midimessage", logMessage);
-    console.log("MessageLog: now listening...");
 
     return () => {
       input.removeListener("midimessage", logMessage);

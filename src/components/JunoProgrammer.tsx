@@ -1,8 +1,5 @@
-import { Container } from "@mantine/core";
-import { ConfigPanel } from "./ConfigPanel";
+import { Container, Overlay } from "@mantine/core";
 import { NoteTester } from "./NoteTester";
-import { HexCalculator } from "./HexCalculator";
-import { MidiMessageTable } from "./MidiMessageTable";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
@@ -24,6 +21,7 @@ import {
   isKiwi106BufferDumpSysexMessage,
   parseKiwi106PatchEditBufferDumpCommand,
 } from "../utils/sysexUtils";
+import { useKiwi106Context } from "../hooks/useKiwi106Context";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -68,7 +66,8 @@ export const JunoProgrammer = () => {
       const message = e.message;
 
       if (!isKiwi106SysexMessage(message)) {
-        console.log("Ignoring non-Kiwi message");
+        // console.log("Ignoring non-Kiwi message");
+        return;
       }
 
       if (isKiwi106UpdatePatchNameSysexMessage(message)) {
@@ -137,7 +136,7 @@ export const JunoProgrammer = () => {
 
                 const updatePatchName = 0x0c;
                 const patchNameBytes = Array.from(s).map(
-                  (char) => char.charCodeAt(0) & 0x7f,
+                  (char) => char.charCodeAt(0) & 0x7f
                 );
 
                 output.sendSysex(kiwiTechnicsSysexId, [
@@ -150,20 +149,29 @@ export const JunoProgrammer = () => {
             }
           }
         }
-      },
+      }
     );
 
     return unsubscribeKiwiSyncer;
   }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
-    <Container size="lg">
-      <ConfigPanel />
-      <MidiMessageTable />
-      <HexCalculator />
+    <Container size="lg" style={{ position: "relative" }}>
+      <DisconnectedOverlay />
+
       <NoteTester />
       <PatchNameEditor />
       <JunoSliders />
     </Container>
   );
 };
+
+function DisconnectedOverlay() {
+  const kiwi106Context = useKiwi106Context();
+
+  if (kiwi106Context.active) {
+    return <></>;
+  }
+
+  return <Overlay backgroundOpacity={0.5} blur={7} />;
+}

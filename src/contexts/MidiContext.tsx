@@ -8,7 +8,6 @@ export interface MidiPortData {
 
 export interface MidiContextEnableData {
   enabled: boolean;
-  enableSuccess: boolean | null;
   enableError: string | null;
 }
 
@@ -18,8 +17,8 @@ export interface MidiContext extends MidiContextEnableData {
 
 const defaultMidiContext: MidiContext = {
   enabled: false,
-  enableSuccess: null,
   enableError: null,
+  
   initialize: () => {},
 };
 
