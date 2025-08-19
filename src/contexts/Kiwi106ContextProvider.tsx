@@ -141,10 +141,11 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   const context: Kiwi106Context = useMemo(
     () => ({
       active,
+      midiError: midiContext.enableError,
       programVersion,
       bootloaderVersion,
     }),
-    [active, programVersion, bootloaderVersion]
+    [active, midiContext.enableError, programVersion, bootloaderVersion]
   );
 
   return (

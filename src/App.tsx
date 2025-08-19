@@ -8,7 +8,8 @@ import {
   Stack,
   Divider,
   Modal,
-  Space,
+  Text,
+  Code,
 } from "@mantine/core";
 import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { JunoProgrammer } from "./components/JunoProgrammer";
@@ -23,6 +24,7 @@ import { MidiPanicButton } from "./components/MidiPanicButton";
 import { InitializeMidiContextButton } from "./components/InitializeMidiContextButton";
 import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
+import { JunoButtonGroup } from "./components/JunoButtonGroup";
 
 function ContextProviders({ children }: { children: ReactNode }) {
   return (
@@ -34,7 +36,7 @@ function ContextProviders({ children }: { children: ReactNode }) {
   );
 }
 
-function App() {
+function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
 
   const [
@@ -47,7 +49,7 @@ function App() {
   ] = useDisclosure(false);
 
   return (
-    <ContextProviders>
+    <>
       <Container size="lg" mt="sm" mb="lg">
         <Stack>
           <Group justify="space-between">
@@ -56,13 +58,20 @@ function App() {
                 KIWI-106
               </H1>
               {!kiwi106Context.active && (
-                <Group bg="black" mt="xs" gap={2} p={4}>
-                  <InitializeMidiContextButton />
+                <Group>
+                  <JunoButtonGroup>
+                    <InitializeMidiContextButton />
+                  </JunoButtonGroup>
+                  {kiwi106Context.midiError && (
+                    <Code color="red">
+                      Something went wrong. Try restarting your browser.
+                    </Code>
+                  )}
                 </Group>
               )}
             </Group>
 
-            <Group bg="black" mt="xs" gap={2} p={4}>
+            <JunoButtonGroup>
               <MidiPanicButton title="Panic" />
               <Button
                 title="Logs"
@@ -82,7 +91,7 @@ function App() {
               >
                 <IconSettings color="black" />
               </Button>
-            </Group>
+            </JunoButtonGroup>
           </Group>
           <Divider color="blue" size="xl" />
         </Stack>
@@ -108,6 +117,14 @@ function App() {
       </Container>
 
       <JunoProgrammer />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ContextProviders>
+      <Kiwi106Programmer />
     </ContextProviders>
   );
 }

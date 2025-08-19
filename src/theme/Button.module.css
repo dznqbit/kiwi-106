@@ -6,7 +6,7 @@
     border-right: 2px solid #66666680;
 
     &:active {
-      transform: translateX(1px);
+      transform: translateX(1px) skewX(-0.1deg);
     }
   }
 
