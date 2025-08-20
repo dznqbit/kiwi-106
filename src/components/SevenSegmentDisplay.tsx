@@ -10,7 +10,7 @@ interface SegmentDisplayProps {
 }
 
 interface SevenSegmentDisplayProps {
-  value: number;
+  value: number | null;
   size?: number;
   color?: string;
   offColor?: string;
@@ -30,6 +30,7 @@ const SevenSegmentDigit = ({
   offColor,
 }: SevenSegmentDigitProps) => {
   const segmentPatterns = {
+    [-1]: [false, false, false, false, false, false, true],
     0: [true, true, true, true, true, true, false],
     1: [false, true, true, false, false, false, false],
     2: [true, true, false, true, true, false, true],
@@ -57,7 +58,7 @@ const SevenSegmentDigit = ({
   const gap = thickness * 0.3;
   const segmentHeight = (height - thickness * 3 - gap * 2) / 2;
 
-  const TopSegment = ({ x, y, w, h, isOn, id }: SegmentDisplayProps) => {
+  const TopSegment = ({ x, y, w, isOn, id }: SegmentDisplayProps) => {
     return (
       <polygon
         id={id}
@@ -73,7 +74,7 @@ const SevenSegmentDigit = ({
     );
   };
 
-  const TopRightSegment = ({ x, y, w, h, isOn, id }: SegmentDisplayProps) => (
+  const TopRightSegment = ({ x, y, h, isOn, id }: SegmentDisplayProps) => (
     <polygon
       id={id}
       points={`
@@ -88,13 +89,7 @@ const SevenSegmentDigit = ({
     />
   );
 
-  const BottomRightSegment = ({
-    x,
-    y,
-    h,
-    isOn,
-    id,
-  }: SegmentDisplayProps) => (
+  const BottomRightSegment = ({ x, y, h, isOn, id }: SegmentDisplayProps) => (
     <polygon
       id={id}
       points={`
@@ -139,7 +134,7 @@ const SevenSegmentDigit = ({
     />
   );
 
-  const TopLeftSegment = ({ x, y, w, h, isOn, id }: SegmentDisplayProps) => (
+  const TopLeftSegment = ({ x, y, h, isOn, id }: SegmentDisplayProps) => (
     <polygon
       id={id}
       points={`
@@ -154,7 +149,7 @@ const SevenSegmentDigit = ({
     />
   );
 
-  const MiddleSegment = ({ x, y, w, h, isOn, id }: SegmentDisplayProps) => (
+  const MiddleSegment = ({ x, y, w, isOn, id }: SegmentDisplayProps) => (
     <polygon
       id={id}
       points={`
@@ -169,13 +164,13 @@ const SevenSegmentDigit = ({
       style={{ fill: isOn ? color : offColor, strokeWidth: 1 }}
     />
   );
-  
+
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height * 0.9}`}>
       <TopSegment
         x={0}
         w={width}
-        h={height}
+        h={segmentHeight}
         y={0}
         isOn={segments[0]}
         id="top"
@@ -238,7 +233,10 @@ export const SevenSegmentDisplay = ({
   color = "#ff0000",
   offColor = "#220000",
 }: SevenSegmentDisplayProps) => {
-  const digits = value.toString().padStart(2, "0").split("").map(Number);
+  const digits =
+    value === null
+      ? [-1, -1]
+      : value.toString().padStart(2, "0").split("").map(Number);
 
   return (
     <Group bg="black" gap={size * 0.3} p={size * 0.3}>
