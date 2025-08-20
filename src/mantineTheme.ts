@@ -83,7 +83,38 @@ export const mantineTheme = createTheme({
   },
 
   components: {
-    Button: Button.extend({ classNames: buttonStyles }),
+    Button: Button.extend({
+      classNames: buttonStyles,
+      vars: (_theme, props) => {
+        if (props.variant !== "juno") {
+          return { root: {} };
+        }
+
+        // We're going to pin Juno button height but leave width variable for different cases:
+        // no content, icons, words, etc.
+        const junoButtonMeasurements = (size: number) => {
+          return {
+            root: {
+              "--button-height": `36px`,
+              "--button-padding-x": `${0.31 * size}px`,
+            },
+          };
+        };
+        switch (props.size) {
+          case "sm":
+            return junoButtonMeasurements(24);
+
+          case "md":
+            return junoButtonMeasurements(36);
+
+          case "lg":
+            return junoButtonMeasurements(80);
+          
+          default:
+            return junoButtonMeasurements(36);
+        }
+      },
+    }),
   },
 
   variantColorResolver: (input) => {

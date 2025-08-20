@@ -22,6 +22,7 @@ import {
   parseKiwi106PatchEditBufferDumpCommand,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
+import { JunoPatchSelector } from "./JunoPatchSelector";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -158,6 +159,7 @@ export const JunoProgrammer = () => {
   return (
     <Container size="lg" style={{ position: "relative" }}>
       <DisconnectedOverlay />
+      <JunoPatchSelector />
       <PatchNameEditor />
       <JunoSliders />
     </Container>

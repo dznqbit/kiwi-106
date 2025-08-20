@@ -46,7 +46,6 @@ export const NoteButton = () => {
           open();
         }
       }}
-      px="xs"
     >
       <IconMusic />
     </Button>

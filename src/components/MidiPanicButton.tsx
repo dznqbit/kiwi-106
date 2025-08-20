@@ -10,7 +10,7 @@ export const MidiPanicButton = (props: ButtonProps & { title: string }) => {
   };
 
   return (
-    <Button color="red" variant="juno" onClick={midiPanic} px="xs" {...props}>
+    <Button color="red" variant="juno" onClick={midiPanic} {...props}>
       <IconExclamationCircle />
     </Button>
   );

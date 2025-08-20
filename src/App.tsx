@@ -25,6 +25,7 @@ import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
+import { JunoPatchSelector } from "./components/JunoPatchSelector";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -71,7 +72,6 @@ function Kiwi106Programmer() {
                 variant="juno"
                 color="orange"
                 onClick={toggleMessageLog}
-                px="xs"
               >
                 <IconLogs color="black" />
               </Button>
@@ -80,7 +80,6 @@ function Kiwi106Programmer() {
                 color="orange"
                 variant="juno"
                 onClick={toggleConfigDrawer}
-                px="xs"
               >
                 <IconSettings color="black" />
               </Button>
@@ -108,7 +107,6 @@ function Kiwi106Programmer() {
           </Container>
         </Drawer>
       </Container>
-
       <JunoProgrammer />
     </>
   );
