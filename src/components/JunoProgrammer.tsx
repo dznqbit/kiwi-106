@@ -158,8 +158,6 @@ export const JunoProgrammer = () => {
   return (
     <Container size="lg" style={{ position: "relative" }}>
       <DisconnectedOverlay />
-
-      <NoteTester />
       <PatchNameEditor />
       <JunoSliders />
     </Container>

@@ -8,7 +8,6 @@ import {
   Stack,
   Divider,
   Modal,
-  Text,
   Code,
 } from "@mantine/core";
 import { MidiContextProvider } from "./contexts/MidiContextProvider";
@@ -17,7 +16,7 @@ import { mantineTheme } from "./mantineTheme";
 import { ConfigPanel } from "./components/ConfigPanel";
 import { MidiMessageTable } from "./components/MidiMessageTable";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
-import { IconLogs, IconSettings } from "@tabler/icons-react";
+import { IconLogs, IconMusic, IconSettings } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";
@@ -25,16 +24,7 @@ import { InitializeMidiContextButton } from "./components/InitializeMidiContextB
 import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
-
-function ContextProviders({ children }: { children: ReactNode }) {
-  return (
-    <MantineProvider theme={mantineTheme} defaultColorScheme="dark">
-      <MidiContextProvider>
-        <Kiwi106ContextProvider>{children}</Kiwi106ContextProvider>
-      </MidiContextProvider>
-    </MantineProvider>
-  );
-}
+import { NoteButton } from "./components/NoteButton";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -43,6 +33,7 @@ function Kiwi106Programmer() {
     isConfigDrawerOpened,
     { toggle: toggleConfigDrawer, close: closeConfigDrawer },
   ] = useDisclosure(false);
+  
   const [
     isMessageLogOpened,
     { toggle: toggleMessageLog, close: closeMessageLog },
@@ -72,6 +63,8 @@ function Kiwi106Programmer() {
             </Group>
 
             <JunoButtonGroup>
+              <NoteButton />
+
               <MidiPanicButton title="Panic" />
               <Button
                 title="Logs"
@@ -118,6 +111,16 @@ function Kiwi106Programmer() {
 
       <JunoProgrammer />
     </>
+  );
+}
+
+function ContextProviders({ children }: { children: ReactNode }) {
+  return (
+    <MantineProvider theme={mantineTheme} defaultColorScheme="dark">
+      <MidiContextProvider>
+        <Kiwi106ContextProvider>{children}</Kiwi106ContextProvider>
+      </MidiContextProvider>
+    </MantineProvider>
   );
 }
 
