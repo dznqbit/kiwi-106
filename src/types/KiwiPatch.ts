@@ -1,15 +1,14 @@
 import { MidiCcValue } from "./Midi";
 
-export type KiwiPatchGroupIndex = 1 | 2 | 3 | 4 | 5;
+export type KiwiPatchGroupIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type KiwiPatchBankIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type KiwiPatchIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export const isKiwiPatchGroupIndex = (n: unknown): n is KiwiPatchGroupIndex => {
-  return typeof n === 'number' && n >= 1 && n <= 5;
+  return typeof n === 'number' && n >= 1 && n <= 8;
 }
 
 export const isKiwiPatchBankIndex = (n: unknown): n is KiwiPatchBankIndex => {
-  console.log(`isKiwiPatchBankIndex? ${n} ${typeof n === 'number' && n >= 1 && n <= 8}`)
   return typeof n === 'number' && n >= 1 && n <= 8;
 }
 

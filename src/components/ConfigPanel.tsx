@@ -10,9 +10,11 @@ import {
 import { useConfigStore } from "../stores/configStore";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { isMidiChannel } from "../types/Midi";
+import { useKiwi106Context } from "../hooks/useKiwi106Context";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
+  const kiwi106Context = useKiwi106Context();
   const configStore = useConfigStore();
 
   const formatName = (i: MidiPortData | null) =>
@@ -23,41 +25,12 @@ export const ConfigPanel = () => {
     configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
 
   const requestGlobalDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x01, // Request Global Dump
-    ]);
+    kiwi106Context.kiwiMidi?.requestGlobalDumpSysex();
   };
 
-  const requestPatchDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x03, // Request Buffer Dump
-    ]);
+  const requestEditBufferDumpSysex = () => {
+    console.log("request edit buffer from", kiwi106Context.kiwiMidi);
+    kiwi106Context.kiwiMidi?.requestEditBufferDumpSysex();
   };
 
   const sendPatchBufferDumpSysex = () => {
@@ -304,7 +277,7 @@ export const ConfigPanel = () => {
         <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
           Request Global Dump
         </Button>
-        <Button onClick={requestPatchDumpSysex} leftSection={<IconBrain />}>
+        <Button onClick={requestEditBufferDumpSysex} leftSection={<IconBrain />}>
           Request Patch Dump
         </Button>
         <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>

@@ -10,6 +10,8 @@ import { useConfigStore } from "../stores/configStore";
 import { Kiwi106Context } from "./Kiwi106Context";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
+import { KiwiMidi } from "../types/KiwiMidi";
+import { buildKiwiMidi } from "../utils/kiwiMidi";
 
 const heartbeatIntervalMs = 5_000;
 
@@ -18,6 +20,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   const configStore = useConfigStore();
 
   const [active, setActive] = useState(false);
+  const [kiwiMidi, setKiwiMidi] = useState<KiwiMidi | null>(null);
   const [programVersion, setProgramVersion] = useState<string | null>(null);
   const [bootloaderVersion, setBootloaderVersion] = useState<string | null>(
     null
@@ -50,8 +53,12 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     const fail = (reason: string) => {
       console.log(`[Kiwi106Context] FAIL ${reason}`);
-      if (active !== active) {
+      if (active) {
         setActive(false);
+      }
+
+      if (kiwiMidi !== null) {
+        setKiwiMidi(null);
       }
     };
 
@@ -66,18 +73,32 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const midiInput = WebMidi.getInputById(midiInputId);
-    if (!midiInput) {
+    const input = WebMidi.getInputById(midiInputId);
+    if (!input) {
       fail(`Could not select midiInput "${midiInputId}"`);
       return;
     }
 
+    if (!configStore.output?.id) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const output = WebMidi.getOutputById(configStore.output?.id);
+    if (!output) {
+      console.log("Send sysex message: no output");
+      return;
+    }
+
+    const newKiwiMidi = buildKiwiMidi({ input, output });
+    setKiwiMidi(newKiwiMidi)
+
     // Fire off an initial device enquiry
-    sendDeviceEnquirySysex();
+    newKiwiMidi.requestDeviceEnquirySysex();
 
     // Set heartbeat timer
     const intervalHandle = setInterval(() => {
-      sendDeviceEnquirySysex();
+      newKiwiMidi.requestDeviceEnquirySysex();
     }, heartbeatIntervalMs);
 
     const kiwi106DeviceEnquiryListener = (e: MessageEvent) => {
@@ -111,13 +132,13 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       }
     };
 
-    midiInput.addListener("sysex", kiwi106DeviceEnquiryListener);
+    input.addListener("sysex", kiwi106DeviceEnquiryListener);
 
     return () => {
       clearInterval(intervalHandle);
-      midiInput.removeListener("sysex", kiwi106DeviceEnquiryListener);
+      input.removeListener("sysex", kiwi106DeviceEnquiryListener);
     };
-  }, [sendDeviceEnquirySysex, midiContext.enabled, configStore.input, active]);
+  }, [sendDeviceEnquirySysex, midiContext.enabled, configStore.input, configStore.output, active]);
 
   useEffect(() => {
     if (!active) {
@@ -126,10 +147,13 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
 
     const heartbeatCheckHandle = setInterval(() => {
       if (lastHeartbeatAt) {
-        const timeSinceLastHeartbeatMs = new Date().getTime() - lastHeartbeatAt.getTime();
+        const timeSinceLastHeartbeatMs =
+          new Date().getTime() - lastHeartbeatAt.getTime();
 
         if (timeSinceLastHeartbeatMs > 15_000) {
-          console.log(`[Kiwi106Context] Haven't seen heartbeat since ${timeSinceLastHeartbeatMs}`);
+          console.log(
+            `[Kiwi106Context] Haven't seen heartbeat since ${timeSinceLastHeartbeatMs}`
+          );
           setActive(false);
         }
       }
@@ -144,8 +168,9 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       midiError: midiContext.enableError,
       programVersion,
       bootloaderVersion,
+      kiwiMidi,
     }),
-    [active, midiContext.enableError, programVersion, bootloaderVersion]
+    [active, kiwiMidi, midiContext.enableError, programVersion, bootloaderVersion]
   );
 
   return (

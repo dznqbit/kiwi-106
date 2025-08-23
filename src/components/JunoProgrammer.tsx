@@ -1,5 +1,4 @@
-import { Box, Center, Container, Overlay, Paper, Text } from "@mantine/core";
-import { NoteTester } from "./NoteTester";
+import { Container, Overlay } from "@mantine/core";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
