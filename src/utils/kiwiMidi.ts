@@ -48,10 +48,10 @@ export const buildKiwiMidi = ({
         output.sendProgramChange(0);
       } else {
         const { group, bank, patch } = patchAddress;
-        
+
         const groupIndex = Math.floor(group / 2);
         const baseTenPatchNumber =
-          ((group % 2) - 1) * 64 + (bank - 1) * 8 + (patch - 1);
+          Math.max(0, (group % 2) - 1) * 64 + (bank - 1) * 8 + (patch - 1);
 
         output.sendControlChange(32, groupIndex);
         output.sendProgramChange(baseTenPatchNumber);
