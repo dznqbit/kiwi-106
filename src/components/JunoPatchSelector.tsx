@@ -105,9 +105,15 @@ export const JunoPatchSelector = () => {
 
       <Stack gap="xs">
         <Group justify="center" grow gap={0}>
-          <Center><Title order={6}>GROUP</Title></Center>
-          <Center><Title order={6}>BANK</Title></Center>
-          <Center><Title order={6}>PATCH</Title></Center>
+          <Center>
+            <Title order={6}>GROUP</Title>
+          </Center>
+          <Center>
+            <Title order={6}>BANK</Title>
+          </Center>
+          <Center>
+            <Title order={6}>PATCH</Title>
+          </Center>
         </Group>
         <KiwiPatchDisplay patchAddress={patchAddress} size={40} />
       </Stack>

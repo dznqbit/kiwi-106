@@ -229,7 +229,7 @@ const SevenSegmentDigit = ({
         isOn={segments[6]}
         id="middle"
       />
-      
+
       {/* dot */}
       <circle
         cx={digitWidth + 2 * gap + dotRadius}

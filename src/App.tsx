@@ -34,7 +34,7 @@ function Kiwi106Programmer() {
     isConfigDrawerOpened,
     { toggle: toggleConfigDrawer, close: closeConfigDrawer },
   ] = useDisclosure(false);
-  
+
   const [
     isMessageLogOpened,
     { toggle: toggleMessageLog, close: closeMessageLog },

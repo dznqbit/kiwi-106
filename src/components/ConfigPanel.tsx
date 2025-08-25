@@ -3,10 +3,7 @@ import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
-import {
-  IconRefresh,
-  IconBrain,
-} from "@tabler/icons-react";
+import { IconRefresh, IconBrain } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { isMidiChannel } from "../types/Midi";
@@ -220,7 +217,7 @@ export const ConfigPanel = () => {
             }
             value={formatName(configStore.input)}
             data={configStore.availableInputs.map(
-              (i) => `${i.manufacturer} ${i.name}`
+              (i) => `${i.manufacturer} ${i.name}`,
             )}
             onChange={(fn) =>
               configStore.setInput(findInputByFormattedName(fn))
@@ -249,7 +246,7 @@ export const ConfigPanel = () => {
             }
             value={formatName(configStore.output)}
             data={configStore.availableOutputs.map(
-              (i) => `${i.manufacturer} ${i.name}`
+              (i) => `${i.manufacturer} ${i.name}`,
             )}
             onChange={(fn) =>
               configStore.setOutput(findOutputByFormattedName(fn))
@@ -277,7 +274,10 @@ export const ConfigPanel = () => {
         <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
           Request Global Dump
         </Button>
-        <Button onClick={requestEditBufferDumpSysex} leftSection={<IconBrain />}>
+        <Button
+          onClick={requestEditBufferDumpSysex}
+          leftSection={<IconBrain />}
+        >
           Request Patch Dump
         </Button>
         <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>

@@ -4,11 +4,15 @@ import { useMidiContext } from "../hooks/useMidiContext";
 
 export const InitializeMidiContextButton = () => {
   const midiContext = useMidiContext();
-  
-  return <Button
-    title="Retry"
-    variant="juno"
-    onClick={() => midiContext.initialize()}
-    px="xs"
-  ><IconRefresh /></Button>;
+
+  return (
+    <Button
+      title="Retry"
+      variant="juno"
+      onClick={() => midiContext.initialize()}
+      px="xs"
+    >
+      <IconRefresh />
+    </Button>
+  );
 };

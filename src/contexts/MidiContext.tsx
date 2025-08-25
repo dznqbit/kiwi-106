@@ -18,7 +18,7 @@ export interface MidiContext extends MidiContextEnableData {
 const defaultMidiContext: MidiContext = {
   enabled: false,
   enableError: null,
-  
+
   initialize: () => {},
 };
 

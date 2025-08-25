@@ -136,7 +136,7 @@ export const JunoProgrammer = () => {
 
                 const updatePatchName = 0x0c;
                 const patchNameBytes = Array.from(s).map(
-                  (char) => char.charCodeAt(0) & 0x7f
+                  (char) => char.charCodeAt(0) & 0x7f,
                 );
 
                 output.sendSysex(kiwiTechnicsSysexId, [
@@ -149,7 +149,7 @@ export const JunoProgrammer = () => {
             }
           }
         }
-      }
+      },
     );
 
     return unsubscribeKiwiSyncer;
@@ -172,7 +172,5 @@ function DisconnectedOverlay() {
     return <></>;
   }
 
-  return (
-    <Overlay backgroundOpacity={0.5} blur={3} />
-  );
+  return <Overlay backgroundOpacity={0.5} blur={3} />;
 }

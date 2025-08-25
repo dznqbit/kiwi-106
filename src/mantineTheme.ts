@@ -81,12 +81,12 @@ export const mantineTheme = createTheme({
       },
 
       h5: {
-        fontSize: "0.875rem"
+        fontSize: "0.875rem",
       },
 
       h6: {
-        fontSize: "0.6rem"
-      }
+        fontSize: "0.6rem",
+      },
     },
   },
 
@@ -117,7 +117,7 @@ export const mantineTheme = createTheme({
 
           case "lg":
             return junoButtonMeasurements(80);
-          
+
           default:
             return junoButtonMeasurements(36);
         }
