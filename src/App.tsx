@@ -42,7 +42,7 @@ function Kiwi106Programmer() {
 
   return (
     <>
-      <Container size="lg" mt="sm" mb="lg">
+      <Container size="xl" mt="sm" mb="lg">
         <Stack>
           <Group justify="space-between">
             <Group>

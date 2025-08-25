@@ -79,6 +79,14 @@ export const mantineTheme = createTheme({
       h1: {
         fontSize: "64px",
       },
+
+      h5: {
+        fontSize: "0.875rem"
+      },
+
+      h6: {
+        fontSize: "0.6rem"
+      }
     },
   },
 

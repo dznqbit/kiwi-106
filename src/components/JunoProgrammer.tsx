@@ -156,7 +156,7 @@ export const JunoProgrammer = () => {
   }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
-    <Container size="lg" style={{ position: "relative" }}>
+    <Container size="xl" style={{ position: "relative" }} p={0} mx="md">
       <DisconnectedOverlay />
       <JunoPatchSelector />
       <PatchNameEditor />

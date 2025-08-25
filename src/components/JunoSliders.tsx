@@ -1,4 +1,4 @@
-import { Group, Stack } from "@mantine/core";
+import { Container, Group } from "@mantine/core";
 import { KiwiPatchPropertySlider } from "./KiwiPatchPropertySlider";
 import { WaveformSelector } from "./WaveformSelector";
 import { Kiwi106Fieldset } from "./Kiwi106Fieldset";
@@ -10,7 +10,7 @@ import { DcoWaveSelector } from "./DcoWaveSelector";
 
 export const JunoSliders = () => {
   return (
-    <Stack>
+    <Container size="xl">
       <Group>
         <Kiwi106Fieldset legend="BEND">
           <Group>
@@ -103,6 +103,6 @@ export const JunoSliders = () => {
           </Group>
         </Kiwi106Fieldset>
       </Group>
-    </Stack>
+    </Container>
   );
 };

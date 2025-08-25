@@ -1,4 +1,5 @@
 import { Group } from "@mantine/core";
+import { KiwiPatchAddress } from "../types/KiwiPatch";
 
 interface SegmentDisplayProps {
   x: number;
@@ -18,6 +19,7 @@ interface SevenSegmentDisplayProps {
 
 interface SevenSegmentDigitProps {
   digit: number;
+  dot: boolean;
   size: number;
   color: string;
   offColor: string;
@@ -25,6 +27,7 @@ interface SevenSegmentDigitProps {
 
 const SevenSegmentDigit = ({
   digit,
+  dot = false,
   size,
   color,
   offColor,
@@ -52,8 +55,8 @@ const SevenSegmentDigit = ({
     false,
   ];
 
-  const width = size * 0.8;
-  const height = size * 1.6;
+  const width = size;
+  const height = size * 1.5;
   const thickness = size * 0.14;
   const gap = thickness * 0.3;
   const segmentHeight = (height - thickness * 3 - gap * 2) / 2;
@@ -165,29 +168,32 @@ const SevenSegmentDigit = ({
     />
   );
 
+  const digitWidth = 0.76 * width;
+  const dotRadius = 0.55 * thickness;
+
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height * 0.9}`}>
       <TopSegment
         x={0}
-        w={width}
+        w={digitWidth}
         h={segmentHeight}
         y={0}
         isOn={segments[0]}
         id="top"
       />
       <TopRightSegment
-        x={width - thickness}
+        x={digitWidth - thickness}
         y={thickness + gap}
         h={segmentHeight}
-        w={width}
+        w={digitWidth}
         isOn={segments[1]}
         id="topRight"
       />
       <BottomRightSegment
-        x={width - thickness}
+        x={digitWidth - thickness}
         y={2 * thickness + segmentHeight + gap}
         h={segmentHeight}
-        w={width}
+        w={digitWidth}
         isOn={segments[2]}
         id="bottomRight"
       />
@@ -195,7 +201,7 @@ const SevenSegmentDigit = ({
         x={0}
         y={2 * (thickness + segmentHeight) - gap}
         h={segmentHeight}
-        w={width}
+        w={digitWidth}
         isOn={segments[3]}
         id="bottom"
       />
@@ -203,7 +209,7 @@ const SevenSegmentDigit = ({
         x={0}
         y={2 * thickness + segmentHeight + gap}
         h={segmentHeight}
-        w={width}
+        w={digitWidth}
         isOn={segments[4]}
         id="bottomLeft"
       />
@@ -211,7 +217,7 @@ const SevenSegmentDigit = ({
         x={0}
         y={thickness + gap}
         h={segmentHeight}
-        w={width}
+        w={digitWidth}
         isOn={segments[5]}
         id="topLeft"
       />
@@ -219,9 +225,17 @@ const SevenSegmentDigit = ({
         x={gap / 2}
         y={thickness + segmentHeight}
         h={segmentHeight}
-        w={width - gap}
+        w={digitWidth - gap}
         isOn={segments[6]}
         id="middle"
+      />
+      
+      {/* dot */}
+      <circle
+        cx={digitWidth + 2 * gap + dotRadius}
+        cy={height - (gap + 2 * dotRadius)}
+        r={dotRadius}
+        fill={dot ? color : "transparent"}
       />
     </svg>
   );
@@ -243,6 +257,38 @@ export const SevenSegmentDisplay = ({
       {digits.map((digit, index) => (
         <SevenSegmentDigit
           key={index}
+          dot={false}
+          digit={digit}
+          size={size}
+          color={color}
+          offColor={offColor}
+        />
+      ))}
+    </Group>
+  );
+};
+
+export const KiwiPatchDisplay = ({
+  patchAddress,
+  size = 60,
+}: {
+  patchAddress: KiwiPatchAddress | null;
+  size?: number;
+}) => {
+  const color = "#ff0000",
+    offColor = "#220000";
+
+  const digits =
+    patchAddress === null
+      ? [-1, -1, -1]
+      : [patchAddress.group, patchAddress.bank, patchAddress.patch];
+
+  return (
+    <Group bg="black" gap={size * 0.2} p={size * 0.3} pl={size * 0.45}>
+      {digits.map((digit, index) => (
+        <SevenSegmentDigit
+          key={index}
+          dot={index === 0}
           digit={digit}
           size={size}
           color={color}
