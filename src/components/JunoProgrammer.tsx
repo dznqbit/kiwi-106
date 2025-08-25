@@ -1,8 +1,4 @@
-import { Container } from "@mantine/core";
-import { ConfigPanel } from "./ConfigPanel";
-import { NoteTester } from "./NoteTester";
-import { HexCalculator } from "./HexCalculator";
-import { MidiMessageTable } from "./MidiMessageTable";
+import { Container, Overlay } from "@mantine/core";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
@@ -24,6 +20,8 @@ import {
   isKiwi106BufferDumpSysexMessage,
   parseKiwi106PatchEditBufferDumpCommand,
 } from "../utils/sysexUtils";
+import { useKiwi106Context } from "../hooks/useKiwi106Context";
+import { JunoPatchSelector } from "./JunoPatchSelector";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -68,7 +66,8 @@ export const JunoProgrammer = () => {
       const message = e.message;
 
       if (!isKiwi106SysexMessage(message)) {
-        console.log("Ignoring non-Kiwi message");
+        // console.log("Ignoring non-Kiwi message");
+        return;
       }
 
       if (isKiwi106UpdatePatchNameSysexMessage(message)) {
@@ -157,13 +156,21 @@ export const JunoProgrammer = () => {
   }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
-    <Container size="lg">
-      <ConfigPanel />
-      <MidiMessageTable />
-      <HexCalculator />
-      <NoteTester />
+    <Container size="xl" style={{ position: "relative" }} p={0} mx="md">
+      <DisconnectedOverlay />
+      <JunoPatchSelector />
       <PatchNameEditor />
       <JunoSliders />
     </Container>
   );
 };
+
+function DisconnectedOverlay() {
+  const kiwi106Context = useKiwi106Context();
+
+  if (kiwi106Context.active) {
+    return <></>;
+  }
+
+  return <Overlay backgroundOpacity={0.5} blur={3} />;
+}

@@ -3,17 +3,15 @@ import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
-import {
-  IconRefresh,
-  IconExclamationCircle,
-  IconBrain,
-} from "@tabler/icons-react";
+import { IconRefresh, IconBrain } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { isMidiChannel } from "../types/Midi";
+import { useKiwi106Context } from "../hooks/useKiwi106Context";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
+  const kiwi106Context = useKiwi106Context();
   const configStore = useConfigStore();
 
   const formatName = (i: MidiPortData | null) =>
@@ -23,71 +21,13 @@ export const ConfigPanel = () => {
   const findOutputByFormattedName = (fn: string | null) =>
     configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
 
-  const midiPanic = () => {
-    for (const output of WebMidi.outputs) {
-      output.sendAllSoundOff();
-    }
-  };
-
-  const sendDeviceEnquirySysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    // Universal
-    const universalNonRealtimeIdentification = [0x7e];
-    const universalData: number[] = [
-      0x7f, // ALL devices
-      0x06, // General information
-      0x01, // Device Inquiry request
-    ];
-
-    output.sendSysex(universalNonRealtimeIdentification, universalData);
-  };
-
   const requestGlobalDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x01, // Request Global Dump
-    ]);
+    kiwi106Context.kiwiMidi?.requestGlobalDumpSysex();
   };
 
-  const requestPatchDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x03, // Request Buffer Dump
-    ]);
+  const requestEditBufferDumpSysex = () => {
+    console.log("request edit buffer from", kiwi106Context.kiwiMidi);
+    kiwi106Context.kiwiMidi?.requestEditBufferDumpSysex();
   };
 
   const sendPatchBufferDumpSysex = () => {
@@ -265,7 +205,7 @@ export const ConfigPanel = () => {
   };
 
   return (
-    <Group wrap="nowrap">
+    <Stack>
       <Fieldset legend="Input">
         <Group wrap="nowrap">
           <Select
@@ -331,16 +271,13 @@ export const ConfigPanel = () => {
         >
           Scan
         </Button>
-        <Button onClick={midiPanic} leftSection={<IconExclamationCircle />}>
-          Panic
-        </Button>
-        <Button onClick={sendDeviceEnquirySysex} leftSection={<IconBrain />}>
-          Device Enquiry
-        </Button>
         <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
           Request Global Dump
         </Button>
-        <Button onClick={requestPatchDumpSysex} leftSection={<IconBrain />}>
+        <Button
+          onClick={requestEditBufferDumpSysex}
+          leftSection={<IconBrain />}
+        >
           Request Patch Dump
         </Button>
         <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>
@@ -350,6 +287,6 @@ export const ConfigPanel = () => {
           Request Patch Name
         </Button>
       </Stack>
-    </Group>
+    </Stack>
   );
 };

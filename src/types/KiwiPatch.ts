@@ -1,5 +1,17 @@
 import { MidiCcValue } from "./Midi";
 
+export type KiwiPatchIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+export const isKiwiPatchIndex = (n: unknown): n is KiwiPatchIndex => {
+  return typeof n === "number" && n >= 1 && n <= 8;
+};
+
+export type KiwiPatchAddress = {
+  group: KiwiPatchIndex;
+  bank: KiwiPatchIndex;
+  patch: KiwiPatchIndex;
+};
+
 export type DcoRange = "16" | "8" | "4";
 export type DcoWave = "off" | "ramp" | "pulse" | "ramp-and-pulse";
 export type PwmControlSource =

@@ -18,7 +18,6 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
 
   const [enableData, setEnableData] = useState<MidiContextEnableData>({
     enabled: false,
-    enableSuccess: null,
     enableError: null,
   });
 
@@ -35,7 +34,6 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
 
         setEnableData({
           enabled: true,
-          enableSuccess: true,
           enableError: null,
         });
       })
@@ -43,7 +41,6 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
         console.log("MidiContext Initialize Failure:", err);
         setEnableData({
           enabled: false,
-          enableSuccess: false,
           enableError: err,
         });
       });
