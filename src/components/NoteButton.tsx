@@ -1,10 +1,10 @@
 import { WebMidi } from "webmidi";
-import { Button } from "@mantine/core";
+import { Button, ButtonProps } from "@mantine/core";
 import { useConfigStore } from "../stores/configStore";
 import { IconMusic } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 
-export const NoteButton = () => {
+export const NoteButton = (props: ButtonProps & { title: string }) => {
   const configStore = useConfigStore();
   const [isPlaying, { open, close }] = useDisclosure(false);
 
@@ -35,6 +35,7 @@ export const NoteButton = () => {
 
   return (
     <Button
+      {...props}
       variant="juno"
       color={isPlaying ? "blue.8" : "blue"}
       onClick={() => {

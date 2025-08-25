@@ -63,7 +63,7 @@ function Kiwi106Programmer() {
             </Group>
 
             <JunoButtonGroup>
-              <NoteButton />
+              <NoteButton title="Test Note" />
 
               <MidiPanicButton title="Panic" />
               <Button
