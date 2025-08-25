@@ -140,6 +140,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     };
   }, [
     sendDeviceEnquirySysex,
+    kiwiMidi,
     midiContext.enabled,
     configStore.input,
     configStore.output,

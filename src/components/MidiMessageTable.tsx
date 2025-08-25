@@ -1,5 +1,5 @@
 import { MessageEvent, WebMidi } from "webmidi";
-import { Button, Group, Stack, Table, Title, Text, Code } from "@mantine/core";
+import { Button, Group, Stack, Table, Text, Code } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { useEffect } from "react";
 import { useConfigStore } from "../stores/configStore";

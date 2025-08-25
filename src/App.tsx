@@ -16,7 +16,7 @@ import { mantineTheme } from "./mantineTheme";
 import { ConfigPanel } from "./components/ConfigPanel";
 import { MidiMessageTable } from "./components/MidiMessageTable";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
-import { IconLogs, IconMusic, IconSettings } from "@tabler/icons-react";
+import { IconLogs, IconSettings } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";
@@ -25,7 +25,6 @@ import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
-import { JunoPatchSelector } from "./components/JunoPatchSelector";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();

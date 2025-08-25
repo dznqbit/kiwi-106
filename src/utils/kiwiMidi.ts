@@ -4,7 +4,6 @@ import { kiwi106Identifier, kiwiTechnicsSysexId } from "./sysexUtils";
 import { KiwiPatchAddress } from "../types/KiwiPatch";
 
 export const buildKiwiMidi = ({
-  input,
   output,
 }: {
   input: Input;
