@@ -13,6 +13,10 @@ export type KiwiPatchAddress = {
 };
 
 export type DcoRange = "16" | "8" | "4";
+export const isDcoRange = (x: unknown): x is DcoRange => {
+  return typeof x === "string" && ["16", "8", "4"].includes(x);
+};
+
 export type DcoWave = "off" | "ramp" | "pulse" | "ramp-and-pulse";
 export type PwmControlSource =
   | "manual"
@@ -40,7 +44,7 @@ export interface KiwiPatch {
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
-  dcoRange: MidiCcValue;
+  dcoRange: DcoRange;
   dcoWave: MidiCcValue;
   dcoPwmModAmount: MidiCcValue;
   dcoPwmControl: MidiCcValue;

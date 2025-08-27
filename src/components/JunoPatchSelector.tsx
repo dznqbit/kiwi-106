@@ -85,7 +85,7 @@ export const JunoPatchSelector = () => {
             .map((_, i) => i + 1)
             .filter(isKiwiPatchIndex)
             .map((bank, i) => (
-              <Stack align="center" gap={4}>
+              <Stack align="center" gap={4} key={i}>
                 <Title order={5}>{bank}</Title>
                 <JunoButtonContainer
                   pl={i === 0 ? 4 : undefined}
@@ -125,7 +125,7 @@ export const JunoPatchSelector = () => {
             .map((_, i) => i + 1)
             .filter(isKiwiPatchIndex)
             .map((patch, i) => (
-              <Stack align="center" gap={4}>
+              <Stack align="center" gap={4} key={i}>
                 <Title order={5}>{patch}</Title>
                 <JunoButtonContainer
                   pl={i === 0 ? 4 : undefined}

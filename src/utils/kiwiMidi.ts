@@ -1,7 +1,24 @@
 import { type Input, type Output } from "webmidi";
 import { type KiwiMidi } from "../types/KiwiMidi";
-import { kiwi106Identifier, kiwiTechnicsSysexId } from "./sysexUtils";
-import { KiwiPatchAddress } from "../types/KiwiPatch";
+import {
+  kiwi106Identifier,
+  kiwiTechnicsSysexId,
+  kiwiPatchToSysexBytes,
+} from "./sysexUtils";
+import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
+import { MidiCcValue } from "../types/Midi";
+
+export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
+  "16": [0, 31],
+  "8": [32, 63],
+  "4": [64, 127],
+};
+
+export const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
+  "16": 0b00,
+  "8": 0b01,
+  "4": 0b10,
+};
 
 export const buildKiwiMidi = ({
   output,
@@ -10,15 +27,7 @@ export const buildKiwiMidi = ({
   output: Output;
 }): KiwiMidi => {
   return {
-    requestGlobalDumpSysex: () => {
-      output.sendSysex(kiwiTechnicsSysexId, [
-        ...kiwi106Identifier,
-        0x00, // Required "Device ID"
-        0x01, // Request Global Dump
-      ]);
-    },
-
-    requestDeviceEnquirySysex: () => {
+    requestSysexDeviceEnquiry: () => {
       const universalNonRealtimeIdentification = [0x7e];
       const universalData: number[] = [
         0x7f, // ALL devices
@@ -29,11 +38,27 @@ export const buildKiwiMidi = ({
       output.sendSysex(universalNonRealtimeIdentification, universalData);
     },
 
-    requestEditBufferDumpSysex: () => {
+    requestSysexEditBufferDump: () => {
       output.sendSysex(kiwiTechnicsSysexId, [
         ...kiwi106Identifier,
         0x00, // Required "Device ID"
         0x03, // Request Buffer Dump
+      ]);
+    },
+
+    requestSysexGlobalDump: () => {
+      output.sendSysex(kiwiTechnicsSysexId, [
+        ...kiwi106Identifier,
+        0x00, // Required "Device ID"
+        0x01, // Request Global Dump
+      ]);
+    },
+
+    requestSysexPatchName: () => {
+      output.sendSysex(kiwiTechnicsSysexId, [
+        ...kiwi106Identifier,
+        0x00, // Required "Device ID"
+        0x0b, // Request patch name
       ]);
     },
 
@@ -55,6 +80,19 @@ export const buildKiwiMidi = ({
         output.sendControlChange(32, groupIndex);
         output.sendProgramChange(baseTenPatchNumber);
       }
+    },
+
+    sendSysexPatchBufferDump: (kiwiPatch: KiwiPatch) => {
+      const dataBytes = kiwiPatchToSysexBytes(kiwiPatch);
+
+      output.sendSysex(kiwiTechnicsSysexId, [
+        ...kiwi106Identifier,
+        0x00, // Required "Device ID"
+        0x04, // Transmit Patch Buffer Dump
+        0x00, // 2 x null bytes
+        0x00,
+        ...dataBytes,
+      ]);
     },
   };
 };

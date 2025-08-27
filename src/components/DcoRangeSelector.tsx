@@ -1,5 +1,5 @@
 import { Group, Stack, Text } from "@mantine/core";
-import { type DcoRange, KiwiPatch } from "../types/KiwiPatch";
+import { type DcoRange, isDcoRange, KiwiPatch } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { isMidiCcValue, MidiCcValue } from "../types/Midi";
@@ -10,50 +10,39 @@ interface DcoRangeSelectorProps {
   label?: string;
 }
 
-// Based on SysEx docs: xx=DCO Range (00=16', 01=8', 10=4')
-// We'll map these to MIDI CC ranges
-const dcoRangeRanges: Record<DcoRange, MidiCcValue[]> = {
-  "16": [0, 42], // 00 binary pattern
-  "8": [43, 85], // 01 binary pattern
-  "4": [86, 127], // 10 binary pattern
-};
-
 export const DcoRangeSelector = ({
   property,
   label,
 }: DcoRangeSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const dcoRangeValue = kiwiPatch[property];
+  const dcoRange = kiwiPatch[property];
 
-  if (!isMidiCcValue(dcoRangeValue)) {
-    throw new Error("Woah! can't set string from DcoRangeSelector");
+  if (!isDcoRange(dcoRange)) {
+    throw new Error(`Woah! Can't assign DcoRangeSelector="${dcoRange}"`);
   }
 
-  const ccValueToDcoRange = (ccValue: MidiCcValue): DcoRange => {
-    for (const [rangeValue, [min, max]] of Object.entries(dcoRangeRanges)) {
-      if (ccValue >= min && ccValue <= max) {
-        return rangeValue as DcoRange;
-      }
-    }
-    return "16"; // Default fallback
-  };
-
-  const dcoRange: DcoRange = ccValueToDcoRange(dcoRangeValue);
+  // const ccValueToDcoRange = (ccValue: MidiCcValue): DcoRange => {
+  //   for (const [rangeValue, [min, max]] of Object.entries(dcoRangeRanges)) {
+  //     if (ccValue >= min && ccValue <= max) {
+  //       return rangeValue as DcoRange;
+  //     }
+  //   }
+  //   return "16"; // Default fallback
+  // };
 
   const setDcoRange = (range: DcoRange) => {
-    const rangeToCcValue = (range: DcoRange): MidiCcValue => {
-      const [min, _] = dcoRangeRanges[range];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
+    // const rangeToCcValue = (range: DcoRange): MidiCcValue => {
+    //   const [min, _] = dcoRangeRanges[range];
+    //   const midiCcValue = min;
+    //   if (!isMidiCcValue(midiCcValue)) {
+    //     throw new Error("Computed impossible Midi CC value");
+    //   }
 
-      return midiCcValue;
-    };
+    //   return midiCcValue;
+    // };
 
-    const dcoRangeCcValue = rangeToCcValue(range);
-    console.log("Setting DCO range", dcoRangeCcValue);
-    setKiwiPatchProperty(property, dcoRangeCcValue, {
+    console.log("Setting DCO range", range);
+    setKiwiPatchProperty(property, range, {
       updatedBy: "Editor Change",
     });
   };

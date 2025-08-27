@@ -25,6 +25,8 @@ import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
+import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferDumpButton";
+import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -64,8 +66,9 @@ function Kiwi106Programmer() {
 
             <JunoButtonGroup>
               <NoteButton title="Test Note" />
-
               <MidiPanicButton title="Panic" />
+              <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
+              <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
               <Button
                 title="Logs"
                 variant="juno"

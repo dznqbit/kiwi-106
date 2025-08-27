@@ -90,15 +90,22 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const newKiwiMidi = buildKiwiMidi({ input, output });
-    setKiwiMidi(newKiwiMidi);
+    const newKiwiMidi = (() => {
+      if (kiwiMidi === null) {
+        const newKiwiMidi = buildKiwiMidi({ input, output });
+        setKiwiMidi(newKiwiMidi);
+        return newKiwiMidi;
+      }
+
+      return kiwiMidi;
+    })();
 
     // Fire off an initial device enquiry
-    newKiwiMidi.requestDeviceEnquirySysex();
+    newKiwiMidi.requestSysexDeviceEnquiry();
 
     // Set heartbeat timer
     const intervalHandle = setInterval(() => {
-      newKiwiMidi.requestDeviceEnquirySysex();
+      newKiwiMidi.requestSysexDeviceEnquiry();
     }, heartbeatIntervalMs);
 
     const kiwi106DeviceEnquiryListener = (e: MessageEvent) => {
@@ -139,8 +146,8 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       input.removeListener("sysex", kiwi106DeviceEnquiryListener);
     };
   }, [
-    sendDeviceEnquirySysex,
     kiwiMidi,
+    sendDeviceEnquirySysex,
     midiContext.enabled,
     configStore.input,
     configStore.output,

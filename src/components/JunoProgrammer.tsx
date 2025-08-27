@@ -22,6 +22,8 @@ import {
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
+import { DcoRange, isDcoRange } from "../types/KiwiPatch";
+import { dcoRangeControlChangeValues } from "../utils/kiwiMidi";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -54,7 +56,20 @@ export const JunoProgrammer = () => {
       const ccData = trimMidiCcValue(b2);
 
       if (patchKey) {
-        setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        if (patchKey === "dcoRange") {
+          const dcoRange =
+            Object.keys(dcoRangeControlChangeValues).find((k) => {
+              if (isDcoRange(k)) {
+                const [loBound, hiBound] = dcoRangeControlChangeValues[k];
+                if (ccData >= loBound && ccData <= hiBound) {
+                  return true;
+                }
+              }
+            }) ?? "16";
+          setPatchProperty(patchKey, dcoRange, { updatedBy: "Control Change" });
+        } else {
+          setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        }
       } else {
         console.log("Received unknown", kiwiCcLabel(b1));
       }
@@ -129,7 +144,12 @@ export const JunoProgrammer = () => {
 
           for (const k of objectKeys(diff)) {
             if (diff[k] !== undefined) {
-              if (isMidiCcValue(diff[k])) {
+              if (isDcoRange(diff[k])) {
+                channel.sendControlChange(
+                  kiwiCcController(k),
+                  dcoRangeControlChangeValues[diff[k]],
+                );
+              } else if (isMidiCcValue(diff[k])) {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
               } else {
                 const s = diff[k];
@@ -156,7 +176,7 @@ export const JunoProgrammer = () => {
   }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
-    <Container size="xl" style={{ position: "relative" }} p={0} mx="md">
+    <Container size="xl" style={{ position: "relative" }} p={0} px="md">
       <DisconnectedOverlay />
       <JunoPatchSelector />
       <PatchNameEditor />

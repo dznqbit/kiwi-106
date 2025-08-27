@@ -3,6 +3,18 @@ import { Message } from "webmidi";
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
+import { dcoRangeSysexValues } from "./kiwiMidi";
+import { objectKeys } from "./objectKeys";
+
+// Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
+const twelveBitToMidi = (highByte: number, lowByte: number): MidiCcValue => {
+  const hi = highByte & 0x1f; // 5 bits
+  const lo = lowByte & 0x7f; // 7 bits
+  const value = (hi << 7) | lo;
+
+  // Convert 12-bit (0-4095) to MIDI CC range (0-127)
+  return Math.round((value / 4095) * 127) as MidiCcValue;
+};
 
 export const isSysexDeviceEnquiryReply = (message: Message) => {
   if (!message.isSystemMessage) {
@@ -113,8 +125,381 @@ export const kiwi106PatchEditBufferFields = {
   "SysEx Footer": [138],
 } as const;
 
+// This is the patch data sysex ONLY!
+// This skips the sysex headers and the "2 null bytes"
+const simplePatchDumpSysex: number[] = [
+  // "yahoo"
+  121,
+  97,
+  104,
+  111,
+  111,
+
+  0x73,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x20,
+  0x0c,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x1f,
+  0x68,
+  0x00,
+  0x00,
+  0x1a,
+  0x22,
+  0x00,
+  0x00,
+  0x00,
+  0x02,
+  0x30,
+  0x00,
+  0x12,
+  0x34,
+  0x00,
+  0x00,
+  0x03,
+  0x6c,
+  0x00,
+  0x00,
+  0x01,
+  0x70,
+  0x00,
+  0x20,
+  0x00,
+  0x00,
+  0x00,
+  0x0c,
+  0x54,
+  0x1f,
+  0x63,
+  0x00,
+  0x00,
+  0x00,
+  0x14,
+  0x03,
+  0x44,
+  0x13,
+  0x6f,
+  0x00,
+  0x00,
+  0x00,
+  0x02,
+  0x14,
+  0x2c,
+  0x17,
+  0x3c,
+  0x00,
+  0x0d,
+  0x41,
+  0x11,
+  0x44,
+  0x00,
+  0x00,
+  0x1c,
+  0x24,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x04,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x0c,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+];
+
+export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
+  // const dataBytes = new Array(128).fill(0);
+  const dataBytes = [...simplePatchDumpSysex];
+
+  // Helper to convert MidiCcValue to 12-bit hi/lo bytes
+  const midiTo12Bit = (value: MidiCcValue): [number, number] => {
+    // Convert MIDI CC range (0-127) to 12-bit (0-4095)
+    const expanded = Math.round((value / 127) * 4095);
+    const hi = (expanded >> 7) & 0x1f; // 5 bits
+    const lo = expanded & 0x7f; // 7 bits
+    return [hi, lo];
+  };
+
+  // Helper to convert single byte MidiCcValue
+  const midiByte = (value: MidiCcValue): number => {
+    return value & 0x7f;
+  };
+
+  const convertLfoWave = (ccValue: MidiCcValue): number => {
+    // Convert CC ranges back to sysex bits
+    // CC ranges: sine: 0-15, triangle: 16-31, sawtooth: 32-63,
+    // reverse-sawtooth: 64-95, square: 96-111, random: 112-127
+    if (ccValue <= 15) return 0; // Sine
+    if (ccValue <= 31) return 1; // Triangle
+    if (ccValue <= 63) return 3; // Sawtooth
+    if (ccValue <= 95) return 4; // Reverse Sawtooth
+    if (ccValue <= 111) return 2; // Square
+    return 5; // Random
+  };
+
+  // Patch Name (bytes 0-19) - 20 bytes
+  const patchNameBytes = [...kiwiPatch.patchName].map((s) => s.charCodeAt(0));
+  for (let i = 0; i < 20; i++) {
+    dataBytes[i] = patchNameBytes[i] || 0;
+  }
+
+  // DCO Wave/Range (byte 20)
+  dataBytes[20] = dcoRangeSysexValues[kiwiPatch.dcoRange];
+
+  // THIS IS COMPLETE FUCKING BUSTED! DONT USE IT YET!
+  // // DCO Env Amount (bytes 23-24)
+  // const [dcoEnvHi, dcoEnvLo] = midiTo12Bit(kiwiPatch.dcoEnvelopeModAmount);
+  // dataBytes[23] = dcoEnvHi;
+  // dataBytes[24] = dcoEnvLo;
+
+  // // DCO LFO Amount (bytes 25-26)
+  // const [dcoLfoHi, dcoLfoLo] = midiTo12Bit(kiwiPatch.dcoLfoModAmount);
+  // dataBytes[25] = dcoLfoHi;
+  // dataBytes[26] = dcoLfoLo;
+
+  // // DCO Bend Mod Amount (bytes 27-28)
+  // const [dcoBendHi, dcoBendLo] = midiTo12Bit(kiwiPatch.dcoBendAmount);
+  // dataBytes[27] = dcoBendHi;
+  // dataBytes[28] = dcoBendLo;
+
+  // // DCO Bend LFO Mod Amount (bytes 29-30) - not in KiwiPatch, using 0
+  // dataBytes[29] = 0;
+  // dataBytes[30] = 0;
+
+  // // DCO PWM Amount (bytes 31-32)
+  // const [dcoPwmHi, dcoPwmLo] = midiTo12Bit(kiwiPatch.dcoPwmModAmount);
+  // dataBytes[31] = dcoPwmHi;
+  // dataBytes[32] = dcoPwmLo;
+
+  // // DCO Control (byte 33)
+  // dataBytes[33] = midiByte(kiwiPatch.dcoPwmControl);
+
+  // // Sub Level (bytes 34-35)
+  // const [subHi, subLo] = midiTo12Bit(kiwiPatch.subLevel);
+  // dataBytes[34] = subHi;
+  // dataBytes[35] = subLo;
+
+  // // Noise Level (bytes 36-37)
+  // const [noiseHi, noiseLo] = midiTo12Bit(kiwiPatch.noiseLevel);
+  // dataBytes[36] = noiseHi;
+  // dataBytes[37] = noiseLo;
+
+  // // HPF Level (byte 38)
+  // dataBytes[38] = midiByte(kiwiPatch.vcfHiPassCutoff);
+
+  // // VCF Cutoff (bytes 39-40)
+  // const [vcfCutoffHi, vcfCutoffLo] = midiTo12Bit(kiwiPatch.vcfLowPassCutoff);
+  // dataBytes[39] = vcfCutoffHi;
+  // dataBytes[40] = vcfCutoffLo;
+
+  // // VCF Resonance (bytes 41-42)
+  // const [vcfResHi, vcfResLo] = midiTo12Bit(kiwiPatch.vcfLowPassResonance);
+  // dataBytes[41] = vcfResHi;
+  // dataBytes[42] = vcfResLo;
+
+  // // VCF LFO Amount (bytes 43-44)
+  // const [vcfLfoHi, vcfLfoLo] = midiTo12Bit(kiwiPatch.vcfLfoModAmount);
+  // dataBytes[43] = vcfLfoHi;
+  // dataBytes[44] = vcfLfoLo;
+
+  // // VCF ENV Amount (bytes 45-46)
+  // const [vcfEnvHi, vcfEnvLo] = midiTo12Bit(kiwiPatch.vcfEnvelopeModAmount);
+  // dataBytes[45] = vcfEnvHi;
+  // dataBytes[46] = vcfEnvLo;
+
+  // // VCF Key Amount (bytes 47-48)
+  // const [vcfKeyHi, vcfKeyLo] = midiTo12Bit(kiwiPatch.vcfPitchFollow);
+  // dataBytes[47] = vcfKeyHi;
+  // dataBytes[48] = vcfKeyLo;
+
+  // // VCF Bend Mod Amount (bytes 49-50)
+  // const [vcfBendHi, vcfBendLo] = midiTo12Bit(kiwiPatch.vcfBendAmount);
+  // dataBytes[49] = vcfBendHi;
+  // dataBytes[50] = vcfBendLo;
+
+  // // VCF Control (byte 51)
+  // dataBytes[51] = midiByte(kiwiPatch.vcfEnvelopeSource);
+
+  // // Env 1 Attack (bytes 52-53)
+  // const [env1AHi, env1ALo] = midiTo12Bit(kiwiPatch.env1Attack);
+  // dataBytes[52] = env1AHi;
+  // dataBytes[53] = env1ALo;
+
+  // // Env 1 Decay (bytes 54-55)
+  // const [env1DHi, env1DLo] = midiTo12Bit(kiwiPatch.env1Decay);
+  // dataBytes[54] = env1DHi;
+  // dataBytes[55] = env1DLo;
+
+  // // Env 1 Sustain (bytes 56-57)
+  // const [env1SHi, env1SLo] = midiTo12Bit(kiwiPatch.env1Sustain);
+  // dataBytes[56] = env1SHi;
+  // dataBytes[57] = env1SLo;
+
+  // // Env 1 Release (bytes 58-59)
+  // const [env1RHi, env1RLo] = midiTo12Bit(kiwiPatch.env1Release);
+  // dataBytes[58] = env1RHi;
+  // dataBytes[59] = env1RLo;
+
+  // // Env 2 Attack (bytes 60-61)
+  // const [env2AHi, env2ALo] = midiTo12Bit(kiwiPatch.env2Attack);
+  // dataBytes[60] = env2AHi;
+  // dataBytes[61] = env2ALo;
+
+  // // Env 2 Decay (bytes 62-63)
+  // const [env2DHi, env2DLo] = midiTo12Bit(kiwiPatch.env2Decay);
+  // dataBytes[62] = env2DHi;
+  // dataBytes[63] = env2DLo;
+
+  // // Env 2 Sustain (bytes 64-65)
+  // const [env2SHi, env2SLo] = midiTo12Bit(kiwiPatch.env2Sustain);
+  // dataBytes[64] = env2SHi;
+  // dataBytes[65] = env2SLo;
+
+  // // Env 2 Release (bytes 66-67)
+  // const [env2RHi, env2RLo] = midiTo12Bit(kiwiPatch.env2Release);
+  // dataBytes[66] = env2RHi;
+  // dataBytes[67] = env2RLo;
+
+  // // Env Control (byte 68)
+  // dataBytes[68] = midiByte(kiwiPatch.dcoEnvelopeSource);
+
+  // // LFO 1 Wave (byte 69)
+  // dataBytes[69] = convertLfoWave(kiwiPatch.lfo1Wave);
+
+  // // LFO 1 Rate (bytes 70-71)
+  // const [lfo1RateHi, lfo1RateLo] = midiTo12Bit(kiwiPatch.lfo1Rate);
+  // dataBytes[70] = lfo1RateHi;
+  // dataBytes[71] = lfo1RateLo;
+
+  // // LFO 1 Delay (bytes 72-73)
+  // const [lfo1DelayHi, lfo1DelayLo] = midiTo12Bit(kiwiPatch.lfo1Delay);
+  // dataBytes[72] = lfo1DelayHi;
+  // dataBytes[73] = lfo1DelayLo;
+
+  // // LFO 2 Wave (byte 74)
+  // dataBytes[74] = convertLfoWave(kiwiPatch.lfo2Wave);
+
+  // // LFO 2 Rate (bytes 75-76)
+  // const [lfo2RateHi, lfo2RateLo] = midiTo12Bit(kiwiPatch.lfo2Rate);
+  // dataBytes[75] = lfo2RateHi;
+  // dataBytes[76] = lfo2RateLo;
+
+  // // LFO 2 Delay (bytes 77-78)
+  // const [lfo2DelayHi, lfo2DelayLo] = midiTo12Bit(kiwiPatch.lfo2Delay);
+  // dataBytes[77] = lfo2DelayHi;
+  // dataBytes[78] = lfo2DelayLo;
+
+  // // LFO1 Control (byte 79)
+  // dataBytes[79] = midiByte(kiwiPatch.lfo1Mode);
+
+  // // Chorus Control (byte 80)
+  // dataBytes[80] = midiByte(kiwiPatch.chorusMode);
+
+  // // VCA Level (bytes 81-82)
+  // const [vcaHi, vcaLo] = midiTo12Bit(kiwiPatch.volume);
+  // dataBytes[81] = vcaHi;
+  // dataBytes[82] = vcaLo;
+
+  // // VCA LFO Mod Amount (bytes 83-84)
+  // const [vcaLfoHi, vcaLfoLo] = midiTo12Bit(kiwiPatch.vcaLfoModAmount);
+  // dataBytes[83] = vcaLfoHi;
+  // dataBytes[84] = vcaLfoLo;
+
+  // // VCA Control (byte 85)
+  // dataBytes[85] = midiByte(kiwiPatch.vcaMode);
+
+  // // Portamento Rate (bytes 86-87)
+  // const [portHi, portLo] = midiTo12Bit(kiwiPatch.portamentoTime);
+  // dataBytes[86] = portHi;
+  // dataBytes[87] = portLo;
+
+  // // Portamento Control (byte 88) - not in KiwiPatch, using 0
+  // dataBytes[88] = 0;
+
+  // // Load Sequence (byte 89) - not in KiwiPatch, using 0
+  // dataBytes[89] = 0;
+
+  // // Load Pattern (byte 90) - not in KiwiPatch, using 0
+  // dataBytes[90] = 0;
+
+  // // Voice Mode (byte 91)
+  // dataBytes[91] = midiByte(kiwiPatch.keyMode);
+
+  // // Voice Detune Amount (bytes 92-93)
+  // const [detuneHi, detuneLo] = midiTo12Bit(kiwiPatch.keyAssignDetune);
+  // dataBytes[92] = detuneHi;
+  // dataBytes[93] = detuneLo;
+
+  // // Detune Control (byte 94)
+  // dataBytes[94] = midiByte(kiwiPatch.keyAssignDetuneMode);
+
+  // // Remaining bytes (95-129) are mostly controls and null tail - using 0
+  // for (let i = 95; i < 130; i++) {
+  //   dataBytes[i] = 0;
+  // }
+
+  // // Set some specific control bytes that might be important
+  // dataBytes[97] = midiByte(kiwiPatch.lfoModWheelAmount); // MW Control
+  // dataBytes[105] = midiByte(kiwiPatch.lfo2Mode); // LFO2 Control
+
+  return dataBytes;
+};
+
 export const parseKiwi106PatchEditBufferDumpCommand = (
-  m: Message,
+  m: Message
 ): Kiwi106SysexPatchEditBufferDumpCommand => {
   // Ensure it's a Kiwi 106 Patch Edit Buffer Dump Command
   if (!isKiwi106BufferDumpSysexMessage(m)) {
@@ -127,9 +512,7 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   const combine12BitToMidi = (hiIdx: number, loIdx: number): MidiCcValue => {
     const hi = data[hiIdx] & 0x1f; // 5 bits
     const lo = data[loIdx] & 0x7f; // 7 bits
-    const value = (hi << 7) | lo;
-    // Convert 12-bit (0-4095) to MIDI CC range (0-127)
-    return Math.round((value / 4095) * 127) as MidiCcValue;
+    return twelveBitToMidi(hi, lo);
   };
 
   // Helper to convert single byte to MidiCcValue
@@ -142,6 +525,13 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   const patchName = String.fromCharCode(...patchNameBytes)
     .replace(/\0/g, "")
     .trim();
+
+  // DCO Wave/Range contains range bits
+  const dcoRangeBytes = byteToMidi(30) & 0b11;
+  const dcoRange =
+    objectKeys(dcoRangeSysexValues).find(
+      (k) => dcoRangeSysexValues[k] == dcoRangeBytes
+    ) ?? "4";
 
   const parseLfoWave = (n: number) => {
     // Sysex bits
@@ -189,7 +579,7 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
     portamentoTime: combine12BitToMidi(94, 95),
     volume: combine12BitToMidi(89, 90), // VCA Level
 
-    dcoRange: byteToMidi(30), // DCO Wave/Range contains range bits
+    dcoRange,
     dcoWave: byteToMidi(30), // DCO Wave/Range contains wave bits
     dcoPwmModAmount: combine12BitToMidi(39, 40),
     dcoPwmControl: byteToMidi(41), // DCO Control

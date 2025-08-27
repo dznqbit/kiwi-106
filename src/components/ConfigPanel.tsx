@@ -1,18 +1,18 @@
-import { WebMidi } from "webmidi";
 import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
 import { IconRefresh, IconBrain } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
-import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { isMidiChannel } from "../types/Midi";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
+import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
   const kiwi106Context = useKiwi106Context();
   const configStore = useConfigStore();
+  const kiwiPatchStore = useKiwiPatchStore();
 
   const formatName = (i: MidiPortData | null) =>
     i == null ? null : `${i.manufacturer} ${i.name}`;
@@ -22,248 +22,84 @@ export const ConfigPanel = () => {
     configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
 
   const requestGlobalDumpSysex = () => {
-    kiwi106Context.kiwiMidi?.requestGlobalDumpSysex();
+    kiwi106Context.kiwiMidi?.requestSysexGlobalDump();
   };
 
   const requestEditBufferDumpSysex = () => {
     console.log("request edit buffer from", kiwi106Context.kiwiMidi);
-    kiwi106Context.kiwiMidi?.requestEditBufferDumpSysex();
+    kiwi106Context.kiwiMidi?.requestSysexEditBufferDump();
   };
 
   const sendPatchBufferDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x04, // Transmit Patch Buffer Dump
-
-      0x00, // Per docs, 2 x null bytes followed by 128 bytes of data in following format
-      0x00,
-
-      // "yahoo"
-      121,
-      97,
-      104,
-      111,
-      111,
-
-      0x73,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x0c,
-      0x00,
-      0x00,
-      0x01,
-      0x00,
-      0x1f,
-      0x68,
-      0x00,
-      0x00,
-      0x1a,
-      0x22,
-      0x00,
-      0x00,
-      0x00,
-      0x02,
-      0x30,
-      0x00,
-      0x12,
-      0x34,
-      0x00,
-      0x00,
-      0x03,
-      0x6c,
-      0x00,
-      0x00,
-      0x01,
-      0x70,
-      0x00,
-      0x20,
-      0x00,
-      0x00,
-      0x00,
-      0x0c,
-      0x54,
-      0x1f,
-      0x63,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x03,
-      0x44,
-      0x13,
-      0x6f,
-      0x00,
-      0x00,
-      0x00,
-      0x02,
-      0x14,
-      0x2c,
-      0x17,
-      0x3c,
-      0x00,
-      0x0d,
-      0x41,
-      0x11,
-      0x44,
-      0x00,
-      0x00,
-      0x1c,
-      0x24,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x04,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x01,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x0c,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-    ]);
+    kiwi106Context.kiwiMidi?.sendSysexPatchBufferDump(kiwiPatchStore.kiwiPatch);
   };
 
   const requestPatchNameSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x0b, // Request patch name
-    ]);
-
+    kiwi106Context.kiwiMidi?.requestSysexPatchName();
     console.log("Requested patch name");
   };
 
   return (
     <Stack>
-      <Fieldset legend="Input">
-        <Group wrap="nowrap">
-          <Select
-            label="Device"
-            clearable
-            allowDeselect={false}
-            placeholder={
-              midiContext.enabled ? "Select an input" : "Not available"
-            }
-            value={formatName(configStore.input)}
-            data={configStore.availableInputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
-            )}
-            onChange={(fn) =>
-              configStore.setInput(findInputByFormattedName(fn))
-            }
-          ></Select>
-          <SelectMidiChannel
-            enabled={midiContext.enabled}
-            value={configStore.inputChannel}
-            onChange={(c) => {
-              if (isMidiChannel(c)) {
-                configStore.setInputChannel(c);
+      <Group>
+        <Fieldset legend="Input">
+          <Group wrap="nowrap">
+            <Select
+              label="Device"
+              clearable
+              allowDeselect={false}
+              placeholder={
+                midiContext.enabled ? "Select an input" : "Not available"
               }
-            }}
-          />
-        </Group>
-      </Fieldset>
-
-      <Fieldset legend="Output">
-        <Group wrap="nowrap">
-          <Select
-            label="Device"
-            clearable
-            allowDeselect={false}
-            placeholder={
-              midiContext.enabled ? "Select an output" : "Not available"
-            }
-            value={formatName(configStore.output)}
-            data={configStore.availableOutputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
-            )}
-            onChange={(fn) =>
-              configStore.setOutput(findOutputByFormattedName(fn))
-            }
-          ></Select>
-          <SelectMidiChannel
-            enabled={midiContext.enabled}
-            value={configStore.outputChannel}
-            onChange={(c) => {
-              if (isMidiChannel(c)) {
-                configStore.setOutputChannel(c);
+              value={formatName(configStore.input)}
+              data={configStore.availableInputs.map(
+                (i) => `${i.manufacturer} ${i.name}`,
+              )}
+              onChange={(fn) =>
+                configStore.setInput(findInputByFormattedName(fn))
               }
-            }}
-          />
-        </Group>
-      </Fieldset>
+            ></Select>
+            <SelectMidiChannel
+              enabled={midiContext.enabled}
+              value={configStore.inputChannel}
+              onChange={(c) => {
+                if (isMidiChannel(c)) {
+                  configStore.setInputChannel(c);
+                }
+              }}
+            />
+          </Group>
+        </Fieldset>
 
+        <Fieldset legend="Output">
+          <Group wrap="nowrap">
+            <Select
+              label="Device"
+              clearable
+              allowDeselect={false}
+              placeholder={
+                midiContext.enabled ? "Select an output" : "Not available"
+              }
+              value={formatName(configStore.output)}
+              data={configStore.availableOutputs.map(
+                (i) => `${i.manufacturer} ${i.name}`,
+              )}
+              onChange={(fn) =>
+                configStore.setOutput(findOutputByFormattedName(fn))
+              }
+            ></Select>
+            <SelectMidiChannel
+              enabled={midiContext.enabled}
+              value={configStore.outputChannel}
+              onChange={(c) => {
+                if (isMidiChannel(c)) {
+                  configStore.setOutputChannel(c);
+                }
+              }}
+            />
+          </Group>
+        </Fieldset>
+      </Group>
       <Stack>
         <Button
           onClick={() => midiContext.initialize()}
