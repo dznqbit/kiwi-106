@@ -1,4 +1,13 @@
-import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
+import {
+  Button,
+  Fieldset,
+  Group,
+  List,
+  ListItem,
+  Select,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiPortData } from "../contexts/MidiContext";
 import { SelectMidiChannel } from "./SelectMidiChannel";
@@ -6,13 +15,13 @@ import { IconRefresh, IconBrain } from "@tabler/icons-react";
 import { useConfigStore } from "../stores/configStore";
 import { isMidiChannel } from "../types/Midi";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
-import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
+import { Selector } from "./Selector";
+import { kiwi106MessageModes } from "../types/KiwiGlobalData";
 
 export const ConfigPanel = () => {
   const midiContext = useMidiContext();
   const kiwi106Context = useKiwi106Context();
   const configStore = useConfigStore();
-  const kiwiPatchStore = useKiwiPatchStore();
 
   const formatName = (i: MidiPortData | null) =>
     i == null ? null : `${i.manufacturer} ${i.name}`;
@@ -23,20 +32,6 @@ export const ConfigPanel = () => {
 
   const requestGlobalDumpSysex = () => {
     kiwi106Context.kiwiMidi?.requestSysexGlobalDump();
-  };
-
-  const requestEditBufferDumpSysex = () => {
-    console.log("request edit buffer from", kiwi106Context.kiwiMidi);
-    kiwi106Context.kiwiMidi?.requestSysexEditBufferDump();
-  };
-
-  const sendPatchBufferDumpSysex = () => {
-    kiwi106Context.kiwiMidi?.sendSysexPatchBufferDump(kiwiPatchStore.kiwiPatch);
-  };
-
-  const requestPatchNameSysex = () => {
-    kiwi106Context.kiwiMidi?.requestSysexPatchName();
-    console.log("Requested patch name");
   };
 
   return (
@@ -53,7 +48,7 @@ export const ConfigPanel = () => {
               }
               value={formatName(configStore.input)}
               data={configStore.availableInputs.map(
-                (i) => `${i.manufacturer} ${i.name}`,
+                (i) => `${i.manufacturer} ${i.name}`
               )}
               onChange={(fn) =>
                 configStore.setInput(findInputByFormattedName(fn))
@@ -82,7 +77,7 @@ export const ConfigPanel = () => {
               }
               value={formatName(configStore.output)}
               data={configStore.availableOutputs.map(
-                (i) => `${i.manufacturer} ${i.name}`,
+                (i) => `${i.manufacturer} ${i.name}`
               )}
               onChange={(fn) =>
                 configStore.setOutput(findOutputByFormattedName(fn))
@@ -110,18 +105,24 @@ export const ConfigPanel = () => {
         <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
           Request Global Dump
         </Button>
-        <Button
-          onClick={requestEditBufferDumpSysex}
-          leftSection={<IconBrain />}
-        >
-          Request Patch Dump
-        </Button>
-        <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>
-          Send Patch Dump
-        </Button>
-        <Button onClick={requestPatchNameSysex} leftSection={<IconBrain />}>
-          Request Patch Name
-        </Button>
+        <List>
+          <ListItem>Program version {kiwi106Context.programVersion}</ListItem>
+
+          <ListItem>
+            Bootloader version {kiwi106Context.bootloaderVersion}
+          </ListItem>
+
+          <ListItem>Build number {kiwi106Context.buildNumber}</ListItem>
+
+          <Group>
+            <Selector
+              label="Midi CC"
+              values={kiwi106MessageModes}
+              selected={kiwi106Context.kiwiGlobalData?.enableMidiCc ?? null}
+              onSelect={(x) => console.log(`Select Midi CC ${x}`)}
+            />
+          </Group>
+        </List>
       </Stack>
     </Stack>
   );

@@ -1,9 +1,14 @@
-import { type Input, type Output } from "webmidi";
+import { Message, type Input, type Output } from "webmidi";
 import { type KiwiMidi } from "../types/KiwiMidi";
 import {
   kiwi106Identifier,
   kiwiTechnicsSysexId,
   kiwiPatchToSysexBytes,
+  isKiwi106BufferDumpSysexMessage,
+  parseKiwi106PatchEditBufferDumpCommand,
+  isKiwi106SysexMessage,
+  isKiwi106GlobalDumpSysexMessage,
+  parseKiwi106GlobalDumpCommand,
 } from "./sysexUtils";
 import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
@@ -94,5 +99,23 @@ export const buildKiwiMidi = ({
         ...dataBytes,
       ]);
     },
+
+    parseSysex: (message: Message) => {
+      if (!isKiwi106SysexMessage(message)) {
+        throw new Error("[kiwiMidi] could not interpret non-Kiwi106 sysex message");
+      }
+      
+      if (isKiwi106BufferDumpSysexMessage(message)) {
+        const command = parseKiwi106PatchEditBufferDumpCommand(message);
+        return command;
+      }
+
+      if (isKiwi106GlobalDumpSysexMessage(message)) {
+        const command = parseKiwi106GlobalDumpCommand(message);
+        return command;
+      }
+
+      throw new Error("[kiwiMidi] unsupport sysex command");
+    }
   };
 };

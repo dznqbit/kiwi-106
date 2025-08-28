@@ -1,10 +1,12 @@
 import _ from "lodash";
 import { Message } from "webmidi";
-import { Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
+import { Kiwi106SysexGlobalDumpCommand, Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
-import { MidiCcValue } from "../types/Midi";
+import { KiwiGlobalData } from "../types/KiwiGlobalData";
+import { MidiCcValue, MidiChannel } from "../types/Midi";
 import { dcoRangeSysexValues } from "./kiwiMidi";
 import { objectKeys } from "./objectKeys";
+import { trimMidiCcValue, trimMidiChannel } from "./trimMidiCcValue";
 
 // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
 const twelveBitToMidi = (highByte: number, lowByte: number): MidiCcValue => {
@@ -550,8 +552,6 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
     // 'square': [96, 111],
     // 'random': [112, 127],
 
-    console.log("Incoming LFO wave", { n });
-
     // Map sysex bits to CC bits
     switch (
       n & 0x07 // Extract lower 3 bits
@@ -642,3 +642,101 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
     kiwiPatch,
   };
 };
+
+export const parseKiwi106GlobalDumpCommand = (m: Message): Kiwi106SysexGlobalDumpCommand => {
+  // Ensure it's a Kiwi 106 Global Dump Command
+  if (!isKiwi106GlobalDumpSysexMessage(m)) {
+    throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
+  }
+
+  const data = [...m.data];
+  const dataBytes = data.slice(8); // Skip header, start from first data byte
+
+  // Global data now uses dataBytes with 0-based indexing matching documentation
+  const globalData: KiwiGlobalData = {
+    midiChannelIn: trimMidiChannel(dataBytes[0]), // Byte 0x00
+    midiChannelOut: trimMidiChannel(dataBytes[1]), // Byte 0x01
+    SequencerMidiChannelOut: trimMidiChannel(dataBytes[2]), // Byte 0x02
+    deviceId: trimMidiChannel(dataBytes[3]), // Byte 0x03
+    
+    enableMidiCc: (() => {
+      const value = dataBytes[4] & 0x03; // Byte 0x04
+      switch (value) {
+        case 0: return "off";
+        case 1: return "rx";
+        case 2: return "tx";
+        case 3: return "rx-tx";
+        default: return "rx";
+      }
+    })(),
+    
+    enableSysex: !!(dataBytes[5] & 0x01), // Byte 0x05
+    
+    enableProgramChange: (() => {
+      const value = dataBytes[6] & 0x03; // Byte 0x06
+      switch (value) {
+        case 0: return "off";
+        case 1: return "rx";
+        case 2: return "tx";
+        case 3: return "rx-tx";
+        default: return "rx";
+      }
+    })(),
+    
+    midiSoftThrough: (() => {
+      const value = dataBytes[7] & 0x03; // Byte 0x07
+      switch (value) {
+        case 0: return "stop-all";
+        case 1: return "pass-all";
+        case 2: return "pass-only-non-cc";
+        case 3: return "stop-only-cc-used";
+        default: return "pass-all";
+      }
+    })(),
+    
+    enableMidiClockGen: !!(dataBytes[8] & 0x01), // Byte 0x08
+    internalVelocity: trimMidiCcValue(dataBytes[9] & 0x7f), // Byte 0x09
+    
+    masterClockSource: (() => {
+      const value = dataBytes[10] & 0x07; // Byte 0x0a
+      switch (value) {
+        case 0: return "internal";
+        case 1: return "midi";
+        case 2: return "ext step";
+        case 3: return "ext 24ppqn";
+        case 4: return "ext 48ppqn";
+        default: return "internal";
+      }
+    })(),
+    
+    // Bytes 0x0b-0x0d not used
+    
+    patternLevel: twelveBitToMidi(dataBytes[14], dataBytes[15]), // Bytes 0x0e-0x0f
+    
+    patternDestinationVca: !!(dataBytes[16] & 0x02), // Byte 0x10, y bit in 00000xyz
+    patternDestinationVcf: !!(dataBytes[16] & 0x01), // Byte 0x10, z bit in 00000xyz
+    patternClockSource: (dataBytes[16] & 0x04) ? "seq" : "arp", // Byte 0x10, x bit in 00000xyz
+    
+    intClockRate: ((dataBytes[17] & 0x0f) << 4) | (dataBytes[18] & 0x0f), // Bytes 0x11-0x12
+    mwLevel: dataBytes[19] & 0x7f, // Byte 0x13
+    atLevel: dataBytes[20] & 0x7f, // Byte 0x14
+    keyTransposeDisable: !!(dataBytes[21] & 0x01), // Byte 0x15
+    
+    clockDisplay: !!(dataBytes[22] & 0x01), // Byte 0x16, z bit in 000000yz
+    scrollingDisplay: !!(dataBytes[22] & 0x02), // Byte 0x16, y bit in 000000yz
+    
+    // Byte 0x17 not used
+    internalTune: dataBytes[25] & 0x7f, // Byte 0x19
+    externalPedalPolarity: (dataBytes[26] & 0x01) ? "inverse" : "normal", // Byte 0x1a
+    
+    // Bytes 0x1b-0x1f are nulls/not used
+  };
+
+  return {
+    command: "Global Dump",
+    data: globalData,
+    dataBytes: m.dataBytes,
+    message: m,
+    isValid: true,
+  };
+}

@@ -1,3 +1,4 @@
+import { KiwiGlobalData } from "./KiwiGlobalData";
 import { KiwiPatch } from "./KiwiPatch";
 import { MidiMessage } from "./Midi";
 
@@ -33,6 +34,11 @@ export interface Kiwi106SysexCommand {
   command: Kiwi106SysexCommandName;
   dataBytes: number[];
   isValid: boolean;
+}
+
+export interface Kiwi106SysexGlobalDumpCommand extends Kiwi106SysexCommand {
+  command: "Global Dump",
+  data: KiwiGlobalData;
 }
 
 export interface Kiwi106SysexPatchEditBufferDumpCommand

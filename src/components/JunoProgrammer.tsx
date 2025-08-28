@@ -17,12 +17,10 @@ import {
   isKiwi106SysexMessage,
   kiwi106Identifier,
   kiwiTechnicsSysexId,
-  isKiwi106BufferDumpSysexMessage,
-  parseKiwi106PatchEditBufferDumpCommand,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { DcoRange, isDcoRange } from "../types/KiwiPatch";
+import { isDcoRange } from "../types/KiwiPatch";
 import { dcoRangeControlChangeValues } from "../utils/kiwiMidi";
 
 export const JunoProgrammer = () => {
@@ -30,6 +28,7 @@ export const JunoProgrammer = () => {
   const configStore = useConfigStore();
   const { setKiwiPatch, setKiwiPatchProperty: setPatchProperty } =
     useKiwiPatchStore();
+  const { kiwiMidi } = useKiwi106Context();
 
   useEffect(() => {
     // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
@@ -81,7 +80,7 @@ export const JunoProgrammer = () => {
       const message = e.message;
 
       if (!isKiwi106SysexMessage(message)) {
-        // console.log("Ignoring non-Kiwi message");
+        console.log("Ignoring non-Kiwi message");
         return;
       }
 
@@ -96,10 +95,20 @@ export const JunoProgrammer = () => {
         return;
       }
 
-      if (isKiwi106BufferDumpSysexMessage(message)) {
-        const command = parseKiwi106PatchEditBufferDumpCommand(message);
-        setKiwiPatch(command.kiwiPatch, { updatedBy: "Sysex Dump" });
-        return;
+      const kiwi106Command = kiwiMidi?.parseSysex(message);
+
+      switch (kiwi106Command?.command) {
+        case "Global Dump":
+          console.log("yay its a global dump");
+          console.log({ data: kiwi106Command.data });
+          break;
+
+        case "Patch Edit Buffer Dump":
+          setKiwiPatch(kiwi106Command.kiwiPatch, { updatedBy: "Sysex Dump" });
+          break;
+
+        default:
+          console.log("Unknown command")
       }
     };
 
@@ -116,6 +125,7 @@ export const JunoProgrammer = () => {
     configStore.inputChannel,
     setPatchProperty,
     setKiwiPatch,
+    kiwiMidi,
   ]);
 
   useEffect(() => {
