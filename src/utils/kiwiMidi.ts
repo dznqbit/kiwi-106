@@ -12,6 +12,7 @@ import {
 } from "./sysexUtils";
 import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
+import { KiwiGlobalData } from "../types/KiwiGlobalData";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "16": [0, 31],
@@ -97,6 +98,17 @@ export const buildKiwiMidi = ({
         0x00, // 2 x null bytes
         0x00,
         ...dataBytes,
+      ]);
+    },
+
+    sendSysexGlobalDump: (kiwiGlobalData: KiwiGlobalData) => {
+      output.sendSysex(kiwiTechnicsSysexId, [
+        ...kiwi106Identifier,
+        0x00, // Required "Device ID"
+        0x02, // Transmit/Receive Global Dump
+
+        // Hardcoded snapshot
+        0,9,9,0,3,1,0,0,0,127,1,0,0,0,19,124,4,11,4,0,0,0,0,1,0,77,0,0,0,0,0
       ]);
     },
 

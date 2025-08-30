@@ -14,12 +14,14 @@ export const SelectMidiChannel = ({
 }: SelectMidiChannelParams) => {
   return (
     <Select
+      width={128}
       label="Channel"
       allowDeselect={false}
       placeholder={enabled ? "1-16" : "N / A"}
       value={String(value)}
       data={Enumerations.CHANNEL_NUMBERS.map(String)}
       onChange={(v) => onChange(Number(v))}
+      comboboxProps={{ width: 128 }}
     ></Select>
   );
 };

@@ -656,7 +656,7 @@ export const parseKiwi106GlobalDumpCommand = (m: Message): Kiwi106SysexGlobalDum
   const globalData: KiwiGlobalData = {
     midiChannelIn: trimMidiChannel(dataBytes[0]), // Byte 0x00
     midiChannelOut: trimMidiChannel(dataBytes[1]), // Byte 0x01
-    SequencerMidiChannelOut: trimMidiChannel(dataBytes[2]), // Byte 0x02
+    sequencerMidiChannelOut: trimMidiChannel(dataBytes[2]), // Byte 0x02
     deviceId: trimMidiChannel(dataBytes[3]), // Byte 0x03
     
     enableMidiCc: (() => {

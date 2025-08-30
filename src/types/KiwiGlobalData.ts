@@ -10,7 +10,7 @@ type Kiwi106MessageMode = (typeof kiwi106MessageModes)[number];
 export interface KiwiGlobalData {
   midiChannelIn: MidiChannel;
   midiChannelOut: MidiChannel;
-  SequencerMidiChannelOut: MidiChannel;
+  sequencerMidiChannelOut: MidiChannel;
   deviceId: IntRange<0, 16>;
   enableMidiCc: Kiwi106MessageMode;
   enableSysex: boolean; // 00=Off / 01=On
