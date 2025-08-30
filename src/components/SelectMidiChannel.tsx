@@ -12,16 +12,18 @@ export const SelectMidiChannel = ({
   value,
   onChange,
 }: SelectMidiChannelParams) => {
+  const width = 96;
+
   return (
     <Select
-      width={128}
+      width={width}
       label="Channel"
       allowDeselect={false}
       placeholder={enabled ? "1-16" : "N / A"}
       value={String(value)}
       data={Enumerations.CHANNEL_NUMBERS.map(String)}
       onChange={(v) => onChange(Number(v))}
-      comboboxProps={{ width: 128 }}
+      comboboxProps={{ width }}
     ></Select>
   );
 };

@@ -1,6 +1,7 @@
 import { Message } from "webmidi";
 import { KiwiPatch, KiwiPatchAddress } from "./KiwiPatch";
 import { Kiwi106SysexGlobalDumpCommand, Kiwi106SysexPatchEditBufferDumpCommand } from "./Kiwi106Sysex";
+import { KiwiGlobalData } from "./KiwiGlobalData";
 
 /** Interface for Strategy pattern, so we can swap out for whatever */
 export interface KiwiMidi {
@@ -11,6 +12,7 @@ export interface KiwiMidi {
 
   sendProgramChange(patchAddress: KiwiPatchAddress | "manual"): void;
   sendSysexPatchBufferDump(kiwiPatch: KiwiPatch): void;
+  sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
   parseSysex(message: Message): Kiwi106SysexGlobalDumpCommand | Kiwi106SysexPatchEditBufferDumpCommand;
 }

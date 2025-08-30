@@ -99,7 +99,6 @@ export const JunoProgrammer = () => {
 
       switch (kiwi106Command?.command) {
         case "Global Dump":
-          console.log("yay its a global dump");
           console.log({ data: kiwi106Command.data });
           break;
 
@@ -122,7 +121,6 @@ export const JunoProgrammer = () => {
   }, [
     midiContext.enabled,
     configStore.input,
-    configStore.inputChannel,
     setPatchProperty,
     setKiwiPatch,
     kiwiMidi,
@@ -150,6 +148,7 @@ export const JunoProgrammer = () => {
             console.log("incomplete (no output)");
             return;
           }
+
           const channel = output.channels[configStore.outputChannel];
 
           for (const k of objectKeys(diff)) {

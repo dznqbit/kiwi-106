@@ -14,7 +14,7 @@ export type MidiMessageType =
   | "channelaftertouch"
   | "keyaftertouch";
 export type MidiCcValue = IntRange<0, 128>;
-export type MidiChannel = IntRange<0, 16>;
+export type MidiChannel = IntRange<1, 17>;
 
 export const isMidiCcValue = (x: unknown): x is MidiCcValue => {
   return (
@@ -24,7 +24,7 @@ export const isMidiCcValue = (x: unknown): x is MidiCcValue => {
 
 export const isMidiChannel = (x: unknown): x is MidiChannel => {
   return (
-    typeof x === "number" && !x.toString().includes(".") && x >= 0 && x < 16
+    typeof x === "number" && !x.toString().includes(".") && x > 0 && x < 17
   );
 };
 
