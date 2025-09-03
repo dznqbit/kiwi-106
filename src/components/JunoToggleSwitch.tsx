@@ -12,12 +12,12 @@ interface JunoToggleSwitchProps<T> {
   onSelect: (t: T) => void;
 }
 
-export const JunoToggleSwitch = ({
+export const JunoToggleSwitch = <T,>({
   label,
   data,
   selected,
   onSelect,
-}: JunoToggleSwitchProps<string>) => {
+}: JunoToggleSwitchProps<T>) => {
   const switchWidth = 20;
   const switchHeight = 22;
   const trackPadding = 2;
@@ -59,7 +59,8 @@ export const JunoToggleSwitch = ({
               cursor: "pointer",
               position: "relative",
               width: switchWidth + 2 * trackPadding,
-              height: (data.length * switchHeight) + (data.length + 1) * trackPadding,
+              height:
+                data.length * switchHeight + (data.length + 1) * trackPadding,
               backgroundColor: "var(--mantine-color-black)",
               margin: "0",
             }}
@@ -67,7 +68,9 @@ export const JunoToggleSwitch = ({
             <Box
               style={{
                 position: "absolute",
-                top: selectedIndex * switchHeight + (selectedIndex + 1) * trackPadding,
+                top:
+                  selectedIndex * switchHeight +
+                  (selectedIndex + 1) * trackPadding,
                 left: trackPadding,
                 width: switchWidth,
                 height: switchHeight,

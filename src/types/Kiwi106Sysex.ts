@@ -37,7 +37,7 @@ export interface Kiwi106SysexCommand {
 }
 
 export interface Kiwi106SysexGlobalDumpCommand extends Kiwi106SysexCommand {
-  command: "Global Dump",
+  command: "Global Dump";
   data: KiwiGlobalData;
 }
 

@@ -1,4 +1,9 @@
-import { isMidiCcValue, isMidiChannel, MidiCcValue, MidiChannel } from "../types/Midi";
+import {
+  isMidiCcValue,
+  isMidiChannel,
+  MidiCcValue,
+  MidiChannel,
+} from "../types/Midi";
 
 export const trimMidiChannel: (v: number) => MidiChannel = (v) => {
   const midiChannel = Math.min(15, Math.max(0, v)) + 1;
@@ -18,6 +23,9 @@ export const trimMidiCcValue: (n: number) => MidiCcValue = (n) => {
   }
 };
 
-const trimIntRange = (n: number, { min, max }: { min: number, max: number }) => {
+const trimIntRange = (
+  n: number,
+  { min, max }: { min: number; max: number },
+) => {
   return Math.min(max, Math.max(min, n));
-}
+};

@@ -14,19 +14,24 @@ export const ConfigPanel = () => {
   }));
 
   const kiwi106MessageData = kiwi106MessageModes.map((mm) => ({
-    value: mm.toString(),
-    label: mm.toString(),
+    value: mm,
+    label: mm,
   }));
 
-  const [midiCc, setMidiCc] = useState("lo");
-  const [kiwiGlobalData, setKiwiGlobalData] = useState<KiwiGlobalData>();
+  const [localKiwiGlobalData, setLocalKiwiGlobalData] =
+    useState<KiwiGlobalData>();
 
   useEffect(() => {
-    const globalData = kiwi106Context.kiwiGlobalData;
-    if (globalData) {
-      setKiwiGlobalData(globalData);
+    if (kiwi106Context.active) {
+      setLocalKiwiGlobalData(kiwi106Context.kiwiGlobalData);
     }
-  }, [kiwi106Context.kiwiGlobalData]);
+  }, [kiwi106Context]);
+
+  if (!kiwi106Context.active) {
+    return <></>;
+  }
+
+  const kiwiGlobalData = localKiwiGlobalData || kiwi106Context.kiwiGlobalData;
 
   return (
     <Stack>
@@ -84,17 +89,18 @@ export const ConfigPanel = () => {
             <JunoToggleSwitch
               label="CC"
               data={kiwi106MessageData}
-              selected={kiwiGlobalData?.enableControlChange ?? "off"}
+              selected={kiwiGlobalData.enableControlChange}
               onSelect={(d) =>
-                setKiwiGlobalData({ ...kiwiGlobalData, enableControlChange: d })
+                setLocalKiwiGlobalData({
+                  ...(localKiwiGlobalData || kiwi106Context.kiwiGlobalData),
+                  enableControlChange: d,
+                })
               }
             />
             <Selector
               label="Enable CC"
               values={kiwi106MessageModes}
-              selected={
-                kiwi106Context.kiwiGlobalData?.enableControlChange ?? null
-              }
+              selected={kiwiGlobalData.enableControlChange}
               onSelect={(x) => console.log(`Select MIDI CC ${x}`)}
             />
 

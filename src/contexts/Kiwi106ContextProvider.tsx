@@ -27,7 +27,9 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     null,
   );
   const [buildNumber, setBuildNumber] = useState<string | null>(null);
-  const [kiwiGlobalData, setKiwiGlobalData] = useState<KiwiGlobalData | null>(null);
+  const [kiwiGlobalData, setKiwiGlobalData] = useState<KiwiGlobalData | null>(
+    null,
+  );
   const [lastHeartbeatAt, setLastHeartbeatAt] = useState<Date | null>(null);
 
   const sendDeviceEnquirySysex = useCallback(() => {
@@ -148,7 +150,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
 
       try {
         const kiwi106Command = newKiwiMidi.parseSysex(e.message);
-        if (kiwi106Command.command === 'Global Dump') {
+        if (kiwi106Command.command === "Global Dump") {
           setKiwiGlobalData(kiwi106Command.data);
         }
       } catch {
@@ -193,26 +195,39 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     return () => clearInterval(heartbeatCheckHandle);
   }, [active, lastHeartbeatAt]);
 
-  const context: Kiwi106Context = useMemo(
-    () => ({
-      active,
-      midiError: midiContext.enableError,
-      programVersion,
-      bootloaderVersion,
-      buildNumber,
-      kiwiMidi,
-      kiwiGlobalData,
-    }),
-    [
-      active,
-      kiwiMidi,
-      kiwiGlobalData,
-      midiContext.enableError,
-      programVersion,
-      bootloaderVersion,
-      buildNumber,
-    ],
-  );
+  const context: Kiwi106Context = useMemo(() => {
+    if (
+      active &&
+      programVersion &&
+      bootloaderVersion &&
+      buildNumber &&
+      kiwiMidi &&
+      kiwiGlobalData
+    ) {
+      return {
+        active: true,
+        midiError: midiContext.enableError,
+        programVersion,
+        bootloaderVersion,
+        buildNumber,
+        kiwiMidi,
+        kiwiGlobalData,
+      };
+    } else {
+      return {
+        active: false,
+        midiError: midiContext.enableError,
+      };
+    }
+  }, [
+    active,
+    kiwiMidi,
+    kiwiGlobalData,
+    midiContext.enableError,
+    programVersion,
+    bootloaderVersion,
+    buildNumber,
+  ]);
 
   return (
     <Kiwi106Context.Provider value={context}>

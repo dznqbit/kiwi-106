@@ -14,9 +14,9 @@ export type MidiMessageType =
   | "channelaftertouch"
   | "keyaftertouch";
 
-export const midiCcValues = [...new Array(128)].map((_, i) => i)
+export const midiCcValues = [...new Array(128)].map((_, i) => i);
 export type MidiCcValue = IntRange<0, 128>;
-export const midiChannels = [...new Array(16)].map((_, i) => i + 1)
+export const midiChannels = [...new Array(16)].map((_, i) => i + 1);
 export type MidiChannel = IntRange<1, 17>;
 
 export const isMidiCcValue = (x: unknown): x is MidiCcValue => {

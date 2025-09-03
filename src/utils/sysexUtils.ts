@@ -1,6 +1,9 @@
 import _ from "lodash";
 import { Message } from "webmidi";
-import { Kiwi106SysexGlobalDumpCommand, Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
+import {
+  Kiwi106SysexGlobalDumpCommand,
+  Kiwi106SysexPatchEditBufferDumpCommand,
+} from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import { MidiCcValue, MidiChannel } from "../types/Midi";
@@ -131,135 +134,18 @@ export const kiwi106PatchEditBufferFields = {
 // This skips the sysex headers and the "2 null bytes"
 const simplePatchDumpSysex: number[] = [
   // "yahoo"
-  121,
-  97,
-  104,
-  111,
-  111,
+  121, 97, 104, 111, 111,
 
-  0x73,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x20,
-  0x0c,
-  0x00,
-  0x00,
-  0x01,
-  0x00,
-  0x1f,
-  0x68,
-  0x00,
-  0x00,
-  0x1a,
-  0x22,
-  0x00,
-  0x00,
-  0x00,
-  0x02,
-  0x30,
-  0x00,
-  0x12,
-  0x34,
-  0x00,
-  0x00,
-  0x03,
-  0x6c,
-  0x00,
-  0x00,
-  0x01,
-  0x70,
-  0x00,
-  0x20,
-  0x00,
-  0x00,
-  0x00,
-  0x0c,
-  0x54,
-  0x1f,
-  0x63,
-  0x00,
-  0x00,
-  0x00,
-  0x14,
-  0x03,
-  0x44,
-  0x13,
-  0x6f,
-  0x00,
-  0x00,
-  0x00,
-  0x02,
-  0x14,
-  0x2c,
-  0x17,
-  0x3c,
-  0x00,
-  0x0d,
-  0x41,
-  0x11,
-  0x44,
-  0x00,
-  0x00,
-  0x1c,
-  0x24,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x04,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x01,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x0c,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
+  0x73, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0x0c, 0x00, 0x00, 0x01, 0x00, 0x1f, 0x68, 0x00, 0x00, 0x1a, 0x22,
+  0x00, 0x00, 0x00, 0x02, 0x30, 0x00, 0x12, 0x34, 0x00, 0x00, 0x03, 0x6c, 0x00,
+  0x00, 0x01, 0x70, 0x00, 0x20, 0x00, 0x00, 0x00, 0x0c, 0x54, 0x1f, 0x63, 0x00,
+  0x00, 0x00, 0x14, 0x03, 0x44, 0x13, 0x6f, 0x00, 0x00, 0x00, 0x02, 0x14, 0x2c,
+  0x17, 0x3c, 0x00, 0x0d, 0x41, 0x11, 0x44, 0x00, 0x00, 0x1c, 0x24, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ];
 
 export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
@@ -501,7 +387,7 @@ export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
 };
 
 export const parseKiwi106PatchEditBufferDumpCommand = (
-  m: Message
+  m: Message,
 ): Kiwi106SysexPatchEditBufferDumpCommand => {
   // Ensure it's a Kiwi 106 Patch Edit Buffer Dump Command
   if (!isKiwi106BufferDumpSysexMessage(m)) {
@@ -532,7 +418,7 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   const dcoRangeBytes = byteToMidi(30) & 0b11;
   const dcoRange =
     objectKeys(dcoRangeSysexValues).find(
-      (k) => dcoRangeSysexValues[k] == dcoRangeBytes
+      (k) => dcoRangeSysexValues[k] == dcoRangeBytes,
     ) ?? "4";
 
   const parseLfoWave = (n: number) => {
@@ -643,7 +529,9 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   };
 };
 
-export const parseKiwi106GlobalDumpCommand = (m: Message): Kiwi106SysexGlobalDumpCommand => {
+export const parseKiwi106GlobalDumpCommand = (
+  m: Message,
+): Kiwi106SysexGlobalDumpCommand => {
   // Ensure it's a Kiwi 106 Global Dump Command
   if (!isKiwi106GlobalDumpSysexMessage(m)) {
     throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
@@ -658,77 +546,98 @@ export const parseKiwi106GlobalDumpCommand = (m: Message): Kiwi106SysexGlobalDum
     midiChannelOut: trimMidiChannel(dataBytes[1]), // Byte 0x01
     sequencerMidiChannelOut: trimMidiChannel(dataBytes[2]), // Byte 0x02
     deviceId: dataBytes[3], // Byte 0x03
-    
+
     enableControlChange: (() => {
       const value = dataBytes[4] & 0x03; // Byte 0x04
       switch (value) {
-        case 0: return "off";
-        case 1: return "rx";
-        case 2: return "tx";
-        case 3: return "rx-tx";
-        default: return "rx";
+        case 0:
+          return "off";
+        case 1:
+          return "rx";
+        case 2:
+          return "tx";
+        case 3:
+          return "rx-tx";
+        default:
+          return "rx";
       }
     })(),
-    
+
     enableSysex: !!(dataBytes[5] & 0x01), // Byte 0x05
-    
+
     enableProgramChange: (() => {
       const value = dataBytes[6] & 0x03; // Byte 0x06
       switch (value) {
-        case 0: return "off";
-        case 1: return "rx";
-        case 2: return "tx";
-        case 3: return "rx-tx";
-        default: return "rx";
+        case 0:
+          return "off";
+        case 1:
+          return "rx";
+        case 2:
+          return "tx";
+        case 3:
+          return "rx-tx";
+        default:
+          return "rx";
       }
     })(),
-    
+
     midiSoftThrough: (() => {
       const value = dataBytes[7] & 0x03; // Byte 0x07
       switch (value) {
-        case 0: return "stop-all";
-        case 1: return "pass-all";
-        case 2: return "pass-only-non-cc";
-        case 3: return "stop-only-cc-used";
-        default: return "pass-all";
+        case 0:
+          return "stop-all";
+        case 1:
+          return "pass-all";
+        case 2:
+          return "pass-only-non-cc";
+        case 3:
+          return "stop-only-cc-used";
+        default:
+          return "pass-all";
       }
     })(),
-    
+
     enableMidiClockGen: !!(dataBytes[8] & 0x01), // Byte 0x08
     internalVelocity: trimMidiCcValue(dataBytes[9] & 0x7f), // Byte 0x09
-    
+
     masterClockSource: (() => {
       const value = dataBytes[10] & 0x07; // Byte 0x0a
       switch (value) {
-        case 0: return "internal";
-        case 1: return "midi";
-        case 2: return "ext step";
-        case 3: return "ext 24ppqn";
-        case 4: return "ext 48ppqn";
-        default: return "internal";
+        case 0:
+          return "internal";
+        case 1:
+          return "midi";
+        case 2:
+          return "ext step";
+        case 3:
+          return "ext 24ppqn";
+        case 4:
+          return "ext 48ppqn";
+        default:
+          return "internal";
       }
     })(),
-    
+
     // Bytes 0x0b-0x0d not used
-    
+
     patternLevel: twelveBitToMidi(dataBytes[14], dataBytes[15]), // Bytes 0x0e-0x0f
-    
+
     patternDestinationVca: !!(dataBytes[16] & 0x02), // Byte 0x10, y bit in 00000xyz
     patternDestinationVcf: !!(dataBytes[16] & 0x01), // Byte 0x10, z bit in 00000xyz
-    patternClockSource: (dataBytes[16] & 0x04) ? "seq" : "arp", // Byte 0x10, x bit in 00000xyz
-    
+    patternClockSource: dataBytes[16] & 0x04 ? "seq" : "arp", // Byte 0x10, x bit in 00000xyz
+
     intClockRate: ((dataBytes[17] & 0x0f) << 4) | (dataBytes[18] & 0x0f), // Bytes 0x11-0x12
     mwLevel: dataBytes[19] & 0x7f, // Byte 0x13
     atLevel: dataBytes[20] & 0x7f, // Byte 0x14
     keyTransposeDisable: !!(dataBytes[21] & 0x01), // Byte 0x15
-    
+
     clockDisplay: !!(dataBytes[22] & 0x01), // Byte 0x16, z bit in 000000yz
     scrollingDisplay: !!(dataBytes[22] & 0x02), // Byte 0x16, y bit in 000000yz
-    
+
     // Byte 0x17 not used
     internalTune: dataBytes[25] & 0x7f, // Byte 0x19
-    externalPedalPolarity: (dataBytes[26] & 0x01) ? "inverse" : "normal", // Byte 0x1a
-    
+    externalPedalPolarity: dataBytes[26] & 0x01 ? "inverse" : "normal", // Byte 0x1a
+
     // Bytes 0x1b-0x1f are nulls/not used
   };
 
@@ -739,4 +648,4 @@ export const parseKiwi106GlobalDumpCommand = (m: Message): Kiwi106SysexGlobalDum
     message: m,
     isValid: true,
   };
-}
+};

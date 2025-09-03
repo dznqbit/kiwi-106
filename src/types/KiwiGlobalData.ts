@@ -14,14 +14,18 @@ export interface KiwiGlobalData {
   deviceId: IntRange<0, 16>;
   enableControlChange: Kiwi106MessageMode;
   enableSysex: boolean; // 00=Off / 01=On
-  
+
   enableProgramChange: "off" | "rx" | "tx" | "rx-tx";
-                      // 00=None
-                      // 01=PC Receive Enabled (Default)
-                      // 02=PC Transmit Enabled
-                      // 03=PC Receive & Transmit Enabled
-  
-  midiSoftThrough: "stop-all" | "pass-all" | "pass-only-non-cc" | "stop-only-cc-used";
+  // 00=None
+  // 01=PC Receive Enabled (Default)
+  // 02=PC Transmit Enabled
+  // 03=PC Receive & Transmit Enabled
+
+  midiSoftThrough:
+    | "stop-all"
+    | "pass-all"
+    | "pass-only-non-cc"
+    | "stop-only-cc-used";
   // xx = 00=Stop all
   // 01=Pass all
   // 10=Pass only nonCC
@@ -32,14 +36,19 @@ export interface KiwiGlobalData {
 
   enableMidiClockGen: boolean;
   internalVelocity: IntRange<0, 128>;
-  masterClockSource: "internal" | "midi" | "ext step" | "ext 24ppqn" | "ext 48ppqn";  
-                      // xx= 000-Internal
-                      // 001-Midi
-                      // 010-Ext Step
-                      // 011-Ext 24ppqn
-                      // 100-Ext 48ppqn
-                      // Note – Master Clock will be divided according to the
-                      // Arp/Seq/LFO Clock Divide options
+  masterClockSource:
+    | "internal"
+    | "midi"
+    | "ext step"
+    | "ext 24ppqn"
+    | "ext 48ppqn";
+  // xx= 000-Internal
+  // 001-Midi
+  // 010-Ext Step
+  // 011-Ext 24ppqn
+  // 100-Ext 48ppqn
+  // Note – Master Clock will be divided according to the
+  // Arp/Seq/LFO Clock Divide options
 
   patternLevel: number; // 12 bit word
   patternDestinationVca: boolean;
@@ -53,6 +62,6 @@ export interface KiwiGlobalData {
   clockDisplay: boolean;
   scrollingDisplay: boolean;
   internalTune: number; // 0=use fine tune knob
-                        // 1-127=override fine tune
+  // 1-127=override fine tune
   externalPedalPolarity: "normal" | "inverse";
 }

@@ -108,15 +108,47 @@ export const buildKiwiMidi = ({
         0x02, // Transmit/Receive Global Dump
 
         // Hardcoded snapshot
-        0,9,9,0,3,1,0,0,0,127,1,0,0,0,19,124,4,11,4,0,0,0,0,1,0,77,0,0,0,0,0
+        0,
+        9,
+        9,
+        0,
+        3,
+        1,
+        0,
+        0,
+        0,
+        127,
+        1,
+        0,
+        0,
+        0,
+        19,
+        124,
+        4,
+        11,
+        4,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        77,
+        0,
+        0,
+        0,
+        0,
+        0,
       ]);
     },
 
     parseSysex: (message: Message) => {
       if (!isKiwi106SysexMessage(message)) {
-        throw new Error("[kiwiMidi] could not interpret non-Kiwi106 sysex message");
+        throw new Error(
+          "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
+        );
       }
-      
+
       if (isKiwi106BufferDumpSysexMessage(message)) {
         const command = parseKiwi106PatchEditBufferDumpCommand(message);
         return command;
@@ -128,6 +160,6 @@ export const buildKiwiMidi = ({
       }
 
       throw new Error("[kiwiMidi] unsupport sysex command");
-    }
+    },
   };
 };

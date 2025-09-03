@@ -107,7 +107,7 @@ export const JunoProgrammer = () => {
           break;
 
         default:
-          console.log("Unknown command")
+          console.log("Unknown command");
       }
     };
 

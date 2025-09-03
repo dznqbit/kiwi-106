@@ -9,10 +9,15 @@ interface SelectorProps {
   onSelect?: (t: T) => void;
 }
 
-export const Selector = ({ label, values, selected, onSelect }: SelectorProps) => {
+export const Selector = ({
+  label,
+  values,
+  selected,
+  onSelect,
+}: SelectorProps) => {
   const valueLabel = (v: T) => {
     return v.toString();
-  }
+  };
 
   return (
     <Stack gap={2} pr="sm" justify="flex-start">
@@ -20,7 +25,7 @@ export const Selector = ({ label, values, selected, onSelect }: SelectorProps) =
         {label}
       </Text>
 
-      {values.map((v) =>
+      {values.map((v) => (
         <Button
           radius={0}
           variant={selected === v ? "filled" : "outline"}
@@ -32,7 +37,7 @@ export const Selector = ({ label, values, selected, onSelect }: SelectorProps) =
         >
           {valueLabel(v)}
         </Button>
-      )}
+      ))}
     </Stack>
   );
 };
