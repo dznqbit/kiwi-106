@@ -1,99 +1,93 @@
-import { Box, Stack, Text, Title } from "@mantine/core";
-import { KiwiPatch } from "../types/KiwiPatch";
-import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
-import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
+import { Box, Group, Stack, Text, Title } from "@mantine/core";
 
-interface JunoToggleSwitchProps {
-  property: keyof KiwiPatch;
-  label?: string;
-  option1: string;
-  option2: string;
-  // MIDI CC ranges for each option
-  option1Range: [MidiCcValue, MidiCcValue];
-  option2Range: [MidiCcValue, MidiCcValue];
+interface ToggleValue<T> {
+  value: T;
+  label: string;
+}
+
+interface JunoToggleSwitchProps<T> {
+  label: string;
+  data: ToggleValue<T>[];
+  selected: T;
+  onSelect: (t: T) => void;
 }
 
 export const JunoToggleSwitch = ({
-  property,
   label,
-  option1,
-  option2,
-  option1Range,
-  option2Range,
-}: JunoToggleSwitchProps) => {
-  const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const switchValue = kiwiPatch[property];
-
-  if (!isMidiCcValue(switchValue)) {
-    throw new Error("Woah! can't set string from JunoToggleSwitch");
-  }
-
+  data,
+  selected,
+  onSelect,
+}: JunoToggleSwitchProps<string>) => {
   const switchWidth = 20;
   const switchHeight = 22;
   const trackPadding = 2;
 
-  const isOption1 =
-    switchValue >= option1Range[0] && switchValue <= option1Range[1];
-
-  const toggleSwitch = () => {
-    const newValue = isOption1 ? option2Range[0] : option1Range[0];
-    console.log(
-      `Toggling ${property} to ${isOption1 ? option2 : option1}`,
-      newValue,
-    );
-    setKiwiPatchProperty(property, newValue, {
-      updatedBy: "Editor Change",
-    });
-  };
+  const selectedIndex = data.map(({ value }) => value).indexOf(selected);
 
   return (
     <Stack gap={8} align="center">
       <Text size="sm" fw="bold">
-        {label ?? kiwiPatchLabel(property)}
+        {label}
       </Text>
 
-      <Stack gap={0} align="center">
-        <Title order={6}>{option1}</Title>
-
-        {/* Switch Track */}
-        <Box
-          onClick={toggleSwitch}
-          style={{
-            cursor: "pointer",
-            position: "relative",
-            width: switchWidth + 2 * trackPadding,
-            height: 2 * (switchHeight + trackPadding),
-            backgroundColor: "var(--mantine-color-black)",
-            margin: "0",
-          }}
-        >
-          {/* Switch Handle */}
+      <Group gap={0}>
+        <Stack justify="center" gap={trackPadding} py={trackPadding}>
+          {data.map((d) => (
+            <Title
+              onClick={() => onSelect(d.value)}
+              order={6}
+              h={switchHeight}
+              style={{ cursor: "pointer", lineHeight: "1.4rem" }}
+              pr="sm"
+            >
+              {d.label}
+            </Title>
+          ))}
+        </Stack>
+        <Stack align="center">
           <Box
+            onClick={(e) => {
+              const containerBox = e.currentTarget;
+              const y =
+                e.pageY -
+                containerBox.getBoundingClientRect().top +
+                window.scrollY;
+              const idx = Math.floor(y / (switchHeight + trackPadding));
+              onSelect(data[idx].value);
+            }}
             style={{
-              position: "absolute",
-              top: isOption1 ? trackPadding : trackPadding + switchHeight,
-              left: trackPadding,
-              width: switchWidth,
-              height: switchHeight,
-              backgroundColor: "var(--mantine-color-gray-8)",
+              cursor: "pointer",
+              position: "relative",
+              width: switchWidth + 2 * trackPadding,
+              height: (data.length * switchHeight) + (data.length + 1) * trackPadding,
+              backgroundColor: "var(--mantine-color-black)",
+              margin: "0",
             }}
           >
-            <svg width={switchWidth} height={switchHeight}>
-              <line
-                y1={switchHeight / 2}
-                y2={switchHeight / 2}
-                x1={0}
-                x2={switchWidth}
-                stroke="var(--mantine-color-gray-2)"
-                strokeWidth={3}
-              />
-            </svg>
+            <Box
+              style={{
+                position: "absolute",
+                top: selectedIndex * switchHeight + (selectedIndex + 1) * trackPadding,
+                left: trackPadding,
+                width: switchWidth,
+                height: switchHeight,
+                backgroundColor: "var(--mantine-color-gray-8)",
+              }}
+            >
+              <svg width={switchWidth} height={switchHeight}>
+                <line
+                  y1={switchHeight / 2}
+                  y2={switchHeight / 2}
+                  x1={0}
+                  x2={switchWidth}
+                  stroke="var(--mantine-color-gray-2)"
+                  strokeWidth={3}
+                />
+              </svg>
+            </Box>
           </Box>
-        </Box>
-
-        <Title order={6}>{option2}</Title>
-      </Stack>
+        </Stack>
+      </Group>
     </Stack>
   );
 };

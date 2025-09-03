@@ -12,7 +12,7 @@ export interface KiwiGlobalData {
   midiChannelOut: MidiChannel;
   sequencerMidiChannelOut: MidiChannel;
   deviceId: IntRange<0, 16>;
-  enableMidiCc: Kiwi106MessageMode;
+  enableControlChange: Kiwi106MessageMode;
   enableSysex: boolean; // 00=Off / 01=On
   
   enableProgramChange: "off" | "rx" | "tx" | "rx-tx";

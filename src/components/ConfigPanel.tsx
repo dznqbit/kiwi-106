@@ -1,21 +1,33 @@
-import {
-  Group,
-  List,
-  ListItem,
-  Select,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Group, List, ListItem, Select, Stack, Text } from "@mantine/core";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { Selector } from "./Selector";
-import { kiwi106MessageModes } from "../types/KiwiGlobalData";
-import { MidiChannel } from "../types/Midi";
+import { kiwi106MessageModes, KiwiGlobalData } from "../types/KiwiGlobalData";
+import { midiChannels } from "../types/Midi";
+import { JunoToggleSwitch } from "./JunoToggleSwitch";
+import { useEffect, useState } from "react";
 
 export const ConfigPanel = () => {
   const kiwi106Context = useKiwi106Context();
-  
-  const midiChannel: MidiChannel = 16;
-  console.log("Midichannel", midiChannel)
+  const midiChannelData = midiChannels.map((c) => ({
+    value: c.toString(),
+    label: c.toString(),
+  }));
+
+  const kiwi106MessageData = kiwi106MessageModes.map((mm) => ({
+    value: mm.toString(),
+    label: mm.toString(),
+  }));
+
+  const [midiCc, setMidiCc] = useState("lo");
+  const [kiwiGlobalData, setKiwiGlobalData] = useState<KiwiGlobalData>();
+
+  useEffect(() => {
+    const globalData = kiwi106Context.kiwiGlobalData;
+    if (globalData) {
+      setKiwiGlobalData(globalData);
+    }
+  }, [kiwi106Context.kiwiGlobalData]);
+
   return (
     <Stack>
       <Stack>
@@ -31,10 +43,7 @@ export const ConfigPanel = () => {
           <Group>
             <Select
               label="MIDI Ch In"
-              data={Array.from({ length: 16 }, (_, i) => ({
-                value: (i + 1).toString(),
-                label: (i + 1).toString(),
-              }))}
+              data={midiChannelData}
               value={
                 kiwi106Context.kiwiGlobalData?.midiChannelIn?.toString() ?? null
               }
@@ -45,10 +54,7 @@ export const ConfigPanel = () => {
 
             <Select
               label="MIDI Ch Out"
-              data={Array.from({ length: 16 }, (_, i) => ({
-                value: (i + 1).toString(),
-                label: (i + 1).toString(),
-              }))}
+              data={midiChannelData}
               value={
                 kiwi106Context.kiwiGlobalData?.midiChannelOut?.toString() ??
                 null
@@ -60,10 +66,7 @@ export const ConfigPanel = () => {
 
             <Select
               label="Seq MIDI Ch Out"
-              data={Array.from({ length: 16 }, (_, i) => ({
-                value: (i + 1).toString(),
-                label: (i + 1).toString(),
-              }))}
+              data={midiChannelData}
               value={
                 kiwi106Context.kiwiGlobalData?.sequencerMidiChannelOut?.toString() ??
                 null
@@ -78,10 +81,20 @@ export const ConfigPanel = () => {
           </Group>
 
           <Group>
+            <JunoToggleSwitch
+              label="CC"
+              data={kiwi106MessageData}
+              selected={kiwiGlobalData?.enableControlChange ?? "off"}
+              onSelect={(d) =>
+                setKiwiGlobalData({ ...kiwiGlobalData, enableControlChange: d })
+              }
+            />
             <Selector
               label="Enable CC"
               values={kiwi106MessageModes}
-              selected={kiwi106Context.kiwiGlobalData?.enableMidiCc ?? null}
+              selected={
+                kiwi106Context.kiwiGlobalData?.enableControlChange ?? null
+              }
               onSelect={(x) => console.log(`Select MIDI CC ${x}`)}
             />
 
