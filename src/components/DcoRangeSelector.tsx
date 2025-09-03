@@ -2,7 +2,6 @@ import { Group, Stack, Text } from "@mantine/core";
 import { type DcoRange, isDcoRange, KiwiPatch } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import { JunoButton } from "./JunoButton";
 
 interface DcoRangeSelectorProps {

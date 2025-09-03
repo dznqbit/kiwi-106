@@ -1,16 +1,27 @@
 import {
   isMidiCcValue,
   isMidiChannel,
+  isNibble,
   MidiCcValue,
   MidiChannel,
+  Nibble,
 } from "../types/Midi";
 
-export const trimMidiChannel: (v: number) => MidiChannel = (v) => {
-  const midiChannel = Math.min(15, Math.max(0, v)) + 1;
+export const trimNibble: (n: number) => Nibble = (n) => {
+  const trimmed = trimIntRange(n, { min: 0, max: 15 });
+  if (isNibble(trimmed)) {
+    return trimmed;
+  } else {
+    throw new Error(`Invalid nibble value (${n})`);
+  }
+}
+
+export const trimMidiChannel: (n: number) => MidiChannel = (n) => {
+  const midiChannel = trimIntRange(n, { min: 0, max: 15 }) + 1;
   if (isMidiChannel(midiChannel)) {
     return midiChannel;
   } else {
-    throw new Error(`Invalid MidiChannel value (${v})`);
+    throw new Error(`Invalid MidiChannel (${n})`);
   }
 };
 

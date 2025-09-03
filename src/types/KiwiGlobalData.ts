@@ -1,8 +1,26 @@
 import { IntRange } from "./IntRange";
-import { MidiChannel } from "./Midi";
+import { MidiChannel, Nibble } from "./Midi";
 
 export const kiwi106MessageModes = ["off", "rx", "tx", "rx-tx"] as const;
-type Kiwi106MessageMode = (typeof kiwi106MessageModes)[number];
+export type Kiwi106MessageMode = (typeof kiwi106MessageModes)[number];
+
+export const kiwi106MidiSoftThroughModes = [
+  "stop-all",
+  "pass-all",
+  "pass-only-non-cc",
+  "stop-only-cc-used",
+] as const;
+export type Kiwi106MidiSoftThroughMode =
+  (typeof kiwi106MidiSoftThroughModes)[number];
+
+export const kiwi106MidiClockGenModes = [
+  "internal",
+  "midi",
+  "ext step",
+  "ext 24ppqn",
+  "ext 48ppqn",
+] as const;
+export type Kiwi106MidiClockGenMode = (typeof kiwi106MidiClockGenModes)[number];
 
 /**
  * Sysex Global Dump data
@@ -11,37 +29,14 @@ export interface KiwiGlobalData {
   midiChannelIn: MidiChannel;
   midiChannelOut: MidiChannel;
   sequencerMidiChannelOut: MidiChannel;
-  deviceId: IntRange<0, 16>;
+  deviceId: Nibble;
   enableControlChange: Kiwi106MessageMode;
-  enableSysex: boolean; // 00=Off / 01=On
-
-  enableProgramChange: "off" | "rx" | "tx" | "rx-tx";
-  // 00=None
-  // 01=PC Receive Enabled (Default)
-  // 02=PC Transmit Enabled
-  // 03=PC Receive & Transmit Enabled
-
-  midiSoftThrough:
-    | "stop-all"
-    | "pass-all"
-    | "pass-only-non-cc"
-    | "stop-only-cc-used";
-  // xx = 00=Stop all
-  // 01=Pass all
-  // 10=Pass only nonCC
-  // 11=Stop only CC we have used
-  // Note - Midi real time (>$F8) will always pass
-  // Note - SysEx intended for the Juno-106 will not be passed
-  // Note – Active Sensing commands are suppressed within the 106 and not passed on
-
+  enableSysex: boolean;
+  enableProgramChange: Kiwi106MessageMode;
+  midiSoftThrough: Kiwi106MidiSoftThroughMode;
   enableMidiClockGen: boolean;
   internalVelocity: IntRange<0, 128>;
-  masterClockSource:
-    | "internal"
-    | "midi"
-    | "ext step"
-    | "ext 24ppqn"
-    | "ext 48ppqn";
+  masterClockSource: Kiwi106MidiClockGenMode;
   // xx= 000-Internal
   // 001-Midi
   // 010-Ext Step

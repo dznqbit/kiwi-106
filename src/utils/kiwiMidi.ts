@@ -9,6 +9,7 @@ import {
   isKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
   parseKiwi106GlobalDumpCommand,
+  buildKiwi106GlobalDumpSysexData,
 } from "./sysexUtils";
 import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
@@ -107,38 +108,7 @@ export const buildKiwiMidi = ({
         0x00, // Required "Device ID"
         0x02, // Transmit/Receive Global Dump
 
-        // Hardcoded snapshot
-        0,
-        9,
-        9,
-        0,
-        3,
-        1,
-        0,
-        0,
-        0,
-        127,
-        1,
-        0,
-        0,
-        0,
-        19,
-        124,
-        4,
-        11,
-        4,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        77,
-        0,
-        0,
-        0,
-        0,
-        0,
+        ...buildKiwi106GlobalDumpSysexData(kiwiGlobalData)
       ]);
     },
 
