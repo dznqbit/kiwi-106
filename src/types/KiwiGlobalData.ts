@@ -13,14 +13,14 @@ export const kiwi106MidiSoftThroughModes = [
 export type Kiwi106MidiSoftThroughMode =
   (typeof kiwi106MidiSoftThroughModes)[number];
 
-export const kiwi106MidiClockGenModes = [
+export const masterClockSources = [
   "internal",
   "midi",
   "ext step",
   "ext 24ppqn",
   "ext 48ppqn",
 ] as const;
-export type Kiwi106MidiClockGenMode = (typeof kiwi106MidiClockGenModes)[number];
+export type Kiwi106MasterClockSource = (typeof masterClockSources)[number];
 
 /**
  * Sysex Global Dump data
@@ -36,7 +36,7 @@ export interface KiwiGlobalData {
   midiSoftThrough: Kiwi106MidiSoftThroughMode;
   enableMidiClockGen: boolean;
   internalVelocity: IntRange<0, 128>;
-  masterClockSource: Kiwi106MidiClockGenMode;
+  masterClockSource: Kiwi106MasterClockSource;
   // xx= 000-Internal
   // 001-Midi
   // 010-Ext Step

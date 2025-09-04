@@ -5,7 +5,6 @@ import { KiwiPatch } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
 import { dcoRangeSysexValues } from "./kiwiMidi";
 import { objectKeys } from "./objectKeys";
-import { trimMidiCcValue } from "./trimMidiCcValue";
 
 /** Packs a bunch of booleans into a single number */
 export const packBits = (...args: boolean[]) => {
@@ -17,28 +16,29 @@ export const packBits = (...args: boolean[]) => {
 
 /** Unpacks bits from a number into an array of booleans */
 export const unpackBits = (value: number, bitCount: number): boolean[] => {
-  return Array.from({ length: bitCount }, (_, i) => !!(value & (1 << i)));
+  return Array.from({ length: bitCount }, (_, i) => !(value & (1 << (bitCount - i))));
 };
 
-export const pack12Bit: (n: number) => [number, number] = (n) => {
+/** Unpack a 12 bit value to two bytes, according to Kiwi106 docs */
+export const unpack12Bit: (n: number) => [number, number] = (n) => {
   const hi = (n >> 7) & 0x1f; // Extract upper 5 bits (xxxxx)
   const lo = n & 0x7f; // Extract lower 7 bits (yyyyyyy)
   return [hi, lo];
 }
 
-// Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
-export const unpack12Bit = (
+/** Pack two bytes into a 12 bit value according to Kiwi106 docs */
+export const pack12Bit = (
   highByte: number,
   lowByte: number
-): MidiCcValue => {
+): number => {
   const hi = highByte & 0x1f; // 5 bits
   const lo = lowByte & 0x7f; // 7 bits
   const value = (hi << 7) | lo;
 
-  // Convert 12-bit (0-4095) to MIDI CC range (0-127)
-  return trimMidiCcValue(Math.floor((value / 4095) * 127));
+  return value;
 };
 
+/* Reverse Record; given a Record value, find the key */
 export const findKeyByValue = <T extends string>(
   lookup: Record<T, number>,
   value: number
@@ -432,7 +432,7 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   const combine12BitToMidi = (hiIdx: number, loIdx: number): MidiCcValue => {
     const hi = data[hiIdx] & 0x1f; // 5 bits
     const lo = data[loIdx] & 0x7f; // 7 bits
-    return unpack12Bit(hi, lo);
+    return pack12Bit(hi, lo);
   };
 
   // Helper to convert single byte to MidiCcValue

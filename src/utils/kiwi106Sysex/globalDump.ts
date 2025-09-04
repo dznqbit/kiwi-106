@@ -2,16 +2,16 @@ import { Message } from "webmidi";
 import { Kiwi106SysexGlobalDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   Kiwi106MessageMode,
-  Kiwi106MidiClockGenMode,
+  Kiwi106MasterClockSource,
   Kiwi106MidiSoftThroughMode,
   KiwiGlobalData,
 } from "../../types/KiwiGlobalData";
 import {
   findKeyByValue,
   isKiwi106GlobalDumpSysexMessage,
-  pack12Bit,
-  packBits,
   unpack12Bit,
+  packBits,
+  pack12Bit,
   unpackBits,
 } from "../sysexUtils";
 import {
@@ -35,7 +35,7 @@ const kiwi106MidiSoftThroughBytes: Record<Kiwi106MidiSoftThroughMode, number> =
     "stop-only-cc-used": 3,
   };
 
-const kiwi106MidiClockGenModeBytes: Record<Kiwi106MidiClockGenMode, number> = {
+const kiwi106MidiClockGenModeBytes: Record<Kiwi106MasterClockSource, number> = {
   internal: 0,
   midi: 1,
   "ext step": 2,
@@ -60,17 +60,17 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   const enableMidiClockGen = Number(gd.enableMidiClockGen);
   const internalVelocity = gd.internalVelocity;
   const masterClockSource = kiwi106MidiClockGenModeBytes[gd.masterClockSource];
-  const [patternLevelHi, patternLevelLo] = pack12Bit(gd.patternLevel);
+  const [patternLevelHi, patternLevelLo] = unpack12Bit(gd.patternLevel);
   const patternControl = packBits(
-    gd.patternClockSource === "seq",
+    gd.patternDestinationVcf,
     gd.patternDestinationVca,
-    gd.patternDestinationVcf
+    gd.patternClockSource === "seq",
   );
-  const [intClockRateHi, intClockRateLo] = pack12Bit(gd.intClockRate);
+  const [intClockRateHi, intClockRateLo] = unpack12Bit(gd.intClockRate);
   const mwLevel = gd.mwLevel;
   const atLevel = gd.atLevel;
   const keyTransposeDisable = Number(gd.keyTransposeDisable);
-  const displayMode = packBits(gd.scrollingDisplay, gd.clockDisplay);
+  const displayMode = packBits(gd.clockDisplay, gd.scrollingDisplay);
   const memoryProtect = 1; // Readonly, controlled via switch. Does nothing.
   const internalTune = gd.internalTune;
   const externalPedalPolarity = Number(gd.externalPedalPolarity === "inverse");
@@ -117,9 +117,9 @@ export const parseKiwi106GlobalDumpCommand = (
 
   const dataBytes = m.data.slice(8);
 
-  const midiChannelIn = trimMidiChannel(dataBytes[0]);
-  const midiChannelOut = trimMidiChannel(dataBytes[1]);
-  const sequencerMidiChannelOut = trimMidiChannel(dataBytes[2]);
+  const midiChannelIn = trimMidiChannel(dataBytes[0] + 1);
+  const midiChannelOut = trimMidiChannel(dataBytes[1] + 1);
+  const sequencerMidiChannelOut = trimMidiChannel(dataBytes[2] + 1);
   const deviceId = trimNibble(dataBytes[3]);
   const enableControlChange = findKeyByValue(
     kiwi106MessageModeBytes,
@@ -144,7 +144,7 @@ export const parseKiwi106GlobalDumpCommand = (
     dataBytes[10] & 0x07
   );
 
-  const patternLevel = unpack12Bit(dataBytes[14], dataBytes[15]);
+  const patternLevel = pack12Bit(dataBytes[14], dataBytes[15]);
 
   const [patternDestinationVcf, patternDestinationVca, patternClockSourceBit] =
     unpackBits(dataBytes[16], 3);
@@ -157,7 +157,6 @@ export const parseKiwi106GlobalDumpCommand = (
 
   const [clockDisplay, scrollingDisplay] = unpackBits(dataBytes[22], 2);
 
-  // Byte 0x17 not used
   const internalTune = dataBytes[25] & 0x7f;
   const externalPedalPolarity = dataBytes[26] & 0x01 ? "inverse" : "normal";
 

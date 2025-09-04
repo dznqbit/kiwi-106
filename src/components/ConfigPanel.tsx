@@ -1,27 +1,73 @@
-import { Group, List, ListItem, Select, Stack, Text } from "@mantine/core";
+import {
+  Code,
+  Group,
+  List,
+  ListItem,
+  Select,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { Selector } from "./Selector";
-import { kiwi106MessageModes, KiwiGlobalData } from "../types/KiwiGlobalData";
+import {
+  kiwi106MessageModes,
+  Kiwi106MasterClockSource,
+  masterClockSources,
+  Kiwi106MidiSoftThroughMode,
+  kiwi106MidiSoftThroughModes,
+  KiwiGlobalData,
+} from "../types/KiwiGlobalData";
 import { midiChannels } from "../types/Midi";
 import { JunoToggleSwitch } from "./JunoToggleSwitch";
+import { VerticalSlider } from "./VerticalSlider";
+import { trimIntRange, trimMidiCcValue } from "../utils/trimMidiCcValue";
 
 interface ConfigPanelProps {
   kiwiGlobalData: KiwiGlobalData;
   setKiwiGlobalData: (kgd: KiwiGlobalData) => void;
 }
 
-export const ConfigPanel = ({ kiwiGlobalData, setKiwiGlobalData }: ConfigPanelProps) => {
+const midiSoftThroughDataLabels: Record<Kiwi106MidiSoftThroughMode, string> = {
+  "stop-all": "Stop all",
+  "pass-all": "Pass all",
+  "pass-only-non-cc": "Pass non-CC",
+  "stop-only-cc-used": "Stop used CC",
+};
+const midiSoftThroughData = kiwi106MidiSoftThroughModes.map((value) => ({
+  value,
+  label: midiSoftThroughDataLabels[value],
+}));
+
+const masterClockSourceLabels: Record<Kiwi106MasterClockSource, string> = {
+  internal: "int",
+  midi: "midi",
+  "ext step": "ext step",
+  "ext 24ppqn": "ext 24ppqn",
+  "ext 48ppqn": "ext 48ppqn",
+};
+
+export const ConfigPanel = ({
+  kiwiGlobalData,
+  setKiwiGlobalData,
+}: ConfigPanelProps) => {
   const kiwi106Context = useKiwi106Context();
   const midiChannelData = midiChannels.map((c) => ({
     value: c.toString(),
     label: c.toString(),
   }));
 
-  const kiwi106MessageData = kiwi106MessageModes.map((mm) => ({
-    value: mm,
-    label: mm,
-  }));
+  const kiwi106MessageData = kiwi106MessageModes
+    .map((mm) => ({
+      value: mm,
+      label: mm,
+    }))
+    .reverse();
 
+  const enabledData = [
+    { value: true, label: "on" },
+    { value: false, label: "off" },
+  ];
 
   if (!kiwi106Context.active) {
     return <></>;
@@ -79,7 +125,7 @@ export const ConfigPanel = ({ kiwiGlobalData, setKiwiGlobalData }: ConfigPanelPr
             </Text>
           </Group>
 
-          <Group>
+          <Group align="flex-start">
             <JunoToggleSwitch
               label="CC"
               data={kiwi106MessageData}
@@ -91,120 +137,184 @@ export const ConfigPanel = ({ kiwiGlobalData, setKiwiGlobalData }: ConfigPanelPr
                 })
               }
             />
-            <Selector
-              label="Enable CC"
-              values={kiwi106MessageModes}
-              selected={kiwiGlobalData.enableControlChange}
-              onSelect={(x) => console.log(`Select MIDI CC ${x}`)}
-            />
 
-            <Selector
-              label="Enable SysEx"
-              values={[true, false]}
-              selected={kiwi106Context.kiwiGlobalData?.enableSysex ?? null}
-              onSelect={(x) => console.log(`Select Enable SysEx ${x}`)}
-            />
-
-            <Selector
-              label="Enable PC"
-              values={kiwi106MessageModes}
-              selected={
-                kiwi106Context.kiwiGlobalData?.enableProgramChange ?? null
+            <JunoToggleSwitch
+              label="PC"
+              data={kiwi106MessageData}
+              selected={kiwiGlobalData.enableProgramChange}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  enableProgramChange: d,
+                })
               }
-              onSelect={(x) => console.log(`Select Enable Program Change ${x}`)}
+            />
+
+            <JunoToggleSwitch
+              label="Sysex"
+              data={enabledData}
+              selected={kiwiGlobalData.enableSysex}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  enableSysex: d,
+                })
+              }
+            />
+
+            <JunoToggleSwitch
+              label="MIDI Thru"
+              data={midiSoftThroughData}
+              selected={kiwiGlobalData.midiSoftThrough}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  midiSoftThrough: d,
+                })
+              }
+            />
+
+            <JunoToggleSwitch
+              label="MIDI Clock Gen"
+              tooltip="Output the internally generated clock as a midi clock command."
+              data={enabledData}
+              selected={kiwiGlobalData.enableMidiClockGen}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  enableMidiClockGen: d,
+                })
+              }
+            />
+
+            <JunoToggleSwitch
+              label="Clock Source"
+              data={masterClockSources.map((value) => ({
+                value,
+                label: masterClockSourceLabels[value],
+              }))}
+              selected={kiwiGlobalData.masterClockSource}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  masterClockSource: d,
+                })
+              }
+            />
+
+            <Stack align="center">
+              <Title order={5}>Internal Clock Rate</Title>
+              <VerticalSlider
+                value={kiwiGlobalData.intClockRate}
+                max={255}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    intClockRate: trimIntRange(v, { min: 0, max: 255 }),
+                  })
+                }
+              />
+              <Code>{kiwiGlobalData.intClockRate}</Code>
+            </Stack>
+          </Group>
+          <Group align="flex-start">
+            <Stack align="center">
+              <Title order={5}>Internal Velocity</Title>
+              <VerticalSlider
+                value={kiwiGlobalData.internalVelocity}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    internalVelocity: trimMidiCcValue(v),
+                  })
+                }
+              />
+              <Code>{kiwiGlobalData.internalVelocity}</Code>
+            </Stack>
+
+            <Stack align="center">
+              <Title order={5}>Pattern Level</Title>
+              <VerticalSlider
+                value={kiwiGlobalData.patternLevel}
+                max={4095}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    patternLevel: v,
+                  })
+                }
+              />
+              <Code>{kiwiGlobalData.patternLevel}</Code>
+            </Stack>
+
+            <JunoToggleSwitch
+              label="Pattern > VCA"
+              data={enabledData}
+              selected={kiwiGlobalData.patternDestinationVca}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  patternDestinationVca: d,
+                })
+              }
+            />
+
+            <JunoToggleSwitch
+              label="Pattern > VCF"
+              data={enabledData}
+              selected={kiwiGlobalData.patternDestinationVcf}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  patternDestinationVcf: d,
+                })
+              }
+            />
+
+            <JunoToggleSwitch
+              label="Pattern Clock Source"
+              data={[
+                { value: "arp" as const, label: "arp" },
+                { value: "seq" as const, label: "seq" },
+              ]}
+              selected={kiwiGlobalData.patternClockSource}
+              onSelect={(d) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  patternClockSource: d,
+                })
+              }
             />
           </Group>
           <Group>
-            <Selector
-              label="MIDI Soft Through"
-              values={[
-                "stop-all",
-                "pass-all",
-                "pass-only-non-cc",
-                "stop-only-cc-used",
-              ]}
-              selected={kiwi106Context.kiwiGlobalData?.midiSoftThrough ?? null}
-              onSelect={(x) => console.log(`Select MIDI Soft Through ${x}`)}
-            />
+            <Stack align="center">
+              <Title order={5}>MW Level</Title>
+              <VerticalSlider
+                value={kiwiGlobalData.mwLevel}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    mwLevel: trimMidiCcValue(v),
+                  })
+                }
+              />
+              <Code>{kiwiGlobalData.mwLevel}</Code>
+            </Stack>
 
-            <Selector
-              label="Enable MIDI Clock Gen"
-              values={[true, false]}
-              selected={
-                kiwi106Context.kiwiGlobalData?.enableMidiClockGen ?? null
-              }
-              onSelect={(x) => console.log(`Select Enable MIDI Clock Gen ${x}`)}
-            />
-
-            <Text>
-              Internal Velocity:{" "}
-              {kiwi106Context.kiwiGlobalData?.internalVelocity ?? "Unknown"}
-            </Text>
-
-            <Selector
-              label="Master Clock Source"
-              values={[
-                "internal",
-                "midi",
-                "ext step",
-                "ext 24ppqn",
-                "ext 48ppqn",
-              ]}
-              selected={
-                kiwi106Context.kiwiGlobalData?.masterClockSource ?? null
-              }
-              onSelect={(x) => console.log(`Select Master Clock Source ${x}`)}
-            />
-
-            <Text>
-              Pattern Level:{" "}
-              {kiwi106Context.kiwiGlobalData?.patternLevel ?? "Unknown"}
-            </Text>
-
-            <Selector
-              label="Pattern Destination VCA"
-              values={[true, false]}
-              selected={
-                kiwi106Context.kiwiGlobalData?.patternDestinationVca ?? null
-              }
-              onSelect={(x) =>
-                console.log(`Select Pattern Destination VCA ${x}`)
-              }
-            />
-
-            <Selector
-              label="Pattern Destination VCF"
-              values={[true, false]}
-              selected={
-                kiwi106Context.kiwiGlobalData?.patternDestinationVcf ?? null
-              }
-              onSelect={(x) =>
-                console.log(`Select Pattern Destination VCF ${x}`)
-              }
-            />
-
-            <Selector
-              label="Pattern Clock Source"
-              values={["arp", "seq"]}
-              selected={
-                kiwi106Context.kiwiGlobalData?.patternClockSource ?? null
-              }
-              onSelect={(x) => console.log(`Select Pattern Clock Source ${x}`)}
-            />
-
-            <Text>
-              Internal Clock Rate:{" "}
-              {kiwi106Context.kiwiGlobalData?.intClockRate ?? "Unknown"}
-            </Text>
-
-            <Text>
-              MW Level: {kiwi106Context.kiwiGlobalData?.mwLevel ?? "Unknown"}
-            </Text>
-
-            <Text>
-              AT Level: {kiwi106Context.kiwiGlobalData?.atLevel ?? "Unknown"}
-            </Text>
-
+            <Stack align="center">
+              <Title order={5}>AT Level</Title>
+              <VerticalSlider
+                value={kiwiGlobalData.atLevel}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    atLevel: trimMidiCcValue(v),
+                  })
+                }
+              />
+              <Code>{kiwiGlobalData.atLevel}</Code>
+            </Stack>
+            
             <Selector
               label="Key Transpose Disable"
               values={[true, false]}

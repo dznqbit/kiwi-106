@@ -17,7 +17,7 @@ export const trimNibble: (n: number) => Nibble = (n) => {
 }
 
 export const trimMidiChannel: (n: number) => MidiChannel = (n) => {
-  const midiChannel = trimIntRange(n, { min: 0, max: 15 }) + 1;
+  const midiChannel = trimIntRange(n, { min: 1, max: 16 });
   if (isMidiChannel(midiChannel)) {
     return midiChannel;
   } else {
@@ -34,7 +34,7 @@ export const trimMidiCcValue: (n: number) => MidiCcValue = (n) => {
   }
 };
 
-const trimIntRange = (
+export const trimIntRange = (
   n: number,
   { min, max }: { min: number; max: number },
 ) => {

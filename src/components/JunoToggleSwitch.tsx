@@ -1,4 +1,4 @@
-import { Box, Group, Stack, Text, Title } from "@mantine/core";
+import { Box, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
 
 interface ToggleValue<T> {
   value: T;
@@ -7,6 +7,7 @@ interface ToggleValue<T> {
 
 interface JunoToggleSwitchProps<T> {
   label: string;
+  tooltip?: string;
   data: ToggleValue<T>[];
   selected: T;
   onSelect: (t: T) => void;
@@ -14,6 +15,7 @@ interface JunoToggleSwitchProps<T> {
 
 export const JunoToggleSwitch = <T,>({
   label,
+  tooltip,
   data,
   selected,
   onSelect,
@@ -24,12 +26,15 @@ export const JunoToggleSwitch = <T,>({
 
   const selectedIndex = data.map(({ value }) => value).indexOf(selected);
 
+  const titleNode = (
+    <Title order={5}>
+      {label}
+    </Title>
+  );
+
   return (
     <Stack gap={8} align="center">
-      <Text size="sm" fw="bold">
-        {label}
-      </Text>
-
+      {tooltip ? <Tooltip label={tooltip}>{titleNode}</Tooltip> : titleNode}
       <Group gap={0}>
         <Stack justify="center" gap={trackPadding} py={trackPadding}>
           {data.map((d) => (
