@@ -15,6 +15,11 @@ export const packBits = (...args: boolean[]) => {
   );
 };
 
+/** Unpacks bits from a number into an array of booleans */
+export const unpackBits = (value: number, bitCount: number): boolean[] => {
+  return Array.from({ length: bitCount }, (_, i) => !!(value & (1 << i)));
+};
+
 export const pack12Bit: (n: number) => [number, number] = (n) => {
   const hi = (n >> 7) & 0x1f; // Extract upper 5 bits (xxxxx)
   const lo = n & 0x7f; // Extract lower 7 bits (yyyyyyy)
@@ -31,7 +36,21 @@ export const unpack12Bit = (
   const value = (hi << 7) | lo;
 
   // Convert 12-bit (0-4095) to MIDI CC range (0-127)
-  return trimMidiCcValue((value / 4095) * 127);
+  return trimMidiCcValue(Math.floor((value / 4095) * 127));
+};
+
+export const findKeyByValue = <T extends string>(
+  lookup: Record<T, number>,
+  value: number
+): T => {
+  const entry = Object.entries(lookup).find(([_, v]) => v === value);
+  if (!entry) {
+    throw new Error(
+      `Could not find key for "${value}" in ${JSON.stringify(lookup)}`
+    );
+  }
+
+  return entry[0] as T;
 };
 
 export const isSysexDeviceEnquiryReply = (message: Message) => {

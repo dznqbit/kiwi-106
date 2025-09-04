@@ -4,9 +4,13 @@ import { Selector } from "./Selector";
 import { kiwi106MessageModes, KiwiGlobalData } from "../types/KiwiGlobalData";
 import { midiChannels } from "../types/Midi";
 import { JunoToggleSwitch } from "./JunoToggleSwitch";
-import { useEffect, useState } from "react";
 
-export const ConfigPanel = () => {
+interface ConfigPanelProps {
+  kiwiGlobalData: KiwiGlobalData;
+  setKiwiGlobalData: (kgd: KiwiGlobalData) => void;
+}
+
+export const ConfigPanel = ({ kiwiGlobalData, setKiwiGlobalData }: ConfigPanelProps) => {
   const kiwi106Context = useKiwi106Context();
   const midiChannelData = midiChannels.map((c) => ({
     value: c.toString(),
@@ -18,20 +22,10 @@ export const ConfigPanel = () => {
     label: mm,
   }));
 
-  const [localKiwiGlobalData, setLocalKiwiGlobalData] =
-    useState<KiwiGlobalData>();
-
-  useEffect(() => {
-    if (kiwi106Context.active) {
-      setLocalKiwiGlobalData(kiwi106Context.kiwiGlobalData);
-    }
-  }, [kiwi106Context]);
 
   if (!kiwi106Context.active) {
     return <></>;
   }
-
-  const kiwiGlobalData = localKiwiGlobalData || kiwi106Context.kiwiGlobalData;
 
   return (
     <Stack>
@@ -91,8 +85,8 @@ export const ConfigPanel = () => {
               data={kiwi106MessageData}
               selected={kiwiGlobalData.enableControlChange}
               onSelect={(d) =>
-                setLocalKiwiGlobalData({
-                  ...(localKiwiGlobalData || kiwi106Context.kiwiGlobalData),
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
                   enableControlChange: d,
                 })
               }

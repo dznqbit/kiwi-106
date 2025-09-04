@@ -7,10 +7,12 @@ import {
   KiwiGlobalData,
 } from "../../types/KiwiGlobalData";
 import {
+  findKeyByValue,
   isKiwi106GlobalDumpSysexMessage,
   pack12Bit,
   packBits,
   unpack12Bit,
+  unpackBits,
 } from "../sysexUtils";
 import {
   trimMidiChannel,
@@ -73,150 +75,116 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   const internalTune = gd.internalTune;
   const externalPedalPolarity = Number(gd.externalPedalPolarity === "inverse");
 
-  const data = new Array(32);
-  data[0] = midiChannelIn;
-  data[1] = midiChannelOut;
-  data[2] = sequencerMidiChannelOut;
-  data[3] = deviceId;
-  data[4] = enableControlChange;
-  data[5] = enableSysex;
-  data[6] = enableProgramChange;
-  data[7] = midiSoftThrough;
-  data[8] = enableMidiClockGen;
-  data[9] = internalVelocity;
-  data[10] = masterClockSource;
-  data[11] = notUsed;
-  data[12] = notUsed;
-  data[13] = notUsed;
-  data[14] = patternLevelHi;
-  data[15] = patternLevelLo;
-  data[16] = patternControl;
-  data[17] = intClockRateHi;
-  data[18] = intClockRateLo;
-  data[19] = mwLevel;
-  data[20] = atLevel;
-  data[21] = keyTransposeDisable;
-  data[22] = displayMode;
-  data[23] = memoryProtect;
-  data[24] = notUsed;
-  data[25] = internalTune;
-  data[26] = externalPedalPolarity;
+  const dataBytes = new Array(32).fill(0);
 
-  return data;
+  dataBytes[0] = midiChannelIn;
+  dataBytes[1] = midiChannelOut;
+  dataBytes[2] = sequencerMidiChannelOut;
+  dataBytes[3] = deviceId;
+  dataBytes[4] = enableControlChange;
+  dataBytes[5] = enableSysex;
+  dataBytes[6] = enableProgramChange;
+  dataBytes[7] = midiSoftThrough;
+  dataBytes[8] = enableMidiClockGen;
+  dataBytes[9] = internalVelocity;
+  dataBytes[10] = masterClockSource;
+  dataBytes[11] = notUsed;
+  dataBytes[12] = notUsed;
+  dataBytes[13] = notUsed;
+  dataBytes[14] = patternLevelHi;
+  dataBytes[15] = patternLevelLo;
+  dataBytes[16] = patternControl;
+  dataBytes[17] = intClockRateHi;
+  dataBytes[18] = intClockRateLo;
+  dataBytes[19] = mwLevel;
+  dataBytes[20] = atLevel;
+  dataBytes[21] = keyTransposeDisable;
+  dataBytes[22] = displayMode;
+  dataBytes[23] = memoryProtect;
+  dataBytes[24] = notUsed;
+  dataBytes[25] = internalTune;
+  dataBytes[26] = externalPedalPolarity;
+
+  return dataBytes;
 };
 
 export const parseKiwi106GlobalDumpCommand = (
   m: Message
 ): Kiwi106SysexGlobalDumpCommand => {
-  // Ensure it's a Kiwi 106 Global Dump Command
   if (!isKiwi106GlobalDumpSysexMessage(m)) {
     throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
   }
 
-  const data = [...m.data];
-  const dataBytes = data.slice(8); // Skip header, start from first data byte
+  const dataBytes = m.data.slice(8);
 
-  // Global data now uses dataBytes with 0-based indexing matching documentation
+  const midiChannelIn = trimMidiChannel(dataBytes[0]);
+  const midiChannelOut = trimMidiChannel(dataBytes[1]);
+  const sequencerMidiChannelOut = trimMidiChannel(dataBytes[2]);
+  const deviceId = trimNibble(dataBytes[3]);
+  const enableControlChange = findKeyByValue(
+    kiwi106MessageModeBytes,
+    dataBytes[4] & 0x03
+  );
+  const enableSysex = dataBytes[5] === 1;
+  const enableProgramChange = findKeyByValue(
+    kiwi106MessageModeBytes,
+    dataBytes[6] & 0x03
+  );
+
+  const midiSoftThrough = findKeyByValue(
+    kiwi106MidiSoftThroughBytes,
+    dataBytes[7] & 0x03
+  );
+
+  const enableMidiClockGen = !!(dataBytes[8] & 0x01);
+  const internalVelocity = trimMidiCcValue(dataBytes[9] & 0x7f);
+
+  const masterClockSource = findKeyByValue(
+    kiwi106MidiClockGenModeBytes,
+    dataBytes[10] & 0x07
+  );
+
+  const patternLevel = unpack12Bit(dataBytes[14], dataBytes[15]);
+
+  const [patternDestinationVcf, patternDestinationVca, patternClockSourceBit] =
+    unpackBits(dataBytes[16], 3);
+  const patternClockSource = patternClockSourceBit ? "seq" : "arp";
+
+  const intClockRate = ((dataBytes[17] & 0x0f) << 4) | (dataBytes[18] & 0x0f);
+  const mwLevel = dataBytes[19] & 0x7f;
+  const atLevel = dataBytes[20] & 0x7f;
+  const keyTransposeDisable = !!(dataBytes[21] & 0x01);
+
+  const [clockDisplay, scrollingDisplay] = unpackBits(dataBytes[22], 2);
+
+  // Byte 0x17 not used
+  const internalTune = dataBytes[25] & 0x7f;
+  const externalPedalPolarity = dataBytes[26] & 0x01 ? "inverse" : "normal";
+
   const globalData: KiwiGlobalData = {
-    midiChannelIn: trimMidiChannel(dataBytes[0]), // Byte 0x00
-    midiChannelOut: trimMidiChannel(dataBytes[1]), // Byte 0x01
-    sequencerMidiChannelOut: trimMidiChannel(dataBytes[2]), // Byte 0x02
-    deviceId: trimNibble(dataBytes[3]), // Byte 0x03
-
-    // CLAUDE: Write a generic function to invert kiwi106MessageModeBytes and then lookup the
-    // key for the given value
-    enableControlChange: (() => {
-      const value = dataBytes[4] & 0x03; // Byte 0x04
-      switch (value) {
-        case 0:
-          return "off";
-        case 1:
-          return "rx";
-        case 2:
-          return "tx";
-        case 3:
-          return "rx-tx";
-        default:
-          return "rx";
-      }
-    })(),
-
-    enableSysex: !!(dataBytes[5] & 0x01), // Byte 0x05
-
-    enableProgramChange: (() => {
-      const value = dataBytes[6] & 0x03; // Byte 0x06
-      switch (value) {
-        case 0:
-          return "off";
-        case 1:
-          return "rx";
-        case 2:
-          return "tx";
-        case 3:
-          return "rx-tx";
-        default:
-          return "rx";
-      }
-    })(),
-
-    midiSoftThrough: (() => {
-      const value = dataBytes[7] & 0x03; // Byte 0x07
-      switch (value) {
-        case 0:
-          return "stop-all";
-        case 1:
-          return "pass-all";
-        case 2:
-          return "pass-only-non-cc";
-        case 3:
-          return "stop-only-cc-used";
-        default:
-          return "pass-all";
-      }
-    })(),
-
-    enableMidiClockGen: !!(dataBytes[8] & 0x01), // Byte 0x08
-    internalVelocity: trimMidiCcValue(dataBytes[9] & 0x7f), // Byte 0x09
-
-    masterClockSource: (() => {
-      const value = dataBytes[10] & 0x07; // Byte 0x0a
-      switch (value) {
-        case 0:
-          return "internal";
-        case 1:
-          return "midi";
-        case 2:
-          return "ext step";
-        case 3:
-          return "ext 24ppqn";
-        case 4:
-          return "ext 48ppqn";
-        default:
-          return "internal";
-      }
-    })(),
-
-    // Bytes 0x0b-0x0d not used
-
-    patternLevel: unpack12Bit(dataBytes[14], dataBytes[15]), // Bytes 0x0e-0x0f
-
-    patternDestinationVca: !!(dataBytes[16] & 0x02), // Byte 0x10, y bit in 00000xyz
-    patternDestinationVcf: !!(dataBytes[16] & 0x01), // Byte 0x10, z bit in 00000xyz
-    patternClockSource: dataBytes[16] & 0x04 ? "seq" : "arp", // Byte 0x10, x bit in 00000xyz
-
-    intClockRate: ((dataBytes[17] & 0x0f) << 4) | (dataBytes[18] & 0x0f), // Bytes 0x11-0x12
-    mwLevel: dataBytes[19] & 0x7f, // Byte 0x13
-    atLevel: dataBytes[20] & 0x7f, // Byte 0x14
-    keyTransposeDisable: !!(dataBytes[21] & 0x01), // Byte 0x15
-
-    clockDisplay: !!(dataBytes[22] & 0x01), // Byte 0x16, z bit in 000000yz
-    scrollingDisplay: !!(dataBytes[22] & 0x02), // Byte 0x16, y bit in 000000yz
-
-    // Byte 0x17 not used
-    internalTune: dataBytes[25] & 0x7f, // Byte 0x19
-    externalPedalPolarity: dataBytes[26] & 0x01 ? "inverse" : "normal", // Byte 0x1a
-
-    // Bytes 0x1b-0x1f are nulls/not used
+    midiChannelIn,
+    midiChannelOut,
+    sequencerMidiChannelOut,
+    deviceId,
+    enableControlChange,
+    enableSysex,
+    enableProgramChange,
+    midiSoftThrough,
+    enableMidiClockGen,
+    internalVelocity,
+    masterClockSource,
+    patternLevel,
+    patternDestinationVca,
+    patternDestinationVcf,
+    patternClockSource,
+    intClockRate,
+    mwLevel,
+    atLevel,
+    keyTransposeDisable,
+    clockDisplay,
+    scrollingDisplay,
+    internalTune,
+    externalPedalPolarity,
   };
 
   return {

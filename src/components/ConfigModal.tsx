@@ -18,6 +18,8 @@ import { isMidiChannel } from "../types/Midi";
 import { SelectMidiChannel } from "./SelectMidiChannel";
 import { MidiPortData } from "../contexts/MidiContext";
 import { useConfigStore } from "../stores/configStore";
+import { useCallback, useEffect, useState } from "react";
+import { blankKiwiGlobalData, KiwiGlobalData } from "../types/KiwiGlobalData";
 
 interface ConfigModalProps {
   opened: boolean;
@@ -27,7 +29,16 @@ interface ConfigModalProps {
 export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
-  const { kiwiMidi } = useKiwi106Context();
+  const kiwi106Context = useKiwi106Context();
+
+  const [localKiwiGlobalData, setLocalKiwiGlobalData] =
+    useState<KiwiGlobalData>(blankKiwiGlobalData);
+
+  useEffect(() => {
+    if (kiwi106Context.active) {
+      setLocalKiwiGlobalData(kiwi106Context.kiwiGlobalData);
+    }
+  }, [kiwi106Context]);
 
   const formatName = (i: MidiPortData | null) =>
     i == null ? null : `${i.manufacturer} ${i.name}`;
@@ -36,10 +47,12 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
   const findOutputByFormattedName = (fn: string | null) =>
     configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
 
-  const sendSysexGlobalDump = () => {
-    // TODO: grab all the shit
-    console.log("[sendSysexGlobalDump]");
-  };
+  const sendSysexGlobalDump = useCallback(() => {
+    if (kiwi106Context.active) {
+      console.log("[sendSysexGlobalDump]", localKiwiGlobalData);
+      kiwi106Context.kiwiMidi.sendSysexGlobalDump(localKiwiGlobalData);
+    }
+  }, [kiwi106Context.active, localKiwiGlobalData]);
 
   return (
     <Modal.Root opened={opened} onClose={onClose} size="xl">
@@ -68,7 +81,11 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                 <Button
                   title="Request Global Dump"
                   variant="juno"
-                  onClick={() => kiwiMidi?.requestSysexGlobalDump()}
+                  onClick={() => {
+                    if (kiwi106Context.active) {
+                      kiwi106Context.kiwiMidi.requestSysexGlobalDump();
+                    }
+                  }}
                 >
                   <IconWorldDown />
                 </Button>
@@ -97,7 +114,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.input)}
                     data={configStore.availableInputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`,
+                      (i) => `${i.manufacturer} ${i.name}`
                     )}
                     onChange={(fn) =>
                       configStore.setInput(findInputByFormattedName(fn))
@@ -126,7 +143,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.output)}
                     data={configStore.availableOutputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`,
+                      (i) => `${i.manufacturer} ${i.name}`
                     )}
                     onChange={(fn) =>
                       configStore.setOutput(findOutputByFormattedName(fn))
@@ -145,7 +162,10 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
               </Fieldset>
             </Group>
 
-            <ConfigPanel />
+            <ConfigPanel
+              kiwiGlobalData={localKiwiGlobalData}
+              setKiwiGlobalData={setLocalKiwiGlobalData}
+            />
           </Stack>
         </Modal.Body>
       </Modal.Content>

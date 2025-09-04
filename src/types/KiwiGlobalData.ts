@@ -60,3 +60,29 @@ export interface KiwiGlobalData {
   // 1-127=override fine tune
   externalPedalPolarity: "normal" | "inverse";
 }
+
+export const blankKiwiGlobalData: KiwiGlobalData = {
+  midiChannelIn: 1,
+  midiChannelOut: 1,
+  sequencerMidiChannelOut: 1,
+  deviceId: 0,
+  enableControlChange: "off",
+  enableSysex: false,
+  enableProgramChange: "off",
+  midiSoftThrough: "stop-all",
+  enableMidiClockGen: false,
+  internalVelocity: 64,
+  masterClockSource: "internal",
+  patternLevel: 0,
+  patternDestinationVca: false,
+  patternDestinationVcf: false,
+  patternClockSource: "arp",
+  intClockRate: 120,
+  mwLevel: 0,
+  atLevel: 0,
+  keyTransposeDisable: false,
+  clockDisplay: false,
+  scrollingDisplay: false,
+  internalTune: 0,
+  externalPedalPolarity: "normal",
+}

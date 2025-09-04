@@ -8,12 +8,11 @@ import {
   parseKiwi106PatchEditBufferDumpCommand,
   isKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
-  parseKiwi106GlobalDumpCommand,
-  buildKiwi106GlobalDumpSysexData,
 } from "./sysexUtils";
 import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
 import { MidiCcValue } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
+import { buildKiwi106GlobalDumpSysexData, parseKiwi106GlobalDumpCommand } from "./kiwi106Sysex/globalDump";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "16": [0, 31],
@@ -129,7 +128,8 @@ export const buildKiwiMidi = ({
         return command;
       }
 
-      throw new Error("[kiwiMidi] unsupport sysex command");
+      // Receiving f0,0,21,16,60,3,0,25,0,1,f7 after sysex writes, likely an ACK
+      throw new Error(`[kiwiMidi] unsupport sysex command 0x${message.data.map(n => n.toString(16))}`);
     },
   };
 };

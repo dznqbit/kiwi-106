@@ -30,7 +30,7 @@ export const trimMidiCcValue: (n: number) => MidiCcValue = (n) => {
   if (isMidiCcValue(trimmed)) {
     return trimmed;
   } else {
-    throw new Error("what the hell");
+    throw new Error(`${trimmed} is not a MidiCcValue`);
   }
 };
 
@@ -38,5 +38,5 @@ const trimIntRange = (
   n: number,
   { min, max }: { min: number; max: number },
 ) => {
-  return Math.min(max, Math.max(min, n));
+  return Math.floor(Math.min(max, Math.max(min, n)));
 };
