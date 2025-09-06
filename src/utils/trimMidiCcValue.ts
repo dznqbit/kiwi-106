@@ -36,7 +36,7 @@ export const trimMidiCcValue: (n: number) => MidiCcValue = (n) => {
 
 export const trimIntRange = (
   n: number,
-  { min, max }: { min: number; max: number },
+  { min = 0, max }: { min: number; max: number },
 ) => {
   return Math.floor(Math.min(max, Math.max(min, n)));
 };

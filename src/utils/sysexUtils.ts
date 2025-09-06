@@ -9,20 +9,27 @@ import { objectKeys } from "./objectKeys";
 /** Packs a bunch of booleans into a single number */
 export const packBits = (...args: boolean[]) => {
   return args.reduce(
-    (result, bit, index) => result | (Number(bit) << index),
+    (result, bit, index) => result | (Number(bit) << (args.length - 1 - index)),
     0
   );
 };
 
 /** Unpacks bits from a number into an array of booleans */
 export const unpackBits = (value: number, bitCount: number): boolean[] => {
-  return Array.from({ length: bitCount }, (_, i) => !(value & (1 << (bitCount - i))));
+  return Array.from({ length: bitCount }, (_, i) => !!(value & (1 << (bitCount - 1 - i))));
 };
 
 /** Unpack a 12 bit value to two bytes, according to Kiwi106 docs */
 export const unpack12Bit: (n: number) => [number, number] = (n) => {
   const hi = (n >> 7) & 0x1f; // Extract upper 5 bits (xxxxx)
   const lo = n & 0x7f; // Extract lower 7 bits (yyyyyyy)
+  return [hi, lo];
+}
+
+/** Unpack a byte value to two bytes, according to Kiwi106 docs */
+export const unpack8Bit: (n: number) => [number, number] = (n) => {
+  const hi = (n >> 4) & 0x1f; // Extract upper 4 bits (xxxx)
+  const lo = n & 0xf; // Extract lower 4 bits (yyyy)
   return [hi, lo];
 }
 
@@ -37,6 +44,18 @@ export const pack12Bit = (
 
   return value;
 };
+
+/** Pack two bytes into an 8 bit value according to Kiwi106 docs */
+export const pack8Bit = (
+  highByte: number,
+  lowByte: number
+): number => {
+  const hi = highByte & 0xf;
+  const lo = lowByte & 0xf;
+  const value = (hi << 4) | lo;
+
+  return value;
+}
 
 /* Reverse Record; given a Record value, find the key */
 export const findKeyByValue = <T extends string>(

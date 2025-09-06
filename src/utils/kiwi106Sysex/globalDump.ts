@@ -13,6 +13,8 @@ import {
   packBits,
   pack12Bit,
   unpackBits,
+  pack8Bit,
+  unpack8Bit,
 } from "../sysexUtils";
 import {
   trimMidiChannel,
@@ -62,11 +64,11 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   const masterClockSource = kiwi106MidiClockGenModeBytes[gd.masterClockSource];
   const [patternLevelHi, patternLevelLo] = unpack12Bit(gd.patternLevel);
   const patternControl = packBits(
-    gd.patternDestinationVcf,
-    gd.patternDestinationVca,
     gd.patternClockSource === "seq",
+    gd.patternDestinationVca,
+    gd.patternDestinationVcf,
   );
-  const [intClockRateHi, intClockRateLo] = unpack12Bit(gd.intClockRate);
+  const [intClockRateHi, intClockRateLo] = unpack8Bit(gd.intClockRate);
   const mwLevel = gd.mwLevel;
   const atLevel = gd.atLevel;
   const keyTransposeDisable = Number(gd.keyTransposeDisable);
@@ -75,8 +77,16 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   const internalTune = gd.internalTune;
   const externalPedalPolarity = Number(gd.externalPedalPolarity === "inverse");
 
-  const dataBytes = new Array(32).fill(0);
+  const dataBytes = new Array(31).fill(0);
 
+  console.log({ 
+    patternControl,
+    clockSounce: gd.patternClockSource === "seq",
+    dVca: gd.patternDestinationVca,
+    dVcf: gd.patternDestinationVcf,
+    internalVelocity,
+  })
+  
   dataBytes[0] = midiChannelIn;
   dataBytes[1] = midiChannelOut;
   dataBytes[2] = sequencerMidiChannelOut;
@@ -86,6 +96,7 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   dataBytes[6] = enableProgramChange;
   dataBytes[7] = midiSoftThrough;
   dataBytes[8] = enableMidiClockGen;
+  // internalVelocity only runs down to 63; anything below that is not stored, and min's out at 63
   dataBytes[9] = internalVelocity;
   dataBytes[10] = masterClockSource;
   dataBytes[11] = notUsed;
@@ -93,9 +104,13 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   dataBytes[13] = notUsed;
   dataBytes[14] = patternLevelHi;
   dataBytes[15] = patternLevelLo;
-  dataBytes[16] = patternControl;
-  dataBytes[17] = intClockRateHi;
-  dataBytes[18] = intClockRateLo;
+  // ^ verified
+  // dataBytes[16] = patternControl;
+  // dataBytes[17] = intClockRateHi;
+  // dataBytes[18] = intClockRateLo;
+  dataBytes[16] = 0x7a;
+  dataBytes[17] = 0x75;
+  dataBytes[18] = 0x07;
   dataBytes[19] = mwLevel;
   dataBytes[20] = atLevel;
   dataBytes[21] = keyTransposeDisable;
@@ -108,6 +123,7 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   return dataBytes;
 };
 
+/** Parse a complete Midi Message into a kiwi106 Global Dump */
 export const parseKiwi106GlobalDumpCommand = (
   m: Message
 ): Kiwi106SysexGlobalDumpCommand => {
@@ -115,6 +131,7 @@ export const parseKiwi106GlobalDumpCommand = (
     throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
   }
 
+  // Slice out dataBytes, and now we can use the same indices from buildKiwi106GlobalDumpSysexData
   const dataBytes = m.data.slice(8);
 
   const midiChannelIn = trimMidiChannel(dataBytes[0] + 1);
@@ -146,11 +163,17 @@ export const parseKiwi106GlobalDumpCommand = (
 
   const patternLevel = pack12Bit(dataBytes[14], dataBytes[15]);
 
-  const [patternDestinationVcf, patternDestinationVca, patternClockSourceBit] =
+  const [patternClockSourceBit, patternDestinationVca, patternDestinationVcf] =
     unpackBits(dataBytes[16], 3);
+
+  console.log({
+    controlData: dataBytes[16],
+    patternClockSourceBit, patternDestinationVca, patternDestinationVcf
+  })
+
   const patternClockSource = patternClockSourceBit ? "seq" : "arp";
 
-  const intClockRate = ((dataBytes[17] & 0x0f) << 4) | (dataBytes[18] & 0x0f);
+  const intClockRate = pack8Bit(dataBytes[17], dataBytes[18])
   const mwLevel = dataBytes[19] & 0x7f;
   const atLevel = dataBytes[20] & 0x7f;
   const keyTransposeDisable = !!(dataBytes[21] & 0x01);

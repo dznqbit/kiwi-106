@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:mantine.dev)"
+      "WebFetch(domain:mantine.dev)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []

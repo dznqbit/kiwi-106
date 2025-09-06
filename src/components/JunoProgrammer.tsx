@@ -80,7 +80,6 @@ export const JunoProgrammer = () => {
       const message = e.message;
 
       if (!isKiwi106SysexMessage(message)) {
-        console.log("Ignoring non-Kiwi message");
         return;
       }
 
@@ -161,19 +160,19 @@ export const JunoProgrammer = () => {
               } else if (isMidiCcValue(diff[k])) {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
               } else {
-                const s = diff[k];
+                // const s = diff[k];
 
-                const updatePatchName = 0x0c;
-                const patchNameBytes = Array.from(s).map(
-                  (char) => char.charCodeAt(0) & 0x7f,
-                );
+                // const updatePatchName = 0x0c;
+                // const patchNameBytes = Array.from(s).map(
+                //   (char) => char.charCodeAt(0) & 0x7f,
+                // );
 
-                output.sendSysex(kiwiTechnicsSysexId, [
-                  ...kiwi106Identifier,
-                  0x00,
-                  updatePatchName,
-                  ...patchNameBytes,
-                ]);
+                // output.sendSysex(kiwiTechnicsSysexId, [
+                //   ...kiwi106Identifier,
+                //   0x00,
+                //   updatePatchName,
+                //   ...patchNameBytes,
+                // ]);
               }
             }
           }
