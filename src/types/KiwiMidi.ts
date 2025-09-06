@@ -6,7 +6,6 @@ import {
 } from "./Kiwi106Sysex";
 import { KiwiGlobalData } from "./KiwiGlobalData";
 
-/** Interface for Strategy pattern, so we can swap out for whatever */
 export interface KiwiMidi {
   requestSysexDeviceEnquiry(): void;
   requestSysexEditBufferDump(): void;
@@ -18,6 +17,6 @@ export interface KiwiMidi {
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
   parseSysex(
-    message: Message,
+    message: Message
   ): Kiwi106SysexGlobalDumpCommand | Kiwi106SysexPatchEditBufferDumpCommand;
 }
