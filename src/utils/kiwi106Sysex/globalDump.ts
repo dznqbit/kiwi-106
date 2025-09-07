@@ -45,6 +45,8 @@ const kiwi106MidiClockGenModeBytes: Record<Kiwi106MasterClockSource, number> = {
   "ext 48ppqn": 4,
 };
 
+const CLOCK_RATE_SCALE = 0.8644067797;
+
 /** Build the sysex DATA for a global dump message
  * This omits the sysex headers, kiwi106 identifier, "device id", and sysex message type
  */
@@ -68,7 +70,10 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
     gd.patternDestinationVca,
     gd.patternDestinationVcf,
   );
-  const [intClockRateHi, intClockRateLo] = unpack8Bit(gd.intClockRate);
+
+  // 0 - 255 => 5 - 300
+  const scaledClockRate = Math.floor((gd.intClockRate - 5) * CLOCK_RATE_SCALE);
+  const [intClockRateHi, intClockRateLo] = unpack8Bit(scaledClockRate);
   const mwLevel = gd.mwLevel;
   const atLevel = gd.atLevel;
   const keyTransposeDisable = Number(gd.keyTransposeDisable);
@@ -79,14 +84,6 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
 
   const dataBytes = new Array(31).fill(0);
 
-  console.log({ 
-    patternControl,
-    clockSounce: gd.patternClockSource === "seq",
-    dVca: gd.patternDestinationVca,
-    dVcf: gd.patternDestinationVcf,
-    internalVelocity,
-  })
-  
   dataBytes[0] = midiChannelIn;
   dataBytes[1] = midiChannelOut;
   dataBytes[2] = sequencerMidiChannelOut;
@@ -105,12 +102,12 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   dataBytes[14] = patternLevelHi;
   dataBytes[15] = patternLevelLo;
   // ^ verified
-  // dataBytes[16] = patternControl;
-  // dataBytes[17] = intClockRateHi;
-  // dataBytes[18] = intClockRateLo;
-  dataBytes[16] = 0x7a;
-  dataBytes[17] = 0x75;
-  dataBytes[18] = 0x07;
+  dataBytes[16] = patternControl;
+  dataBytes[17] = intClockRateHi;
+  dataBytes[18] = intClockRateLo;
+  // dataBytes[16] = 0x7a;
+  // dataBytes[17] = 0x75;
+  // dataBytes[18] = 0x07;
   dataBytes[19] = mwLevel;
   dataBytes[20] = atLevel;
   dataBytes[21] = keyTransposeDisable;
@@ -173,7 +170,8 @@ export const parseKiwi106GlobalDumpCommand = (
 
   const patternClockSource = patternClockSourceBit ? "seq" : "arp";
 
-  const intClockRate = pack8Bit(dataBytes[17], dataBytes[18])
+  const scaledClockRate = pack8Bit(dataBytes[17], dataBytes[18])
+  const intClockRate = Math.floor(scaledClockRate / CLOCK_RATE_SCALE) + 5;
   const mwLevel = dataBytes[19] & 0x7f;
   const atLevel = dataBytes[20] & 0x7f;
   const keyTransposeDisable = !!(dataBytes[21] & 0x01);

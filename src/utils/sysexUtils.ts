@@ -21,6 +21,8 @@ export const unpackBits = (value: number, bitCount: number): boolean[] => {
 
 /** Unpack a 12 bit value to two bytes, according to Kiwi106 docs */
 export const unpack12Bit: (n: number) => [number, number] = (n) => {
+  // Hi & Lo are combined to make single 12 bit command.
+  // 0000xxxxxyyyyyyy = 000xxxxx + 0yyyyyyy
   const hi = (n >> 7) & 0x1f; // Extract upper 5 bits (xxxxx)
   const lo = n & 0x7f; // Extract lower 7 bits (yyyyyyy)
   return [hi, lo];

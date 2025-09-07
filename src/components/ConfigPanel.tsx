@@ -216,7 +216,7 @@ export const ConfigPanel = ({
               onChange={(v) =>
                 setKiwiGlobalData({
                   ...kiwiGlobalData,
-                  intClockRate: trimIntRange(v, { min: 0, max: 255 }),
+                  intClockRate: trimIntRange(v, { min: 5, max: 300 }),
                 })
               }
             />
