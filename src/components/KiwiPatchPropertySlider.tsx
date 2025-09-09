@@ -19,7 +19,7 @@ export const KiwiPatchPropertySlider = ({
 }: KiwiPatchPropertySlider) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
   const value = kiwiPatch[property];
-  
+
   if (!isMidiCcValue(value)) {
     throw new Error(`Cannot draw slider ${property} value "${value}"`);
   }

@@ -105,7 +105,6 @@ export const buildKiwiMidi = ({
     },
 
     sendSysexGlobalDump: (kiwiGlobalData: KiwiGlobalData) => {
-      console.log("OUTGOING GLOBAL DATA", buildKiwi106GlobalDumpSysexData(kiwiGlobalData).map(String).join(" "))
       output.sendSysex(kiwiTechnicsSysexId, [
         ...kiwi106Identifier,
         0x00, // Required "Device ID"
@@ -118,7 +117,7 @@ export const buildKiwiMidi = ({
     parseSysex: (message: Message) => {
       if (!isKiwi106SysexMessage(message)) {
         throw new Error(
-          "[kiwiMidi] could not interpret non-Kiwi106 sysex message"
+          "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
         );
       }
 
@@ -128,14 +127,13 @@ export const buildKiwiMidi = ({
       }
 
       if (isKiwi106GlobalDumpSysexMessage(message)) {
-        console.log("INCOMING GLOBAL DUMP", message.rawData.slice(8).join(" "));
         const command = parseKiwi106GlobalDumpCommand(message);
         return command;
       }
 
       // Receiving f0,0,21,16,60,3,0,25,0,1,f7 after sysex writes, likely an ACK
       throw new Error(
-        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`
+        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`,
       );
     },
   };

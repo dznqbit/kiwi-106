@@ -14,7 +14,7 @@ export const trimNibble: (n: number) => Nibble = (n) => {
   } else {
     throw new Error(`Invalid nibble value (${n})`);
   }
-}
+};
 
 export const trimMidiChannel: (n: number) => MidiChannel = (n) => {
   const midiChannel = trimIntRange(n, { min: 1, max: 16 });

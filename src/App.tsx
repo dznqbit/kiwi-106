@@ -14,10 +14,7 @@ import { JunoProgrammer } from "./components/JunoProgrammer";
 import { mantineTheme } from "./mantineTheme";
 import { MidiMessageTable } from "./components/MidiMessageTable";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
-import {
-  IconLogs,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconLogs, IconSettings } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";

@@ -98,7 +98,7 @@ export const JunoProgrammer = () => {
 
       switch (kiwi106Command?.command) {
         case "Global Dump":
-          console.log({ data: kiwi106Command.data });
+          // noop. Global dump is handled at the kiwiMidi level
           break;
 
         case "Patch Edit Buffer Dump":
@@ -161,12 +161,10 @@ export const JunoProgrammer = () => {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
               } else {
                 // const s = diff[k];
-
                 // const updatePatchName = 0x0c;
                 // const patchNameBytes = Array.from(s).map(
                 //   (char) => char.charCodeAt(0) & 0x7f,
                 // );
-
                 // output.sendSysex(kiwiTechnicsSysexId, [
                 //   ...kiwi106Identifier,
                 //   0x00,

@@ -72,7 +72,7 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   );
 
   // 0 - 255 => 5 - 300
-  const scaledClockRate = Math.floor((gd.intClockRate - 5) * CLOCK_RATE_SCALE);
+  const scaledClockRate = Math.round((gd.intClockRate - 5) * CLOCK_RATE_SCALE);
   const [intClockRateHi, intClockRateLo] = unpack8Bit(scaledClockRate);
   const mwLevel = gd.mwLevel;
   const atLevel = gd.atLevel;
@@ -102,12 +102,12 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   dataBytes[14] = patternLevelHi;
   dataBytes[15] = patternLevelLo;
   // ^ verified
-  dataBytes[16] = patternControl;
+  // The docs suggest that 16 should be patternControl, but from experimentation
+  // it's actually the hi byte of clock rate.
+  // dataBytes[16] = patternControl;
+  dataBytes[16] = intClockRateHi;
   dataBytes[17] = intClockRateHi;
   dataBytes[18] = intClockRateLo;
-  // dataBytes[16] = 0x7a;
-  // dataBytes[17] = 0x75;
-  // dataBytes[18] = 0x07;
   dataBytes[19] = mwLevel;
   dataBytes[20] = atLevel;
   dataBytes[21] = keyTransposeDisable;
@@ -122,7 +122,7 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
 
 /** Parse a complete Midi Message into a kiwi106 Global Dump */
 export const parseKiwi106GlobalDumpCommand = (
-  m: Message
+  m: Message,
 ): Kiwi106SysexGlobalDumpCommand => {
   if (!isKiwi106GlobalDumpSysexMessage(m)) {
     throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
@@ -137,17 +137,17 @@ export const parseKiwi106GlobalDumpCommand = (
   const deviceId = trimNibble(dataBytes[3]);
   const enableControlChange = findKeyByValue(
     kiwi106MessageModeBytes,
-    dataBytes[4] & 0x03
+    dataBytes[4] & 0x03,
   );
   const enableSysex = dataBytes[5] === 1;
   const enableProgramChange = findKeyByValue(
     kiwi106MessageModeBytes,
-    dataBytes[6] & 0x03
+    dataBytes[6] & 0x03,
   );
 
   const midiSoftThrough = findKeyByValue(
     kiwi106MidiSoftThroughBytes,
-    dataBytes[7] & 0x03
+    dataBytes[7] & 0x03,
   );
 
   const enableMidiClockGen = !!(dataBytes[8] & 0x01);
@@ -155,7 +155,7 @@ export const parseKiwi106GlobalDumpCommand = (
 
   const masterClockSource = findKeyByValue(
     kiwi106MidiClockGenModeBytes,
-    dataBytes[10] & 0x07
+    dataBytes[10] & 0x07,
   );
 
   const patternLevel = pack12Bit(dataBytes[14], dataBytes[15]);
@@ -163,15 +163,10 @@ export const parseKiwi106GlobalDumpCommand = (
   const [patternClockSourceBit, patternDestinationVca, patternDestinationVcf] =
     unpackBits(dataBytes[16], 3);
 
-  console.log({
-    controlData: dataBytes[16],
-    patternClockSourceBit, patternDestinationVca, patternDestinationVcf
-  })
-
   const patternClockSource = patternClockSourceBit ? "seq" : "arp";
 
-  const scaledClockRate = pack8Bit(dataBytes[17], dataBytes[18])
-  const intClockRate = Math.floor(scaledClockRate / CLOCK_RATE_SCALE) + 5;
+  const scaledClockRate = pack8Bit(dataBytes[17], dataBytes[18]);
+  const intClockRate = Math.round(scaledClockRate / CLOCK_RATE_SCALE) + 5;
   const mwLevel = dataBytes[19] & 0x7f;
   const atLevel = dataBytes[20] & 0x7f;
   const keyTransposeDisable = !!(dataBytes[21] & 0x01);

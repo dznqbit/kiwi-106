@@ -116,7 +116,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.input)}
                     data={configStore.availableInputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`
+                      (i) => `${i.manufacturer} ${i.name}`,
                     )}
                     onChange={(fn) =>
                       configStore.setInput(findInputByFormattedName(fn))
@@ -145,7 +145,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.output)}
                     data={configStore.availableOutputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`
+                      (i) => `${i.manufacturer} ${i.name}`,
                     )}
                     onChange={(fn) =>
                       configStore.setOutput(findOutputByFormattedName(fn))

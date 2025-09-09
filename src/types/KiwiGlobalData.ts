@@ -51,8 +51,8 @@ export interface KiwiGlobalData {
   patternClockSource: "arp" | "seq";
 
   intClockRate: number; // Range is 0-255 for 5-300 BPM
-  mwLevel: number; // I have NO IDEA what this is
-  atLevel: number; // I have NO IDEA what this is
+  mwLevel: number; // Mod Wheel level
+  atLevel: number; // Aftertouch level
   keyTransposeDisable: boolean;
   clockDisplay: boolean;
   scrollingDisplay: boolean;
@@ -85,4 +85,4 @@ export const blankKiwiGlobalData: KiwiGlobalData = {
   scrollingDisplay: false,
   internalTune: 0,
   externalPedalPolarity: "normal",
-}
+};

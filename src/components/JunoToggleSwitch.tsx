@@ -1,4 +1,5 @@
-import { Box, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { Box, Group, Stack, Title, Tooltip } from "@mantine/core";
+import { IconAlertCircle, IconPlugConnectedX } from "@tabler/icons-react";
 
 interface ToggleValue<T> {
   value: T;
@@ -8,6 +9,7 @@ interface ToggleValue<T> {
 interface JunoToggleSwitchProps<T> {
   label: string;
   tooltip?: string;
+  isFlaky?: boolean;
   data: ToggleValue<T>[];
   selected: T;
   onSelect: (t: T) => void;
@@ -16,6 +18,7 @@ interface JunoToggleSwitchProps<T> {
 export const JunoToggleSwitch = <T,>({
   label,
   tooltip,
+  isFlaky,
   data,
   selected,
   onSelect,
@@ -27,15 +30,21 @@ export const JunoToggleSwitch = <T,>({
   const selectedIndex = data.map(({ value }) => value).indexOf(selected);
 
   const titleNode = (
-    <Title order={5}>
-      {label}
-    </Title>
+    <Group gap="xs">
+      <Title order={5}>{label}</Title>
+      {isFlaky && (
+        <Tooltip label="This setting is read-only, and cannot be written to the Kiwi106">
+          <IconAlertCircle />
+        </Tooltip>
+      )}
+    </Group>
   );
 
   return (
     <Stack gap={8} align="center">
       {tooltip ? <Tooltip label={tooltip}>{titleNode}</Tooltip> : titleNode}
-      <Group gap={0}>
+
+      <Group wrap="nowrap" gap={0}>
         <Stack justify="center" gap={trackPadding} py={trackPadding}>
           {data.map((d) => (
             <Title

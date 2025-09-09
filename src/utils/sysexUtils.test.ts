@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { unpack12Bit, packBits, unpackBits, pack12Bit, pack8Bit, unpack8Bit } from "./sysexUtils";
+import {
+  unpack12Bit,
+  packBits,
+  unpackBits,
+  pack12Bit,
+  pack8Bit,
+  unpack8Bit,
+} from "./sysexUtils";
 
 describe("packBits", () => {
   it("packs bits correctly", () => {
@@ -27,7 +34,7 @@ describe("unpack12Bit", () => {
   it("unpacks a 12 bit number into two bytes", () => {
     expect(unpack12Bit(0b110011001100)).toEqual([0b11001, 0b01001100]);
 
-    // 512 + 256  + 128 + 64 + 32 + 0 + 8
+    // 512 + 256 + 128 + 64 + 32 + 0 + 8
     // 1000 = 0b11 1110 1000
     expect(unpack12Bit(1000)).toEqual([0b00000111, 0b01101000]);
   });

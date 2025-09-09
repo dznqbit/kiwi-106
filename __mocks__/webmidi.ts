@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 export class Input {
   constructor(id: string) {
@@ -6,10 +6,10 @@ export class Input {
   }
 
   id: string;
-  name: string = 'Mock Input';
-  manufacturer: string = 'Mock Manufacturer';
-  state: string = 'connected';
-  type: string = 'input';
+  name: string = "Mock Input";
+  manufacturer: string = "Mock Manufacturer";
+  state: string = "connected";
+  type: string = "input";
 
   addListener = vi.fn();
   removeListener = vi.fn();
@@ -37,10 +37,10 @@ export class Output {
 
   id: string;
 
-  name: string = 'Mock Output';
-  manufacturer: string = 'Mock Manufacturer';
-  state: string = 'connected';
-  type: string = 'output';
+  name: string = "Mock Output";
+  manufacturer: string = "Mock Manufacturer";
+  state: string = "connected";
+  type: string = "output";
 
   addListener = vi.fn();
   removeListener = vi.fn();
@@ -68,11 +68,11 @@ class MockWebMidi {
 
   enable = vi.fn();
   disable = vi.fn();
-  
+
   getInputById(id: string): Input {
     return new Input(id);
   }
-  
+
   getOutputById(id: string): Output {
     return new Output(id);
   }
