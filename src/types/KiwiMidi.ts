@@ -1,10 +1,10 @@
-import { Message } from "webmidi";
 import { KiwiPatch, KiwiPatchAddress } from "./KiwiPatch";
 import {
   Kiwi106SysexGlobalDumpCommand,
   Kiwi106SysexPatchEditBufferDumpCommand,
 } from "./Kiwi106Sysex";
 import { KiwiGlobalData } from "./KiwiGlobalData";
+import { MidiMessage } from "./Midi";
 
 export interface KiwiMidi {
   requestSysexDeviceEnquiry(): void;
@@ -17,6 +17,6 @@ export interface KiwiMidi {
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
   parseSysex(
-    message: Message,
+    message: MidiMessage,
   ): Kiwi106SysexGlobalDumpCommand | Kiwi106SysexPatchEditBufferDumpCommand;
 }

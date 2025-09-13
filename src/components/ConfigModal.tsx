@@ -1,4 +1,3 @@
-import { WebMidi, MessageEvent } from "webmidi";
 import {
   Modal,
   Stack,
@@ -21,7 +20,6 @@ import { MidiPortData } from "../contexts/MidiContext";
 import { useConfigStore } from "../stores/configStore";
 import { useCallback, useEffect, useState } from "react";
 import { blankKiwiGlobalData, KiwiGlobalData } from "../types/KiwiGlobalData";
-import { buildKiwiMidi } from "../utils/kiwiMidi";
 
 interface ConfigModalProps {
   opened: boolean;
@@ -54,6 +52,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
       console.log("[sendSysexGlobalDump]", localKiwiGlobalData);
       kiwi106Context.kiwiMidi.sendSysexGlobalDump(localKiwiGlobalData);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kiwi106Context.active, localKiwiGlobalData]);
 
   return (

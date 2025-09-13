@@ -3,7 +3,7 @@ import { Message } from "webmidi";
 import { IntRange } from "./IntRange";
 
 // TODO: swap all messages over to MidiMessage type
-export type MidiMessage = Message;
+export type MidiMessage = Pick<Message, 'data' | 'isChannelMessage' | 'isSystemMessage'>;
 export type MidiMessageType =
   | "noteon"
   | "noteoff"

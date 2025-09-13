@@ -15,8 +15,6 @@ import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
   isKiwi106SysexMessage,
-  kiwi106Identifier,
-  kiwiTechnicsSysexId,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";

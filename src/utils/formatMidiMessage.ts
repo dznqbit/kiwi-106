@@ -150,6 +150,7 @@ const midiMessageType = (messageType: string): MidiMessageType => {
 };
 
 // format MessageEvent for our message log
+// TODO: plug in MidiMessage so we don't rely so much on webmidi
 export const formatMidiMessage = (
   messageEvent: MessageEvent,
 ): FormattedMidiMessage => {

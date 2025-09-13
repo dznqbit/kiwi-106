@@ -1,8 +1,7 @@
 import _ from "lodash";
-import { Message } from "webmidi";
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
-import { MidiCcValue } from "../types/Midi";
+import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { dcoRangeSysexValues } from "./kiwiMidi";
 import { objectKeys } from "./objectKeys";
 
@@ -71,7 +70,7 @@ export const findKeyByValue = <T extends string>(
   return entry[0] as T;
 };
 
-export const isSysexDeviceEnquiryReply = (message: Message) => {
+export const isSysexDeviceEnquiryReply = (message: MidiMessage) => {
   if (!message.isSystemMessage) {
     return false;
   }
@@ -84,31 +83,31 @@ export const isSysexDeviceEnquiryReply = (message: Message) => {
 export const kiwiTechnicsSysexId = [0x00, 0x21, 0x16];
 export const kiwi106Identifier = [0x60, 0x03];
 
-export const isKiwiTechnicsSysexMessage = (message: Message) => {
+export const isKiwiTechnicsSysexMessage = (message: MidiMessage) => {
   const manufacturerId = message.data.slice(1, 4);
   return _.isEqual(manufacturerId, kiwiTechnicsSysexId);
 };
 
-export const isKiwi106SysexMessage = (message: Message) => {
+export const isKiwi106SysexMessage = (message: MidiMessage) => {
   return (
     isKiwiTechnicsSysexMessage(message) &&
     _.isEqual(message.data.slice(4, 6), kiwi106Identifier)
   );
 };
 
-export const isKiwi106GlobalDumpSysexMessage = (message: Message) => {
+export const isKiwi106GlobalDumpSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x02;
 };
 
-export const isKiwi106BufferDumpSysexMessage = (message: Message) => {
+export const isKiwi106BufferDumpSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] == 0x04;
 };
 
-export const isKiwi106RequestPatchNameSysexMessage = (message: Message) => {
+export const isKiwi106RequestPatchNameSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x0b;
 };
 
-export const isKiwi106UpdatePatchNameSysexMessage = (message: Message) => {
+export const isKiwi106UpdatePatchNameSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x0c;
 };
 
@@ -202,31 +201,31 @@ export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
   // const dataBytes = new Array(128).fill(0);
   const dataBytes = [...simplePatchDumpSysex];
 
-  // Helper to convert MidiCcValue to 12-bit hi/lo bytes
-  const midiTo12Bit = (value: MidiCcValue): [number, number] => {
-    // Convert MIDI CC range (0-127) to 12-bit (0-4095)
-    const expanded = Math.round((value / 127) * 4095);
-    const hi = (expanded >> 7) & 0x1f; // 5 bits
-    const lo = expanded & 0x7f; // 7 bits
-    return [hi, lo];
-  };
+  // // Helper to convert MidiCcValue to 12-bit hi/lo bytes
+  // const midiTo12Bit = (value: MidiCcValue): [number, number] => {
+  //   // Convert MIDI CC range (0-127) to 12-bit (0-4095)
+  //   const expanded = Math.round((value / 127) * 4095);
+  //   const hi = (expanded >> 7) & 0x1f; // 5 bits
+  //   const lo = expanded & 0x7f; // 7 bits
+  //   return [hi, lo];
+  // };
 
-  // Helper to convert single byte MidiCcValue
-  const midiByte = (value: MidiCcValue): number => {
-    return value & 0x7f;
-  };
+  // // Helper to convert single byte MidiCcValue
+  // const midiByte = (value: MidiCcValue): number => {
+  //   return value & 0x7f;
+  // };
 
-  const convertLfoWave = (ccValue: MidiCcValue): number => {
-    // Convert CC ranges back to sysex bits
-    // CC ranges: sine: 0-15, triangle: 16-31, sawtooth: 32-63,
-    // reverse-sawtooth: 64-95, square: 96-111, random: 112-127
-    if (ccValue <= 15) return 0; // Sine
-    if (ccValue <= 31) return 1; // Triangle
-    if (ccValue <= 63) return 3; // Sawtooth
-    if (ccValue <= 95) return 4; // Reverse Sawtooth
-    if (ccValue <= 111) return 2; // Square
-    return 5; // Random
-  };
+  // const convertLfoWave = (ccValue: MidiCcValue): number => {
+  //   // Convert CC ranges back to sysex bits
+  //   // CC ranges: sine: 0-15, triangle: 16-31, sawtooth: 32-63,
+  //   // reverse-sawtooth: 64-95, square: 96-111, random: 112-127
+  //   if (ccValue <= 15) return 0; // Sine
+  //   if (ccValue <= 31) return 1; // Triangle
+  //   if (ccValue <= 63) return 3; // Sawtooth
+  //   if (ccValue <= 95) return 4; // Reverse Sawtooth
+  //   if (ccValue <= 111) return 2; // Square
+  //   return 5; // Random
+  // };
 
   // Patch Name (bytes 0-19) - 20 bytes
   const patchNameBytes = [...kiwiPatch.patchName].map((s) => s.charCodeAt(0));
@@ -437,7 +436,7 @@ export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
 };
 
 export const parseKiwi106PatchEditBufferDumpCommand = (
-  m: Message,
+  m: MidiMessage,
 ): Kiwi106SysexPatchEditBufferDumpCommand => {
   // Ensure it's a Kiwi 106 Patch Edit Buffer Dump Command
   if (!isKiwi106BufferDumpSysexMessage(m)) {

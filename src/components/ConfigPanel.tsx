@@ -8,7 +8,6 @@ import {
   Stack,
   Tooltip,
   Title,
-  Box,
 } from "@mantine/core";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import {
@@ -27,7 +26,7 @@ import {
   trimMidiCcValue,
   trimMidiChannel,
 } from "../utils/trimMidiCcValue";
-import { IconAlertCircle, IconPlugConnectedX } from "@tabler/icons-react";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 interface ConfigPanelProps {
   kiwiGlobalData: KiwiGlobalData;

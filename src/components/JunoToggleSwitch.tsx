@@ -1,5 +1,5 @@
 import { Box, Group, Stack, Title, Tooltip } from "@mantine/core";
-import { IconAlertCircle, IconPlugConnectedX } from "@tabler/icons-react";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 interface ToggleValue<T> {
   value: T;

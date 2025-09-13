@@ -1,4 +1,3 @@
-import { Message } from "webmidi";
 import { Kiwi106SysexGlobalDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   Kiwi106MessageMode,
@@ -6,6 +5,7 @@ import {
   Kiwi106MidiSoftThroughMode,
   KiwiGlobalData,
 } from "../../types/KiwiGlobalData";
+import { MidiMessage } from "../../types/Midi";
 import {
   findKeyByValue,
   isKiwi106GlobalDumpSysexMessage,
@@ -65,11 +65,13 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
   const internalVelocity = gd.internalVelocity;
   const masterClockSource = kiwi106MidiClockGenModeBytes[gd.masterClockSource];
   const [patternLevelHi, patternLevelLo] = unpack12Bit(gd.patternLevel);
-  const patternControl = packBits(
-    gd.patternClockSource === "seq",
-    gd.patternDestinationVca,
-    gd.patternDestinationVcf,
-  );
+
+  // Pattern control appears to be busted, so comment for now.
+  // const patternControl = packBits(
+  //   gd.patternClockSource === "seq",
+  //   gd.patternDestinationVca,
+  //   gd.patternDestinationVcf,
+  // );
 
   // 0 - 255 => 5 - 300
   const scaledClockRate = Math.round((gd.intClockRate - 5) * CLOCK_RATE_SCALE);
@@ -122,7 +124,7 @@ export const buildKiwi106GlobalDumpSysexData = (gd: KiwiGlobalData) => {
 
 /** Parse a complete Midi Message into a kiwi106 Global Dump */
 export const parseKiwi106GlobalDumpCommand = (
-  m: Message,
+  m: MidiMessage,
 ): Kiwi106SysexGlobalDumpCommand => {
   if (!isKiwi106GlobalDumpSysexMessage(m)) {
     throw new Error("Message is not a Kiwi-106 Global Dump Sysex Command");
