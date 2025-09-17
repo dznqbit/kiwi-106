@@ -1,6 +1,7 @@
 import { KiwiPatch, KiwiPatchAddress } from "./KiwiPatch";
 import {
   Kiwi106SysexGlobalDumpCommand,
+  Kiwi106SysexGlobalDumpReceivedCommand,
   Kiwi106SysexPatchEditBufferDumpCommand,
 } from "./Kiwi106Sysex";
 import { KiwiGlobalData } from "./KiwiGlobalData";
@@ -17,6 +18,9 @@ export interface KiwiMidi {
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
   parseSysex(
-    message: MidiMessage,
-  ): Kiwi106SysexGlobalDumpCommand | Kiwi106SysexPatchEditBufferDumpCommand;
+    message: MidiMessage
+  ):
+    | Kiwi106SysexGlobalDumpCommand
+    | Kiwi106SysexGlobalDumpReceivedCommand
+    | Kiwi106SysexPatchEditBufferDumpCommand;
 }

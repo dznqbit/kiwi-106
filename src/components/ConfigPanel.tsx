@@ -190,20 +190,18 @@ export const ConfigPanel = ({
 
           <Fieldset w="44%" legend="Clock">
             <Group justify="flex-start" align="flex-start">
-              <Stack align="center">
-                <Title order={5}>Internal Clock Rate</Title>
-                <VerticalSlider
-                  value={kiwiGlobalData.intClockRate}
-                  max={300}
-                  onChange={(v) =>
-                    setKiwiGlobalData({
-                      ...kiwiGlobalData,
-                      intClockRate: trimIntRange(v, { min: 5, max: 300 }),
-                    })
-                  }
-                />
-                <Code>{kiwiGlobalData.intClockRate}</Code>
-              </Stack>
+              <ConfigFader
+                title="Internal Clock Rate"
+                value={kiwiGlobalData.intClockRate}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    intClockRate: trimIntRange(v, { min: 5, max: 300 }),
+                  })
+                }
+                min={5}
+                max={300}
+              />
 
               <Stack align="flex-start">
                 <JunoToggleSwitch
@@ -456,5 +454,33 @@ function FaderTitle({
 
   return (
     <>{tooltip ? <Tooltip label={tooltip}>{titleNode}</Tooltip> : titleNode}</>
+  );
+}
+
+interface ConfigFaderProps {
+  title: string;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  isFlaky?: boolean;
+  flakyDescription?: string;
+}
+
+function ConfigFader({
+  title,
+  value,
+  onChange,
+  min,
+  max,
+  isFlaky,
+  flakyDescription,
+}: ConfigFaderProps) {
+  return (
+    <Stack align="center">
+      <FaderTitle label={title} {...{ isFlaky, flakyDescription }} />
+      <VerticalSlider value={value} onChange={onChange} min={min} max={max} />
+      <Code>{value}</Code>
+    </Stack>
   );
 }

@@ -96,6 +96,7 @@ export const JunoProgrammer = () => {
 
       switch (kiwi106Command?.command) {
         case "Global Dump":
+        case "Global Dump Received":
           // noop. Global dump is handled at the kiwiMidi level
           break;
 

@@ -34,6 +34,7 @@ export const trimMidiCcValue: (n: number) => MidiCcValue = (n) => {
   }
 };
 
+/** Trim a number inside a range [min, max] eg INCLUSIVE */
 export const trimIntRange = (
   n: number,
   { min = 0, max }: { min: number; max: number },

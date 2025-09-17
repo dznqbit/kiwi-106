@@ -2,7 +2,6 @@ import {
   Modal,
   Stack,
   Group,
-  Title,
   Divider,
   Flex,
   Button,
@@ -52,22 +51,22 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
       console.log("[sendSysexGlobalDump]", localKiwiGlobalData);
       kiwi106Context.kiwiMidi.sendSysexGlobalDump(localKiwiGlobalData);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kiwi106Context.active, localKiwiGlobalData]);
 
   return (
-    <Modal.Root opened={opened} onClose={onClose} size="xl">
+    <Modal.Root
+      opened={opened}
+      onClose={onClose}
+      size="xl"
+    >
       <Modal.Overlay />
       <Modal.Content>
         <Modal.Header px={0} pb={4}>
           <Stack gap="xs" style={{ width: "100%" }}>
             <Group px="md" style={{ width: "100%" }}>
-              <Modal.Title>
-                <Title order={2} style={{ lineHeight: 0.8 }}>
-                  CONFIGURATION
-                </Title>
-              </Modal.Title>
-              <Modal.CloseButton style={{ marginTop: -5 }} />
+              <Modal.Title>CONFIGURATION</Modal.Title>
+              <Modal.CloseButton />
             </Group>
             <Divider color="dark.0" size="xl" mx="md" />
             <Flex mx="md" mt={4} justify="flex-end">
@@ -115,7 +114,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.input)}
                     data={configStore.availableInputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`,
+                      (i) => `${i.manufacturer} ${i.name}`
                     )}
                     onChange={(fn) =>
                       configStore.setInput(findInputByFormattedName(fn))
@@ -144,7 +143,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.output)}
                     data={configStore.availableOutputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`,
+                      (i) => `${i.manufacturer} ${i.name}`
                     )}
                     onChange={(fn) =>
                       configStore.setOutput(findOutputByFormattedName(fn))

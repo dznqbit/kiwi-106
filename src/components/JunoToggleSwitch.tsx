@@ -53,6 +53,7 @@ export const JunoToggleSwitch = <T,>({
               h={switchHeight}
               style={{ cursor: "pointer", lineHeight: "1.4rem" }}
               pr="sm"
+              key={d.label}
             >
               {d.label}
             </Title>

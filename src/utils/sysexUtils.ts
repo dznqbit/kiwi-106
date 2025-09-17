@@ -99,6 +99,10 @@ export const isKiwi106GlobalDumpSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x02;
 };
 
+export const isKiwi106GlobalDumpReceivedSysexMessage = (message: MidiMessage) => {
+  return isKiwi106SysexMessage(message) && message.data[7] === 0x25;
+};
+
 export const isKiwi106BufferDumpSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] == 0x04;
 };
@@ -572,7 +576,7 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   return {
     message: m,
     command: "Patch Edit Buffer Dump",
-    dataBytes: data.slice(8), // Skip header, start from first data byte
+    data: data.slice(8), // Skip header, start from first data byte
     isValid: data[0] === 0xf0 && data[data.length - 1] === 0xf7,
     kiwiPatch,
   };

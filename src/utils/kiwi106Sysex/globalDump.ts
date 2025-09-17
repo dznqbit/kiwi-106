@@ -178,7 +178,7 @@ export const parseKiwi106GlobalDumpCommand = (
   const internalTune = dataBytes[25] & 0x7f;
   const externalPedalPolarity = dataBytes[26] & 0x01 ? "inverse" : "normal";
 
-  const globalData: KiwiGlobalData = {
+  const kiwiGlobalData: KiwiGlobalData = {
     midiChannelIn,
     midiChannelOut,
     sequencerMidiChannelOut,
@@ -206,8 +206,8 @@ export const parseKiwi106GlobalDumpCommand = (
 
   return {
     command: "Global Dump",
-    data: globalData,
-    dataBytes: m.dataBytes,
+    kiwiGlobalData,
+    data: m.data,
     message: m,
     isValid: true,
   };

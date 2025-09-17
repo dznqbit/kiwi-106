@@ -1,4 +1,4 @@
-import { Message, type Input, type Output } from "webmidi";
+import { type Input, type Output } from "webmidi";
 import { type KiwiMidi } from "../types/KiwiMidi";
 import {
   kiwi106Identifier,
@@ -8,9 +8,10 @@ import {
   parseKiwi106PatchEditBufferDumpCommand,
   isKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
+  isKiwi106GlobalDumpReceivedSysexMessage,
 } from "./sysexUtils";
 import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
-import { MidiCcValue } from "../types/Midi";
+import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import {
   buildKiwi106GlobalDumpSysexData,
@@ -114,7 +115,7 @@ export const buildKiwiMidi = ({
       ]);
     },
 
-    parseSysex: (message: Message) => {
+    parseSysex: (message: MidiMessage) => {
       if (!isKiwi106SysexMessage(message)) {
         throw new Error(
           "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
@@ -131,7 +132,14 @@ export const buildKiwiMidi = ({
         return command;
       }
 
-      // Receiving f0,0,21,16,60,3,0,25,0,1,f7 after sysex writes, likely an ACK
+      if (isKiwi106GlobalDumpReceivedSysexMessage(message)) {
+        // Receiving f0,0,21,16,60,3,0,25,0,1,f7 after sysex writes, likely an ACK
+        // That 0,1 might be an interesting data byte, for now we'll just ignore
+        return {
+          command: "Global Dump Received",
+        };
+      }
+
       throw new Error(
         `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`,
       );
