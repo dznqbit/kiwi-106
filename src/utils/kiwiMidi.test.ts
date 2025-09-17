@@ -186,6 +186,20 @@ describe("kiwiMidi", () => {
       expect(result.command).toBe("Global Dump");
     });
 
+    it("parses global dump received command", () => {
+      const { kiwiMidi } = subject();
+      const mockMessage: MidiMessage = {
+        isSystemMessage: true,
+        isChannelMessage: false,
+        data: [
+          0xf0, 0x00, 0x21, 0x16, 0x60, 0x03, 0x00, 0x25, 0x00, 0x01, 0xf7,
+        ],
+      };
+
+      const result = kiwiMidi.parseSysex(mockMessage);
+      expect(result.command).toBe("Global Dump Received");
+    });
+
     it("throws error for non-Kiwi106 sysex message", () => {
       const { kiwiMidi } = subject();
       const mockMessage: MidiMessage = {
@@ -208,7 +222,7 @@ describe("kiwiMidi", () => {
         isSystemMessage: true,
         isChannelMessage: false,
         data: [
-          0xf0, 0x00, 0x21, 0x16, 0x60, 0x03, 0x00, 0x25, 0x00, 0x01, 0xf7,
+          0xf0, 0x00, 0x21, 0x16, 0x60, 0x03, 0x00, 0x30, 0x00, 0x01, 0xf7,
         ],
       };
 

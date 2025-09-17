@@ -137,6 +137,9 @@ export const buildKiwiMidi = ({
         // That 0,1 might be an interesting data byte, for now we'll just ignore
         return {
           command: "Global Dump Received",
+          message,
+          data: message.data,
+          isValid: true,
         };
       }
 
