@@ -26,7 +26,8 @@ export const JunoProgrammer = () => {
   const configStore = useConfigStore();
   const { setKiwiPatch, setKiwiPatchProperty: setPatchProperty } =
     useKiwiPatchStore();
-  const { kiwiMidi } = useKiwi106Context();
+  const kiwi106Context = useKiwi106Context();
+  const kiwiMidi = kiwi106Context.active ? kiwi106Context.kiwiMidi : null;
 
   useEffect(() => {
     // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
@@ -154,7 +155,7 @@ export const JunoProgrammer = () => {
               if (isDcoRange(diff[k])) {
                 channel.sendControlChange(
                   kiwiCcController(k),
-                  dcoRangeControlChangeValues[diff[k]],
+                  dcoRangeControlChangeValues[diff[k]]
                 );
               } else if (isMidiCcValue(diff[k])) {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
@@ -174,7 +175,7 @@ export const JunoProgrammer = () => {
             }
           }
         }
-      },
+      }
     );
 
     return unsubscribeKiwiSyncer;
@@ -182,20 +183,10 @@ export const JunoProgrammer = () => {
 
   return (
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">
-      <DisconnectedOverlay />
+      {!kiwi106Context.active && <Overlay backgroundOpacity={0.5} blur={3} />}
       <JunoPatchSelector />
       <PatchNameEditor />
       <JunoSliders />
     </Container>
   );
 };
-
-function DisconnectedOverlay() {
-  const kiwi106Context = useKiwi106Context();
-
-  if (kiwi106Context.active) {
-    return <></>;
-  }
-
-  return <Overlay backgroundOpacity={0.5} blur={3} />;
-}

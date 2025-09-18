@@ -204,7 +204,5 @@ function Version({ kiwi106Context }: VersionProps) {
         </Group>
       </Group>
     );
-  } else {
-    return <Text>Woah</Text>;
   }
 }
