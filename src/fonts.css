@@ -1,8 +1,8 @@
 @font-face {
   font-family: 'LibrestileExtBold';
   src: url('./assets/fonts/librestileextbold-webfont.woff2') format('woff2'),
-       url('./assets/fonts/librestileextbold-webfont.woff') format('woff'),
-       url('./assets/fonts/LibrestileExtBold.ttf') format('truetype');
+    url('./assets/fonts/librestileextbold-webfont.woff') format('woff'),
+    url('./assets/fonts/LibrestileExtBold.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -11,8 +11,28 @@
 @font-face {
   font-family: 'LibrestileExtBold';
   src: url('./assets/fonts/librestileextboldoblique-webfont.woff2') format('woff2'),
-       url('./assets/fonts/librestileextboldoblique-webfont.woff') format('woff'),
-       url('./assets/fonts/LibrestileExtBoldOblique.ttf') format('truetype');
+    url('./assets/fonts/librestileextboldoblique-webfont.woff') format('woff'),
+    url('./assets/fonts/LibrestileExtBoldOblique.ttf') format('truetype');
+  font-weight: bold;
+  font-style: oblique;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PokemonClassic';
+  src: url('./assets/fonts/PokemonClassic.woff2') format('woff2'),
+    url('./assets/fonts/PokemonClassic.woff') format('woff'),
+    url('./assets/fonts/PokemonClassic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: oblique;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'RetroComputer';
+  src: url('./assets/fonts/RetroComputer.woff2') format('woff2'),
+    url('./assets/fonts/RetroComputer.woff') format('woff'),
+    url('./assets/fonts/RetroComputer.ttf') format('truetype');
   font-weight: bold;
   font-style: oblique;
   font-display: swap;

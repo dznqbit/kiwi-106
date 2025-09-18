@@ -151,7 +151,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       try {
         const kiwi106Command = newKiwiMidi.parseSysex(e.message);
         if (kiwi106Command.command === "Global Dump") {
-          setKiwiGlobalData(kiwi106Command.data);
+          setKiwiGlobalData(kiwi106Command.kiwiGlobalData);
         }
       } catch {
         return;
@@ -204,6 +204,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       kiwiMidi &&
       kiwiGlobalData
     ) {
+      console.log("Active!")
       return {
         active: true,
         midiError: midiContext.enableError,
@@ -214,6 +215,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
         kiwiGlobalData,
       };
     } else {
+      console.log("Dead!")
       return {
         active: false,
         midiError: midiContext.enableError,

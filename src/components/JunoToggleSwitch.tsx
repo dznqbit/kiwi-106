@@ -51,7 +51,7 @@ export const JunoToggleSwitch = <T,>({
               onClick={() => onSelect(d.value)}
               order={6}
               h={switchHeight}
-              style={{ cursor: "pointer", lineHeight: "1.4rem" }}
+              style={{ cursor: "pointer", textTransform: "uppercase", lineHeight: "1.4rem", textWrap: "nowrap" }}
               pr="sm"
               key={d.label}
             >

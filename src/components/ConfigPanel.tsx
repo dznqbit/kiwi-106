@@ -2,14 +2,11 @@ import {
   Code,
   Fieldset,
   Group,
-  List,
-  ListItem,
   Select,
   Stack,
   Tooltip,
   Title,
 } from "@mantine/core";
-import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import {
   kiwi106MessageModes,
   Kiwi106MasterClockSource,
@@ -61,7 +58,6 @@ export const ConfigPanel = ({
   kiwiGlobalData,
   setKiwiGlobalData,
 }: ConfigPanelProps) => {
-  const kiwi106Context = useKiwi106Context();
   const midiChannelData = midiChannels.map((c) => ({
     value: c.toString(),
     label: c.toString(),
@@ -79,22 +75,9 @@ export const ConfigPanel = ({
     { value: false, label: "off" },
   ];
 
-  if (!kiwi106Context.active) {
-    return <></>;
-  }
-
   return (
     <Stack>
       <Stack>
-        <List>
-          <ListItem>Program version {kiwi106Context.programVersion}</ListItem>
-          <ListItem>
-            Bootloader version {kiwi106Context.bootloaderVersion}
-          </ListItem>
-          <ListItem>Build number {kiwi106Context.buildNumber}</ListItem>
-          <ListItem>Device ID {kiwiGlobalData.deviceId}</ListItem>
-        </List>
-
         <Group>
           <Select
             label="MIDI Ch In"
