@@ -204,7 +204,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       kiwiMidi &&
       kiwiGlobalData
     ) {
-      console.log("Active!")
+      console.log("Active!");
       return {
         active: true,
         midiError: midiContext.enableError,
@@ -215,7 +215,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
         kiwiGlobalData,
       };
     } else {
-      console.log("Dead!")
+      console.log("Dead!");
       return {
         active: false,
         midiError: midiContext.enableError,

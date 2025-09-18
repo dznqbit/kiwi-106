@@ -38,7 +38,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
 
   useEffect(() => {
     if (kiwi106Context.active) {
-      console.log("set the damn context")
+      console.log("set the damn context");
       setLocalKiwiGlobalData(kiwi106Context.kiwiGlobalData);
     }
   }, [kiwi106Context]);
@@ -115,7 +115,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.input)}
                     data={configStore.availableInputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`
+                      (i) => `${i.manufacturer} ${i.name}`,
                     )}
                     onChange={(fn) =>
                       configStore.setInput(findInputByFormattedName(fn))
@@ -144,7 +144,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                     }
                     value={formatName(configStore.output)}
                     data={configStore.availableOutputs.map(
-                      (i) => `${i.manufacturer} ${i.name}`
+                      (i) => `${i.manufacturer} ${i.name}`,
                     )}
                     onChange={(fn) =>
                       configStore.setOutput(findOutputByFormattedName(fn))
@@ -181,7 +181,10 @@ interface VersionProps {
 }
 
 function Version({ kiwi106Context }: VersionProps) {
-  const style: MantineStyleProp = { fontFamily: "RetroComputer, PokemonClassic, monospace", fontSize: "0.6rem" };
+  const style: MantineStyleProp = {
+    fontFamily: "RetroComputer, PokemonClassic, monospace",
+    fontSize: "0.6rem",
+  };
   if (kiwi106Context.active) {
     return (
       <Group gap="md">

@@ -99,7 +99,9 @@ export const isKiwi106GlobalDumpSysexMessage = (message: MidiMessage) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x02;
 };
 
-export const isKiwi106GlobalDumpReceivedSysexMessage = (message: MidiMessage) => {
+export const isKiwi106GlobalDumpReceivedSysexMessage = (
+  message: MidiMessage,
+) => {
   return isKiwi106SysexMessage(message) && message.data[7] === 0x25;
 };
 

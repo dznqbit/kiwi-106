@@ -18,7 +18,7 @@ export interface KiwiMidi {
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
   parseSysex(
-    message: MidiMessage
+    message: MidiMessage,
   ):
     | Kiwi106SysexGlobalDumpCommand
     | Kiwi106SysexGlobalDumpReceivedCommand

@@ -25,7 +25,7 @@ export const kiwi106SysexCommandNames = [
   "Sequence Edit Buffer Dump",
   "Request Sequence Edit Buffer Step",
   "Sequence Edit Buffer Step",
-  "Global Dump Received" // 0x25
+  "Global Dump Received", // 0x25
 ] as const;
 
 export type Kiwi106SysexCommandName = (typeof kiwi106SysexCommandNames)[number];
@@ -42,7 +42,8 @@ export interface Kiwi106SysexGlobalDumpCommand extends Kiwi106SysexCommand {
   kiwiGlobalData: KiwiGlobalData;
 }
 
-export interface Kiwi106SysexGlobalDumpReceivedCommand extends Kiwi106SysexCommand {
+export interface Kiwi106SysexGlobalDumpReceivedCommand
+  extends Kiwi106SysexCommand {
   command: "Global Dump Received";
 }
 

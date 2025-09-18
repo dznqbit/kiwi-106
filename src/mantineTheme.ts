@@ -132,15 +132,15 @@ export const mantineTheme = createTheme({
     Modal: Modal.extend({
       styles: {
         close: {
-           marginTop: -5,
+          marginTop: -5,
         },
         title: {
           fontWeight: "bold",
           fontSize: "1.625rem",
           lineHeight: 0.8,
-        }
-      }
-    })
+        },
+      },
+    }),
   },
 
   variantColorResolver: (input) => {
