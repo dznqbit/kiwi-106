@@ -278,20 +278,17 @@ export const ConfigPanel = ({
 
           <Fieldset w="44%" legend="Pattern Control">
             <Group align="flex-start">
-              <Stack align="center">
-                <Title order={5}>Pattern Level</Title>
-                <VerticalSlider
-                  value={kiwiGlobalData.patternLevel}
-                  max={4095}
-                  onChange={(v) =>
-                    setKiwiGlobalData({
-                      ...kiwiGlobalData,
-                      patternLevel: v,
-                    })
-                  }
-                />
-                <Code>{kiwiGlobalData.patternLevel}</Code>
-              </Stack>
+              <ConfigFader
+                title="Pattern Level"
+                value={kiwiGlobalData.patternLevel}
+                max={4095}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    patternLevel: v,
+                  })
+                }
+              />
 
               <Stack align="center">
                 <JunoToggleSwitch
@@ -342,63 +339,54 @@ export const ConfigPanel = ({
 
         <Fieldset legend="Levels">
           <Group>
-            <Stack align="center">
-              <FaderTitle label="Internal Velocity" />
-              <VerticalSlider
-                value={kiwiGlobalData.internalVelocity}
-                min={63}
-                onChange={(v) =>
-                  setKiwiGlobalData({
-                    ...kiwiGlobalData,
-                    internalVelocity: trimMidiCcValue(v),
-                  })
-                }
-              />
-              <Code>{kiwiGlobalData.internalVelocity}</Code>
-            </Stack>
+            <ConfigFader
+              title="Internal Velocity"
+              value={kiwiGlobalData.internalVelocity}
+              min={63}
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  internalVelocity: trimMidiCcValue(v),
+                })
+              }
+            />
 
-            <Stack align="center">
-              <FaderTitle isFlaky label="Internal Tune" />
-              <VerticalSlider
-                value={kiwiGlobalData.internalTune}
-                max={127}
-                onChange={(v) =>
-                  setKiwiGlobalData({
-                    ...kiwiGlobalData,
-                    internalTune: trimMidiCcValue(v),
-                  })
-                }
-              />
-              <Code>{kiwiGlobalData.internalTune}</Code>
-            </Stack>
+            <ConfigFader
+              title="Internal Tune"
+              value={kiwiGlobalData.internalTune}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  internalTune: trimMidiCcValue(v),
+                })
+              }
+              max={127}
+            />
 
-            <Stack align="center">
-              <FaderTitle isFlaky label="Mod Wheel Level" />
-              <VerticalSlider
-                value={kiwiGlobalData.mwLevel}
-                onChange={(v) =>
-                  setKiwiGlobalData({
-                    ...kiwiGlobalData,
-                    mwLevel: trimMidiCcValue(v),
-                  })
-                }
-              />
-              <Code>{kiwiGlobalData.mwLevel}</Code>
-            </Stack>
+            <ConfigFader
+              title="Mod Wheel Level"
+              value={kiwiGlobalData.mwLevel}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  mwLevel: trimMidiCcValue(v),
+                })
+              }
+            />
 
-            <Stack align="center">
-              <FaderTitle isFlaky label="Aftertouch Level" />
-              <VerticalSlider
-                value={kiwiGlobalData.atLevel}
-                onChange={(v) =>
-                  setKiwiGlobalData({
-                    ...kiwiGlobalData,
-                    atLevel: trimMidiCcValue(v),
-                  })
-                }
-              />
-              <Code>{kiwiGlobalData.atLevel}</Code>
-            </Stack>
+            <ConfigFader
+              title="Aftertouch Level"
+              value={kiwiGlobalData.atLevel}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  atLevel: trimMidiCcValue(v),
+                })
+              }
+            />
           </Group>
         </Fieldset>
       </Stack>
@@ -462,7 +450,13 @@ function ConfigFader({
   return (
     <Stack align="center">
       <FaderTitle label={title} {...{ isFlaky, flakyDescription }} />
-      <VerticalSlider value={value} onChange={onChange} min={min} max={max} />
+      <VerticalSlider
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        disabled={isFlaky}
+      />
       <Code>{value}</Code>
     </Stack>
   );

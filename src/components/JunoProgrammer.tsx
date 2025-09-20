@@ -159,18 +159,6 @@ export const JunoProgrammer = () => {
                 );
               } else if (isMidiCcValue(diff[k])) {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
-              } else {
-                // const s = diff[k];
-                // const updatePatchName = 0x0c;
-                // const patchNameBytes = Array.from(s).map(
-                //   (char) => char.charCodeAt(0) & 0x7f,
-                // );
-                // output.sendSysex(kiwiTechnicsSysexId, [
-                //   ...kiwi106Identifier,
-                //   0x00,
-                //   updatePatchName,
-                //   ...patchNameBytes,
-                // ]);
               }
             }
           }
