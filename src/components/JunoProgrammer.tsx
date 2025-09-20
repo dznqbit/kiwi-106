@@ -155,7 +155,7 @@ export const JunoProgrammer = () => {
               if (isDcoRange(diff[k])) {
                 channel.sendControlChange(
                   kiwiCcController(k),
-                  dcoRangeControlChangeValues[diff[k]]
+                  dcoRangeControlChangeValues[diff[k]],
                 );
               } else if (isMidiCcValue(diff[k])) {
                 channel.sendControlChange(kiwiCcController(k), diff[k]);
@@ -163,7 +163,7 @@ export const JunoProgrammer = () => {
             }
           }
         }
-      }
+      },
     );
 
     return unsubscribeKiwiSyncer;

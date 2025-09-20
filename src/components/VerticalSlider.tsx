@@ -25,7 +25,7 @@ export const VerticalSlider = ({
     if (disabled) {
       return;
     }
-    
+
     // Invert y (1 - y) so moving up increases value
     const newNormalizedValue = 1 - y;
     const newValue =

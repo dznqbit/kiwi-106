@@ -9,6 +9,7 @@ import {
   Select,
   Text,
   MantineStyleProp,
+  Space,
 } from "@mantine/core";
 import { IconRefresh, IconWorldDown, IconWorldUp } from "@tabler/icons-react";
 import { ConfigPanel } from "./ConfigPanel";
@@ -71,6 +72,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
             <Divider color="dark.0" size="xl" mx="md" />
             <Flex mx="md" mt={4} justify="space-between">
               <Version kiwi106Context={kiwi106Context} />
+              <Space />
               <JunoButtonGroup mt={0}>
                 <Button
                   title="Refresh MIDI Context"
