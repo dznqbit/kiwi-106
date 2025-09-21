@@ -2,7 +2,6 @@ import _ from "lodash";
 import {
   kiwi106SysexCommandBytes,
   Kiwi106SysexCommandName,
-  kiwi106SysexCommandNames,
   Kiwi106SysexPatchEditBufferDumpCommand,
 } from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";

@@ -5,7 +5,6 @@ import {
   kiwiTechnicsSysexId,
   kiwiPatchToSysexBytes,
   isKiwi106BufferDumpSysexMessage,
-  parseKiwi106PatchEditBufferDumpCommand,
   isAnyKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
   isKiwi106GlobalDumpReceivedSysexMessage,
