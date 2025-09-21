@@ -12,6 +12,7 @@ import { useMidiContext } from "../hooks/useMidiContext";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { KiwiMidi } from "../types/KiwiMidi";
 import { buildKiwiMidi } from "../utils/kiwiMidi";
+import { type KiwiGlobalData } from "../types/KiwiGlobalData";
 
 const heartbeatIntervalMs = 5_000;
 
@@ -23,6 +24,10 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   const [kiwiMidi, setKiwiMidi] = useState<KiwiMidi | null>(null);
   const [programVersion, setProgramVersion] = useState<string | null>(null);
   const [bootloaderVersion, setBootloaderVersion] = useState<string | null>(
+    null,
+  );
+  const [buildNumber, setBuildNumber] = useState<string | null>(null);
+  const [kiwiGlobalData, setKiwiGlobalData] = useState<KiwiGlobalData | null>(
     null,
   );
   const [lastHeartbeatAt, setLastHeartbeatAt] = useState<Date | null>(null);
@@ -90,18 +95,26 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const newKiwiMidi = buildKiwiMidi({ input, output });
-    setKiwiMidi(newKiwiMidi);
+    const newKiwiMidi = (() => {
+      if (kiwiMidi === null) {
+        const newKiwiMidi = buildKiwiMidi({ input, output });
+        setKiwiMidi(newKiwiMidi);
+        return newKiwiMidi;
+      }
+
+      return kiwiMidi;
+    })();
 
     // Fire off an initial device enquiry
-    newKiwiMidi.requestDeviceEnquirySysex();
+    newKiwiMidi.requestSysexDeviceEnquiry();
+    newKiwiMidi.requestSysexGlobalDump();
 
     // Set heartbeat timer
     const intervalHandle = setInterval(() => {
-      newKiwiMidi.requestDeviceEnquirySysex();
+      newKiwiMidi.requestSysexDeviceEnquiry();
     }, heartbeatIntervalMs);
 
-    const kiwi106DeviceEnquiryListener = (e: MessageEvent) => {
+    const sysexListener = (e: MessageEvent) => {
       const messageData = e.message.data;
 
       if (
@@ -125,22 +138,35 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
         const bootLoaderMinorVersionNumber = messageData[14];
         const bootLoaderVersion = `${bootLoaderMajorVersionNumber}.${bootLoaderMinorVersionNumber}`;
 
+        const buildNumber = messageData[15].toString();
+
         setActive(true);
         setBootloaderVersion(bootLoaderVersion);
         setProgramVersion(programVersion);
+        setBuildNumber(buildNumber);
         setLastHeartbeatAt(new Date());
+        return;
+      }
+
+      try {
+        const kiwi106Command = newKiwiMidi.parseSysex(e.message);
+        if (kiwi106Command.command === "Global Dump") {
+          setKiwiGlobalData(kiwi106Command.kiwiGlobalData);
+        }
+      } catch {
+        return;
       }
     };
 
-    input.addListener("sysex", kiwi106DeviceEnquiryListener);
+    input.addListener("sysex", sysexListener);
 
     return () => {
       clearInterval(intervalHandle);
-      input.removeListener("sysex", kiwi106DeviceEnquiryListener);
+      input.removeListener("sysex", sysexListener);
     };
   }, [
-    sendDeviceEnquirySysex,
     kiwiMidi,
+    sendDeviceEnquirySysex,
     midiContext.enabled,
     configStore.input,
     configStore.output,
@@ -169,22 +195,39 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     return () => clearInterval(heartbeatCheckHandle);
   }, [active, lastHeartbeatAt]);
 
-  const context: Kiwi106Context = useMemo(
-    () => ({
-      active,
-      midiError: midiContext.enableError,
-      programVersion,
-      bootloaderVersion,
-      kiwiMidi,
-    }),
-    [
-      active,
-      kiwiMidi,
-      midiContext.enableError,
-      programVersion,
-      bootloaderVersion,
-    ],
-  );
+  const context: Kiwi106Context = useMemo(() => {
+    if (
+      active &&
+      programVersion &&
+      bootloaderVersion &&
+      buildNumber &&
+      kiwiMidi &&
+      kiwiGlobalData
+    ) {
+      return {
+        active: true,
+        midiError: midiContext.enableError,
+        programVersion,
+        bootloaderVersion,
+        buildNumber,
+        kiwiMidi,
+        kiwiGlobalData,
+      };
+    } else {
+      return {
+        active: false,
+        midiError: midiContext.enableError,
+      };
+    }
+  }, [
+    active,
+    kiwiMidi,
+    kiwiGlobalData,
+    midiContext.enableError,
+    programVersion,
+    bootloaderVersion,
+    buildNumber,
+  ]);
 
   return (
     <Kiwi106Context.Provider value={context}>

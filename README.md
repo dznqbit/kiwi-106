@@ -20,6 +20,17 @@ This entire project hinges on the [Web MIDI API spec](https://webaudio.github.io
 - [React](https://react.dev)
 - [Mantine](https://mantine.dev)
 
+### Compatible Browsers
+- Firefox
+- Chrome
+
+### Incompatible Browsers
+- Safari, and this will likely never change
+
+### Fonts
+- [Retro Computer](https://www.dafont.com/retro-computer.font)
+- [Librestyle](https://github.com/ocelothe/Librestile)
+
 ## How to Contribute
 If you notice a bug, or want a feature implemented, you have three options.
 - File an issue via [Github Issues](https://github.com/dznqbit/kiwi-106/issues).

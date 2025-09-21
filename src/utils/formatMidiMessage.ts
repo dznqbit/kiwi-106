@@ -150,6 +150,7 @@ const midiMessageType = (messageType: string): MidiMessageType => {
 };
 
 // format MessageEvent for our message log
+// TODO: plug in MidiMessage so we don't rely so much on webmidi
 export const formatMidiMessage = (
   messageEvent: MessageEvent,
 ): FormattedMidiMessage => {
@@ -206,9 +207,9 @@ export const formatMidiMessage = (
         const kiwi106GlobalDump: Kiwi106GlobalDumpSysexMidiMessage = {
           ...baseMessageData,
           messageType,
-          midiChannelIn: trimMidiChannel(messageData[8]),
-          midiChannelOut: trimMidiChannel(messageData[9]),
-          sequencerMidiChannelOut: trimMidiChannel(messageData[10]),
+          midiChannelIn: trimMidiChannel(messageData[8] + 1),
+          midiChannelOut: trimMidiChannel(messageData[9] + 1),
+          sequencerMidiChannelOut: trimMidiChannel(messageData[10] + 1),
           deviceId: messageData[11],
           enableMidiCc: messageData[12],
           enableSysex: messageData[13],
@@ -231,7 +232,6 @@ export const formatMidiMessage = (
           externalPedalPolarity: messageData[34],
         };
 
-        console.log(kiwi106GlobalDump);
         return kiwi106GlobalDump;
       }
 

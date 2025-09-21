@@ -7,13 +7,11 @@ import {
   Drawer,
   Stack,
   Divider,
-  Modal,
   Code,
 } from "@mantine/core";
 import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { JunoProgrammer } from "./components/JunoProgrammer";
 import { mantineTheme } from "./mantineTheme";
-import { ConfigPanel } from "./components/ConfigPanel";
 import { MidiMessageTable } from "./components/MidiMessageTable";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
 import { IconLogs, IconSettings } from "@tabler/icons-react";
@@ -25,6 +23,9 @@ import { ReactNode } from "react";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
+import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferDumpButton";
+import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
+import { ConfigModal } from "./components/ConfigModal";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -63,9 +64,10 @@ function Kiwi106Programmer() {
             </Group>
 
             <JunoButtonGroup>
-              <NoteButton />
-
+              <NoteButton title="Test Note" />
               <MidiPanicButton title="Panic" />
+              <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
+              <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
               <Button
                 title="Logs"
                 variant="juno"
@@ -87,13 +89,10 @@ function Kiwi106Programmer() {
           <Divider color="blue" size="xl" />
         </Stack>
 
-        <Modal
+        <ConfigModal
           opened={isConfigDrawerOpened}
           onClose={closeConfigDrawer}
-          size="lg"
-        >
-          <ConfigPanel />
-        </Modal>
+        />
 
         <Drawer
           opened={isMessageLogOpened}

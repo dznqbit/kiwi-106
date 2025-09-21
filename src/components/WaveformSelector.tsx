@@ -54,7 +54,6 @@ export const WaveformSelector = ({
     };
 
     const waveformCcValue = waveformToCcValue(waveform);
-    console.log("Alright set", waveformCcValue);
     setKiwiPatchProperty(property, waveformCcValue, {
       updatedBy: "Editor Change",
     });

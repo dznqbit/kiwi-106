@@ -4,6 +4,7 @@ import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 import { VerticalSlider, type VerticalSliderProps } from "./VerticalSlider";
 import { Code, Stack, Title } from "@mantine/core";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
+import { isMidiCcValue } from "../types/Midi";
 
 interface KiwiPatchPropertySlider {
   label?: string;
@@ -17,12 +18,11 @@ export const KiwiPatchPropertySlider = ({
   sliderProps,
 }: KiwiPatchPropertySlider) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-
-  if (property === "patchName") {
-    throw new Error("Cannot draw slider for patch name");
-  }
-
   const value = kiwiPatch[property];
+
+  if (!isMidiCcValue(value)) {
+    throw new Error(`Cannot draw slider ${property} value "${value}"`);
+  }
 
   return (
     <Stack align="center">

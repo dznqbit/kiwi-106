@@ -1,292 +1,463 @@
-import { WebMidi } from "webmidi";
-import { Button, Fieldset, Group, Select, Stack } from "@mantine/core";
-import { useMidiContext } from "../hooks/useMidiContext";
-import { MidiPortData } from "../contexts/MidiContext";
-import { SelectMidiChannel } from "./SelectMidiChannel";
-import { IconRefresh, IconBrain } from "@tabler/icons-react";
-import { useConfigStore } from "../stores/configStore";
-import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
-import { isMidiChannel } from "../types/Midi";
-import { useKiwi106Context } from "../hooks/useKiwi106Context";
+import {
+  Code,
+  Fieldset,
+  Group,
+  Select,
+  Stack,
+  Tooltip,
+  Title,
+} from "@mantine/core";
+import {
+  kiwi106MessageModes,
+  Kiwi106MasterClockSource,
+  masterClockSources,
+  Kiwi106MidiSoftThroughMode,
+  kiwi106MidiSoftThroughModes,
+  KiwiGlobalData,
+} from "../types/KiwiGlobalData";
+import { midiChannels } from "../types/Midi";
+import { JunoToggleSwitch } from "./JunoToggleSwitch";
+import { VerticalSlider } from "./VerticalSlider";
+import {
+  trimIntRange,
+  trimMidiCcValue,
+  trimMidiChannel,
+} from "../utils/trimMidiCcValue";
+import { IconAlertCircle } from "@tabler/icons-react";
 
-export const ConfigPanel = () => {
-  const midiContext = useMidiContext();
-  const kiwi106Context = useKiwi106Context();
-  const configStore = useConfigStore();
+interface ConfigPanelProps {
+  kiwiGlobalData: KiwiGlobalData;
+  setKiwiGlobalData: (kgd: KiwiGlobalData) => void;
+}
 
-  const formatName = (i: MidiPortData | null) =>
-    i == null ? null : `${i.manufacturer} ${i.name}`;
-  const findInputByFormattedName = (fn: string | null) =>
-    configStore.availableInputs.find((i) => formatName(i) === fn) ?? null;
-  const findOutputByFormattedName = (fn: string | null) =>
-    configStore.availableOutputs.find((o) => formatName(o) === fn) ?? null;
+const midiSoftThroughDataLabels: Record<Kiwi106MidiSoftThroughMode, string> = {
+  "stop-all": "Stop all",
+  "pass-all": "Pass all",
+  "pass-only-non-cc": "Pass non-CC",
+  "stop-only-cc-used": "Stop used CC",
+};
+const midiSoftThroughData = kiwi106MidiSoftThroughModes.map((value) => ({
+  value,
+  label: midiSoftThroughDataLabels[value],
+}));
 
-  const requestGlobalDumpSysex = () => {
-    kiwi106Context.kiwiMidi?.requestGlobalDumpSysex();
-  };
+const masterClockSourceLabels: Record<Kiwi106MasterClockSource, string> = {
+  internal: "int",
+  midi: "midi",
+  "ext step": "ext step",
+  "ext 24ppqn": "ext 24ppqn",
+  "ext 48ppqn": "ext 48ppqn",
+};
 
-  const requestEditBufferDumpSysex = () => {
-    console.log("request edit buffer from", kiwi106Context.kiwiMidi);
-    kiwi106Context.kiwiMidi?.requestEditBufferDumpSysex();
-  };
+const externalPedalPolarityData = [
+  { value: "normal" as const, label: "normal" },
+  { value: "inverse" as const, label: "inverse" },
+];
 
-  const sendPatchBufferDumpSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
+export const ConfigPanel = ({
+  kiwiGlobalData,
+  setKiwiGlobalData,
+}: ConfigPanelProps) => {
+  const midiChannelData = midiChannels.map((c) => ({
+    value: c.toString(),
+    label: c.toString(),
+  }));
 
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
+  const kiwi106MessageData = kiwi106MessageModes
+    .map((mm) => ({
+      value: mm,
+      label: mm,
+    }))
+    .reverse();
 
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x04, // Transmit Patch Buffer Dump
-
-      0x00, // Per docs, 2 x null bytes followed by 128 bytes of data in following format
-      0x00,
-
-      // "yahoo"
-      121,
-      97,
-      104,
-      111,
-      111,
-
-      0x73,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x20,
-      0x0c,
-      0x00,
-      0x00,
-      0x01,
-      0x00,
-      0x1f,
-      0x68,
-      0x00,
-      0x00,
-      0x1a,
-      0x22,
-      0x00,
-      0x00,
-      0x00,
-      0x02,
-      0x30,
-      0x00,
-      0x12,
-      0x34,
-      0x00,
-      0x00,
-      0x03,
-      0x6c,
-      0x00,
-      0x00,
-      0x01,
-      0x70,
-      0x00,
-      0x20,
-      0x00,
-      0x00,
-      0x00,
-      0x0c,
-      0x54,
-      0x1f,
-      0x63,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x03,
-      0x44,
-      0x13,
-      0x6f,
-      0x00,
-      0x00,
-      0x00,
-      0x02,
-      0x14,
-      0x2c,
-      0x17,
-      0x3c,
-      0x00,
-      0x0d,
-      0x41,
-      0x11,
-      0x44,
-      0x00,
-      0x00,
-      0x1c,
-      0x24,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x04,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x01,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x0c,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-    ]);
-  };
-
-  const requestPatchNameSysex = () => {
-    if (!configStore.output?.id) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    const output = WebMidi.getOutputById(configStore.output?.id);
-    if (!output) {
-      console.log("Send sysex message: no output");
-      return;
-    }
-
-    output.sendSysex(kiwiTechnicsSysexId, [
-      ...kiwi106Identifier,
-      0x00, // Required "Device ID"
-      0x0b, // Request patch name
-    ]);
-
-    console.log("Requested patch name");
-  };
+  const enabledData = [
+    { value: true, label: "on" },
+    { value: false, label: "off" },
+  ];
 
   return (
     <Stack>
-      <Fieldset legend="Input">
-        <Group wrap="nowrap">
-          <Select
-            label="Device"
-            clearable
-            allowDeselect={false}
-            placeholder={
-              midiContext.enabled ? "Select an input" : "Not available"
-            }
-            value={formatName(configStore.input)}
-            data={configStore.availableInputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
-            )}
-            onChange={(fn) =>
-              configStore.setInput(findInputByFormattedName(fn))
-            }
-          ></Select>
-          <SelectMidiChannel
-            enabled={midiContext.enabled}
-            value={configStore.inputChannel}
-            onChange={(c) => {
-              if (isMidiChannel(c)) {
-                configStore.setInputChannel(c);
-              }
-            }}
-          />
-        </Group>
-      </Fieldset>
-
-      <Fieldset legend="Output">
-        <Group wrap="nowrap">
-          <Select
-            label="Device"
-            clearable
-            allowDeselect={false}
-            placeholder={
-              midiContext.enabled ? "Select an output" : "Not available"
-            }
-            value={formatName(configStore.output)}
-            data={configStore.availableOutputs.map(
-              (i) => `${i.manufacturer} ${i.name}`,
-            )}
-            onChange={(fn) =>
-              configStore.setOutput(findOutputByFormattedName(fn))
-            }
-          ></Select>
-          <SelectMidiChannel
-            enabled={midiContext.enabled}
-            value={configStore.outputChannel}
-            onChange={(c) => {
-              if (isMidiChannel(c)) {
-                configStore.setOutputChannel(c);
-              }
-            }}
-          />
-        </Group>
-      </Fieldset>
-
       <Stack>
-        <Button
-          onClick={() => midiContext.initialize()}
-          leftSection={<IconRefresh />}
-        >
-          Scan
-        </Button>
-        <Button onClick={requestGlobalDumpSysex} leftSection={<IconBrain />}>
-          Request Global Dump
-        </Button>
-        <Button
-          onClick={requestEditBufferDumpSysex}
-          leftSection={<IconBrain />}
-        >
-          Request Patch Dump
-        </Button>
-        <Button onClick={sendPatchBufferDumpSysex} leftSection={<IconBrain />}>
-          Send Patch Dump
-        </Button>
-        <Button onClick={requestPatchNameSysex} leftSection={<IconBrain />}>
-          Request Patch Name
-        </Button>
+        <Group>
+          <Select
+            label="MIDI Ch In"
+            data={midiChannelData}
+            value={kiwiGlobalData.midiChannelIn.toString()}
+            onChange={(d) =>
+              setKiwiGlobalData({
+                ...kiwiGlobalData,
+                midiChannelIn: trimMidiChannel(Number(d)),
+              })
+            }
+          />
+
+          <Select
+            label="MIDI Ch Out"
+            data={midiChannelData}
+            value={kiwiGlobalData.midiChannelOut.toString()}
+            onChange={(d) =>
+              setKiwiGlobalData({
+                ...kiwiGlobalData,
+                midiChannelOut: trimMidiChannel(Number(d)),
+              })
+            }
+          />
+
+          <Select
+            label="Seq MIDI Ch Out"
+            data={midiChannelData}
+            value={kiwiGlobalData.sequencerMidiChannelOut.toString()}
+            onChange={(d) =>
+              setKiwiGlobalData({
+                ...kiwiGlobalData,
+                sequencerMidiChannelOut: trimMidiChannel(Number(d)),
+              })
+            }
+          />
+        </Group>
+
+        <Group align="flex-start">
+          <Fieldset w="52%" legend="Message Routing">
+            <Group wrap="nowrap" align="flex-start">
+              <JunoToggleSwitch
+                label="CC"
+                data={kiwi106MessageData}
+                selected={kiwiGlobalData.enableControlChange}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    enableControlChange: d,
+                  })
+                }
+              />
+
+              <JunoToggleSwitch
+                label="PC"
+                data={kiwi106MessageData}
+                selected={kiwiGlobalData.enableProgramChange}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    enableProgramChange: d,
+                  })
+                }
+              />
+
+              <JunoToggleSwitch
+                label="Sysex"
+                data={[
+                  { value: true, label: "rx-tx" },
+                  { value: false, label: "tx" },
+                ]}
+                selected={kiwiGlobalData.enableSysex}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    enableSysex: d,
+                  })
+                }
+              />
+              <JunoToggleSwitch
+                label="MIDI Thru"
+                data={midiSoftThroughData}
+                selected={kiwiGlobalData.midiSoftThrough}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    midiSoftThrough: d,
+                  })
+                }
+              />
+            </Group>
+          </Fieldset>
+
+          <Fieldset w="44%" legend="Clock">
+            <Group justify="flex-start" align="flex-start">
+              <ConfigFader
+                title="Internal Clock Rate"
+                value={kiwiGlobalData.intClockRate}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    intClockRate: trimIntRange(v, { min: 5, max: 300 }),
+                  })
+                }
+                min={5}
+                max={300}
+              />
+
+              <Stack align="flex-start">
+                <JunoToggleSwitch
+                  label="Clock Source"
+                  data={masterClockSources.map((value) => ({
+                    value,
+                    label: masterClockSourceLabels[value],
+                  }))}
+                  selected={kiwiGlobalData.masterClockSource}
+                  onSelect={(d) =>
+                    setKiwiGlobalData({
+                      ...kiwiGlobalData,
+                      masterClockSource: d,
+                    })
+                  }
+                />
+
+                <JunoToggleSwitch
+                  label="MIDI Clock Gen"
+                  tooltip="Output the internally generated clock as a midi clock command."
+                  data={enabledData}
+                  selected={kiwiGlobalData.enableMidiClockGen}
+                  onSelect={(d) =>
+                    setKiwiGlobalData({
+                      ...kiwiGlobalData,
+                      enableMidiClockGen: d,
+                    })
+                  }
+                />
+              </Stack>
+            </Group>
+          </Fieldset>
+        </Group>
+
+        <Group align="flex-start">
+          <Fieldset w="52%" legend="Misc">
+            <Stack justify="flex-start">
+              <JunoToggleSwitch
+                isFlaky
+                label="External Pedal Polarity"
+                data={externalPedalPolarityData}
+                selected={kiwiGlobalData.externalPedalPolarity}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    externalPedalPolarity: d,
+                  })
+                }
+              />
+
+              <JunoToggleSwitch
+                isFlaky
+                label="Key Transpose Disable"
+                data={enabledData}
+                selected={kiwiGlobalData.keyTransposeDisable}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    keyTransposeDisable: d,
+                  })
+                }
+              />
+
+              <JunoToggleSwitch
+                isFlaky
+                label="Clock Display"
+                data={enabledData}
+                selected={kiwiGlobalData.clockDisplay}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    clockDisplay: d,
+                  })
+                }
+              />
+
+              <JunoToggleSwitch
+                isFlaky
+                label="Scrolling Display"
+                data={enabledData}
+                selected={kiwiGlobalData.scrollingDisplay}
+                onSelect={(d) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    scrollingDisplay: d,
+                  })
+                }
+              />
+            </Stack>
+          </Fieldset>
+
+          <Fieldset w="44%" legend="Pattern Control">
+            <Group align="flex-start">
+              <ConfigFader
+                title="Pattern Level"
+                value={kiwiGlobalData.patternLevel}
+                max={4095}
+                onChange={(v) =>
+                  setKiwiGlobalData({
+                    ...kiwiGlobalData,
+                    patternLevel: v,
+                  })
+                }
+              />
+
+              <Stack align="center">
+                <JunoToggleSwitch
+                  isFlaky
+                  label="Pattern > VCA"
+                  data={enabledData}
+                  selected={kiwiGlobalData.patternDestinationVca}
+                  onSelect={(d) =>
+                    setKiwiGlobalData({
+                      ...kiwiGlobalData,
+                      patternDestinationVca: d,
+                    })
+                  }
+                />
+
+                <JunoToggleSwitch
+                  isFlaky
+                  label="Pattern > VCF"
+                  data={enabledData}
+                  selected={kiwiGlobalData.patternDestinationVcf}
+                  onSelect={(d) =>
+                    setKiwiGlobalData({
+                      ...kiwiGlobalData,
+                      patternDestinationVcf: d,
+                    })
+                  }
+                />
+
+                <JunoToggleSwitch
+                  isFlaky
+                  label="Pattern Clock Source"
+                  data={[
+                    { value: "seq" as const, label: "seq" },
+                    { value: "arp" as const, label: "arp" },
+                  ]}
+                  selected={kiwiGlobalData.patternClockSource}
+                  onSelect={(d) =>
+                    setKiwiGlobalData({
+                      ...kiwiGlobalData,
+                      patternClockSource: d,
+                    })
+                  }
+                />
+              </Stack>
+            </Group>
+          </Fieldset>
+        </Group>
+
+        <Fieldset legend="Levels">
+          <Group>
+            <ConfigFader
+              title="Internal Velocity"
+              value={kiwiGlobalData.internalVelocity}
+              min={63}
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  internalVelocity: trimMidiCcValue(v),
+                })
+              }
+            />
+
+            <ConfigFader
+              title="Internal Tune"
+              value={kiwiGlobalData.internalTune}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  internalTune: trimMidiCcValue(v),
+                })
+              }
+              max={127}
+            />
+
+            <ConfigFader
+              title="Mod Wheel Level"
+              value={kiwiGlobalData.mwLevel}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  mwLevel: trimMidiCcValue(v),
+                })
+              }
+            />
+
+            <ConfigFader
+              title="Aftertouch Level"
+              value={kiwiGlobalData.atLevel}
+              isFlaky
+              onChange={(v) =>
+                setKiwiGlobalData({
+                  ...kiwiGlobalData,
+                  atLevel: trimMidiCcValue(v),
+                })
+              }
+            />
+          </Group>
+        </Fieldset>
       </Stack>
     </Stack>
   );
 };
+
+interface FaderTitleProps {
+  flakyDescription?: string;
+  isFlaky?: boolean;
+  label: string;
+  tooltip?: string;
+}
+
+function FaderTitle({
+  flakyDescription,
+  isFlaky,
+  label,
+  tooltip,
+}: FaderTitleProps) {
+  const titleNode = (
+    <Group gap="xs">
+      <Title order={5}>{label}</Title>
+      {isFlaky && (
+        <Tooltip
+          label={
+            flakyDescription ??
+            "This setting is read-only, and cannot be written to the Kiwi106"
+          }
+        >
+          <IconAlertCircle />
+        </Tooltip>
+      )}
+    </Group>
+  );
+
+  return (
+    <>{tooltip ? <Tooltip label={tooltip}>{titleNode}</Tooltip> : titleNode}</>
+  );
+}
+
+interface ConfigFaderProps {
+  title: string;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  isFlaky?: boolean;
+  flakyDescription?: string;
+}
+
+function ConfigFader({
+  title,
+  value,
+  onChange,
+  min,
+  max,
+  isFlaky,
+  flakyDescription,
+}: ConfigFaderProps) {
+  return (
+    <Stack align="center">
+      <FaderTitle label={title} {...{ isFlaky, flakyDescription }} />
+      <VerticalSlider
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        disabled={isFlaky}
+      />
+      <Code>{value}</Code>
+    </Stack>
+  );
+}

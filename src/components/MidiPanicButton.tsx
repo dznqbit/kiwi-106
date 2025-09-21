@@ -2,7 +2,10 @@ import { Button, ButtonProps } from "@mantine/core";
 import { IconExclamationCircle } from "@tabler/icons-react";
 import { WebMidi } from "webmidi";
 
-export const MidiPanicButton = (props: ButtonProps & { title: string }) => {
+export const MidiPanicButton = ({
+  title,
+  ...props
+}: ButtonProps & { title: string }) => {
   const midiPanic = () => {
     for (const output of WebMidi.outputs) {
       output.sendAllSoundOff();
@@ -10,7 +13,14 @@ export const MidiPanicButton = (props: ButtonProps & { title: string }) => {
   };
 
   return (
-    <Button color="red" variant="juno" onClick={midiPanic} {...props}>
+    <Button
+      color="red"
+      variant="juno"
+      onClick={midiPanic}
+      title={title}
+      aria-label={title}
+      {...props}
+    >
       <IconExclamationCircle />
     </Button>
   );

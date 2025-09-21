@@ -3,7 +3,7 @@ import { Code, Group, Tooltip } from "@mantine/core";
 import { SysexMidiMessage } from "../../utils/formatMidiMessage";
 import { formatHex } from "../../utils/formatHex";
 import {
-  isKiwi106SysexMessage,
+  isAnyKiwi106SysexMessage,
   kiwi106PatchEditBufferFields,
   isKiwi106BufferDumpSysexMessage,
 } from "../../utils/sysexUtils";
@@ -23,7 +23,7 @@ export const SysexMessageData = ({
   }
 
   // Check if this is any other Kiwi-106 SysEx message
-  if (isKiwi106SysexMessage(messageEvent.message)) {
+  if (isAnyKiwi106SysexMessage(messageEvent.message)) {
     return <Kiwi106GenericSysexDisplay data={sysexData} />;
   }
 

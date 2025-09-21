@@ -4,6 +4,7 @@ import { useMove } from "@mantine/hooks";
 export interface VerticalSliderProps {
   value: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
   min?: number;
   max?: number;
   step?: number;
@@ -12,6 +13,7 @@ export interface VerticalSliderProps {
 export const VerticalSlider = ({
   value,
   onChange,
+  disabled = false,
   min = 0,
   max = 127,
   step = 1,
@@ -20,6 +22,10 @@ export const VerticalSlider = ({
   const normalizedValue = (value - min) / (max - min);
 
   const { ref } = useMove(({ y }) => {
+    if (disabled) {
+      return;
+    }
+
     // Invert y (1 - y) so moving up increases value
     const newNormalizedValue = 1 - y;
     const newValue =
@@ -44,8 +50,9 @@ export const VerticalSlider = ({
         width: trackWidth,
         height: trackHeight,
         position: "relative",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "ns-resize",
         borderRadius: 4,
+        opacity: disabled ? 0.8 : 1,
       }}
     >
       {/* Track */}

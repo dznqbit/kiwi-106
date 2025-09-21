@@ -14,20 +14,20 @@ import { PatchNameEditor } from "./PatchNameEditor";
 import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
-  isKiwi106SysexMessage,
-  kiwi106Identifier,
-  kiwiTechnicsSysexId,
-  isKiwi106BufferDumpSysexMessage,
-  parseKiwi106PatchEditBufferDumpCommand,
+  isAnyKiwi106SysexMessage,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
+import { isDcoRange } from "../types/KiwiPatch";
+import { dcoRangeControlChangeValues } from "../utils/kiwiMidi";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
   const configStore = useConfigStore();
   const { setKiwiPatch, setKiwiPatchProperty: setPatchProperty } =
     useKiwiPatchStore();
+  const kiwi106Context = useKiwi106Context();
+  const kiwiMidi = kiwi106Context.active ? kiwi106Context.kiwiMidi : null;
 
   useEffect(() => {
     // Wire incoming CC messages to the Kiwi store (ie READ MIDI IN)
@@ -54,7 +54,20 @@ export const JunoProgrammer = () => {
       const ccData = trimMidiCcValue(b2);
 
       if (patchKey) {
-        setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        if (patchKey === "dcoRange") {
+          const dcoRange =
+            Object.keys(dcoRangeControlChangeValues).find((k) => {
+              if (isDcoRange(k)) {
+                const [loBound, hiBound] = dcoRangeControlChangeValues[k];
+                if (ccData >= loBound && ccData <= hiBound) {
+                  return true;
+                }
+              }
+            }) ?? "16";
+          setPatchProperty(patchKey, dcoRange, { updatedBy: "Control Change" });
+        } else {
+          setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        }
       } else {
         console.log("Received unknown", kiwiCcLabel(b1));
       }
@@ -65,8 +78,7 @@ export const JunoProgrammer = () => {
     const sysexListener = (e: MessageEvent) => {
       const message = e.message;
 
-      if (!isKiwi106SysexMessage(message)) {
-        // console.log("Ignoring non-Kiwi message");
+      if (!isAnyKiwi106SysexMessage(message)) {
         return;
       }
 
@@ -81,10 +93,20 @@ export const JunoProgrammer = () => {
         return;
       }
 
-      if (isKiwi106BufferDumpSysexMessage(message)) {
-        const command = parseKiwi106PatchEditBufferDumpCommand(message);
-        setKiwiPatch(command.kiwiPatch, { updatedBy: "Sysex Dump" });
-        return;
+      const kiwi106Command = kiwiMidi?.parseSysex(message);
+
+      switch (kiwi106Command?.command) {
+        case "Global Dump":
+        case "Global Dump Received":
+          // noop. Global dump is handled at the kiwiMidi level
+          break;
+
+        case "Patch Edit Buffer Dump":
+          setKiwiPatch(kiwi106Command.kiwiPatch, { updatedBy: "Sysex Dump" });
+          break;
+
+        default:
+          console.log(`Unknown command`);
       }
     };
 
@@ -98,9 +120,9 @@ export const JunoProgrammer = () => {
   }, [
     midiContext.enabled,
     configStore.input,
-    configStore.inputChannel,
     setPatchProperty,
     setKiwiPatch,
+    kiwiMidi,
   ]);
 
   useEffect(() => {
@@ -125,26 +147,18 @@ export const JunoProgrammer = () => {
             console.log("incomplete (no output)");
             return;
           }
+
           const channel = output.channels[configStore.outputChannel];
 
           for (const k of objectKeys(diff)) {
             if (diff[k] !== undefined) {
-              if (isMidiCcValue(diff[k])) {
-                channel.sendControlChange(kiwiCcController(k), diff[k]);
-              } else {
-                const s = diff[k];
-
-                const updatePatchName = 0x0c;
-                const patchNameBytes = Array.from(s).map(
-                  (char) => char.charCodeAt(0) & 0x7f,
+              if (isDcoRange(diff[k])) {
+                channel.sendControlChange(
+                  kiwiCcController(k),
+                  dcoRangeControlChangeValues[diff[k]],
                 );
-
-                output.sendSysex(kiwiTechnicsSysexId, [
-                  ...kiwi106Identifier,
-                  0x00,
-                  updatePatchName,
-                  ...patchNameBytes,
-                ]);
+              } else if (isMidiCcValue(diff[k])) {
+                channel.sendControlChange(kiwiCcController(k), diff[k]);
               }
             }
           }
@@ -156,21 +170,11 @@ export const JunoProgrammer = () => {
   }, [configStore.output?.id, configStore.outputChannel]);
 
   return (
-    <Container size="xl" style={{ position: "relative" }} p={0} mx="md">
-      <DisconnectedOverlay />
+    <Container size="xl" style={{ position: "relative" }} p={0} px="md">
+      {!kiwi106Context.active && <Overlay backgroundOpacity={0.5} blur={3} />}
       <JunoPatchSelector />
       <PatchNameEditor />
       <JunoSliders />
     </Container>
   );
 };
-
-function DisconnectedOverlay() {
-  const kiwi106Context = useKiwi106Context();
-
-  if (kiwi106Context.active) {
-    return <></>;
-  }
-
-  return <Overlay backgroundOpacity={0.5} blur={3} />;
-}

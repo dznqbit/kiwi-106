@@ -54,7 +54,6 @@ export const EnvelopeSelector = ({
     };
 
     const envelopeSourceCcValue = waveformToCcValue(waveform);
-    console.log("Alright set", envelopeSourceCcValue);
     setKiwiPatchProperty(property, envelopeSourceCcValue, {
       updatedBy: "Editor Change",
     });

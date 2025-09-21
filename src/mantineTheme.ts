@@ -2,6 +2,7 @@ import {
   Button,
   createTheme,
   defaultVariantColorsResolver,
+  Modal,
   parseThemeColor,
 } from "@mantine/core";
 import buttonStyles from "./theme/Button.module.css";
@@ -77,7 +78,11 @@ export const mantineTheme = createTheme({
 
     sizes: {
       h1: {
-        fontSize: "64px",
+        fontSize: "4rem",
+      },
+
+      h2: {
+        fontSize: "1.625rem",
       },
 
       h5: {
@@ -121,6 +126,19 @@ export const mantineTheme = createTheme({
           default:
             return junoButtonMeasurements(36);
         }
+      },
+    }),
+
+    Modal: Modal.extend({
+      styles: {
+        close: {
+          marginTop: -5,
+        },
+        title: {
+          fontWeight: "bold",
+          fontSize: "1.625rem",
+          lineHeight: 0.8,
+        },
       },
     }),
   },
