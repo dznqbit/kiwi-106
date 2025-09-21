@@ -3,8 +3,13 @@ import { Button, ButtonProps } from "@mantine/core";
 import { useConfigStore } from "../stores/configStore";
 import { IconMusic } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
+import { useKiwi106Context } from "../hooks/useKiwi106Context";
 
-export const NoteButton = (props: ButtonProps & { title: string }) => {
+export const NoteButton = ({
+  title,
+  ...props
+}: ButtonProps & { title: string }) => {
+  const kiwi106Context = useKiwi106Context();
   const configStore = useConfigStore();
   const [isPlaying, { open, close }] = useDisclosure(false);
 
@@ -36,9 +41,16 @@ export const NoteButton = (props: ButtonProps & { title: string }) => {
   return (
     <Button
       {...props}
+      title={title}
+      aria-label={title}
+      disabled={!kiwi106Context.active}
       variant="juno"
       color={isPlaying ? "blue.8" : "blue"}
       onClick={() => {
+        if (!kiwi106Context.active) {
+          return;
+        }
+
         if (isPlaying) {
           noteOff();
           close();

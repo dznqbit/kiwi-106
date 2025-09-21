@@ -84,6 +84,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                 <Button
                   title="Request Global Dump"
                   variant="juno"
+                  disabled={!kiwi106Context.active}
                   onClick={() => {
                     if (kiwi106Context.active) {
                       kiwi106Context.kiwiMidi.requestSysexGlobalDump();
@@ -95,6 +96,7 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
                 <Button
                   title="Send Global Dump"
                   variant="juno"
+                  disabled={!kiwi106Context.active}
                   onClick={sendSysexGlobalDump}
                 >
                   <IconWorldUp />

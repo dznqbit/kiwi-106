@@ -66,8 +66,8 @@ function Kiwi106Programmer() {
             <JunoButtonGroup>
               <NoteButton title="Test Note" />
               <MidiPanicButton title="Panic" />
-              <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
               <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
+              <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
               <Button
                 title="Logs"
                 variant="juno"

@@ -1,9 +1,15 @@
 import _ from "lodash";
-import { Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
+import {
+  kiwi106SysexCommandBytes,
+  Kiwi106SysexCommandName,
+  kiwi106SysexCommandNames,
+  Kiwi106SysexPatchEditBufferDumpCommand,
+} from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { dcoRangeSysexValues } from "./kiwiMidi";
 import { objectKeys } from "./objectKeys";
+import { trimMidiCcValue } from "./trimMidiCcValue";
 
 /** Packs a bunch of booleans into a single number */
 export const packBits = (...args: boolean[]) => {
@@ -88,33 +94,43 @@ export const isKiwiTechnicsSysexMessage = (message: MidiMessage) => {
   return _.isEqual(manufacturerId, kiwiTechnicsSysexId);
 };
 
-export const isKiwi106SysexMessage = (message: MidiMessage) => {
+export const isAnyKiwi106SysexMessage = (message: MidiMessage) => {
   return (
     isKiwiTechnicsSysexMessage(message) &&
     _.isEqual(message.data.slice(4, 6), kiwi106Identifier)
   );
 };
 
+export const isKiwi106SysexMessage = (
+  message: MidiMessage,
+  command: Kiwi106SysexCommandName,
+) => {
+  return (
+    isAnyKiwi106SysexMessage(message) &&
+    message.data[7] === kiwi106SysexCommandBytes[command]
+  );
+};
+
 export const isKiwi106GlobalDumpSysexMessage = (message: MidiMessage) => {
-  return isKiwi106SysexMessage(message) && message.data[7] === 0x02;
+  return isKiwi106SysexMessage(message, "Global Dump");
 };
 
 export const isKiwi106GlobalDumpReceivedSysexMessage = (
   message: MidiMessage,
 ) => {
-  return isKiwi106SysexMessage(message) && message.data[7] === 0x25;
+  return isKiwi106SysexMessage(message, "Global Dump Received");
 };
 
 export const isKiwi106BufferDumpSysexMessage = (message: MidiMessage) => {
-  return isKiwi106SysexMessage(message) && message.data[7] == 0x04;
+  return isKiwi106SysexMessage(message, "Patch Edit Buffer Dump");
 };
 
 export const isKiwi106RequestPatchNameSysexMessage = (message: MidiMessage) => {
-  return isKiwi106SysexMessage(message) && message.data[7] === 0x0b;
+  return isKiwi106SysexMessage(message, "Request Patch Name");
 };
 
 export const isKiwi106UpdatePatchNameSysexMessage = (message: MidiMessage) => {
-  return isKiwi106SysexMessage(message) && message.data[7] === 0x0c;
+  return isKiwi106SysexMessage(message, "Patch Name");
 };
 
 export const kiwi106PatchEditBufferFields = {
@@ -455,7 +471,8 @@ export const parseKiwi106PatchEditBufferDumpCommand = (
   const combine12BitToMidi = (hiIdx: number, loIdx: number): MidiCcValue => {
     const hi = data[hiIdx] & 0x1f; // 5 bits
     const lo = data[loIdx] & 0x7f; // 7 bits
-    return pack12Bit(hi, lo);
+    const twelveBit = pack12Bit(hi, lo);
+    return trimMidiCcValue(twelveBit / 4096);
   };
 
   // Helper to convert single byte to MidiCcValue

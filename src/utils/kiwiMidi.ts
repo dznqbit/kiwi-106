@@ -6,7 +6,7 @@ import {
   kiwiPatchToSysexBytes,
   isKiwi106BufferDumpSysexMessage,
   parseKiwi106PatchEditBufferDumpCommand,
-  isKiwi106SysexMessage,
+  isAnyKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
   isKiwi106GlobalDumpReceivedSysexMessage,
 } from "./sysexUtils";
@@ -116,7 +116,7 @@ export const buildKiwiMidi = ({
     },
 
     parseSysex: (message: MidiMessage) => {
-      if (!isKiwi106SysexMessage(message)) {
+      if (!isAnyKiwi106SysexMessage(message)) {
         throw new Error(
           "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
         );
@@ -124,6 +124,7 @@ export const buildKiwiMidi = ({
 
       if (isKiwi106BufferDumpSysexMessage(message)) {
         const command = parseKiwi106PatchEditBufferDumpCommand(message);
+        console.log("Patch Edit Buffer Dump", command);
         return command;
       }
 

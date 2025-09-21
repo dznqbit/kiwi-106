@@ -10,7 +10,12 @@ export const RequestPatchBufferDumpButton = (
   return (
     <Button
       {...props}
-      onClick={() => kiwi106Context.kiwiMidi?.requestSysexEditBufferDump()}
+      disabled={!kiwi106Context.active}
+      onClick={() => {
+        if (kiwi106Context.active) {
+          kiwi106Context.kiwiMidi.requestSysexEditBufferDump();
+        }
+      }}
       variant="juno"
     >
       <IconSettingsDown />

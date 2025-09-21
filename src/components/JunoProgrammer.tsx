@@ -14,7 +14,7 @@ import { PatchNameEditor } from "./PatchNameEditor";
 import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
-  isKiwi106SysexMessage,
+  isAnyKiwi106SysexMessage,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
@@ -78,7 +78,7 @@ export const JunoProgrammer = () => {
     const sysexListener = (e: MessageEvent) => {
       const message = e.message;
 
-      if (!isKiwi106SysexMessage(message)) {
+      if (!isAnyKiwi106SysexMessage(message)) {
         return;
       }
 
@@ -106,7 +106,7 @@ export const JunoProgrammer = () => {
           break;
 
         default:
-          console.log("Unknown command");
+          console.log(`Unknown command`);
       }
     };
 
