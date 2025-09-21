@@ -219,6 +219,7 @@ const simplePatchDumpSysex: number[] = [
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ];
 
+/* THIS HAS NEVER WORKED, AND IS DEPRECATED IN FAVOR OF utils/kiwi106Sysex/patchEditBufferDump.ts */
 export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
   // const dataBytes = new Array(128).fill(0);
   const dataBytes = [...simplePatchDumpSysex];
@@ -457,6 +458,7 @@ export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
   return dataBytes;
 };
 
+/* THIS IS DEPRECATED IN FAVOR OF utils/kiwi106Sysex/patchEditBufferDump.ts */
 export const parseKiwi106PatchEditBufferDumpCommand = (
   m: MidiMessage,
 ): Kiwi106SysexPatchEditBufferDumpCommand => {

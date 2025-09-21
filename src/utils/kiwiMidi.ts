@@ -17,6 +17,7 @@ import {
   buildKiwi106GlobalDumpSysexData,
   parseKiwi106GlobalDumpCommand,
 } from "./kiwi106Sysex/globalDump";
+import { parseKiwi106PatchEditBufferSysexDump } from "./kiwi106Sysex/patchEditBufferDump";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "16": [0, 31],
@@ -123,7 +124,7 @@ export const buildKiwiMidi = ({
       }
 
       if (isKiwi106BufferDumpSysexMessage(message)) {
-        const command = parseKiwi106PatchEditBufferDumpCommand(message);
+        const command = parseKiwi106PatchEditBufferSysexDump(message);
         console.log("Patch Edit Buffer Dump", command);
         return command;
       }
