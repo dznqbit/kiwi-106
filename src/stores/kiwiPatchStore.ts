@@ -31,7 +31,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     portamentoTime: 0,
     volume: 0,
     dcoRange: "16",
-    dcoWave: 0,
+    dcoWave: "off",
     dcoPwmModAmount: 0,
     dcoPwmControl: 0,
     dcoLfoModAmount: 0,

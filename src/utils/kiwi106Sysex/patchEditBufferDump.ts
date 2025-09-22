@@ -73,7 +73,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     portamentoTime: 0,
     volume: 0,
     dcoRange,
-    dcoWave: 0,
+    dcoWave: "off",
     dcoPwmModAmount: 0,
     dcoPwmControl: 0,
     dcoLfoModAmount: 0,
