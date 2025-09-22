@@ -18,8 +18,11 @@ import {
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { isDcoRange } from "../types/KiwiPatch";
-import { dcoRangeControlChangeValues } from "../utils/kiwiMidi";
+import { isDcoRange, isDcoWave } from "../types/KiwiPatch";
+import {
+  dcoRangeControlChangeValues,
+  dcoWaveControlChangeValues,
+} from "../utils/kiwiMidi";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -65,6 +68,17 @@ export const JunoProgrammer = () => {
               }
             }) ?? "16";
           setPatchProperty(patchKey, dcoRange, { updatedBy: "Control Change" });
+        } else if (patchKey === "dcoWave") {
+          const dcoWave =
+            Object.keys(dcoWaveControlChangeValues).find((k) => {
+              if (isDcoWave(k)) {
+                const [loBound, hiBound] = dcoWaveControlChangeValues[k];
+                if (ccData >= loBound && ccData <= hiBound) {
+                  return true;
+                }
+              }
+            }) ?? "16";
+          setPatchProperty(patchKey, dcoWave, { updatedBy: "Control Change" });
         } else {
           setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
         }
@@ -151,14 +165,14 @@ export const JunoProgrammer = () => {
           const channel = output.channels[configStore.outputChannel];
 
           for (const k of objectKeys(diff)) {
-            if (diff[k] !== undefined) {
-              if (isDcoRange(diff[k])) {
-                channel.sendControlChange(
-                  kiwiCcController(k),
-                  dcoRangeControlChangeValues[diff[k]],
-                );
-              } else if (isMidiCcValue(diff[k])) {
-                channel.sendControlChange(kiwiCcController(k), diff[k]);
+            const value = diff[k];
+            if (value !== undefined) {
+              if (isDcoRange(value)) {
+                kiwiMidi?.sendControlChange("dcoRange", value);
+              } else if (isDcoWave(value)) {
+                kiwiMidi?.sendControlChange("dcoWave", value);
+              } else if (isMidiCcValue(value)) {
+                channel.sendControlChange(kiwiCcController(k), value);
               }
             }
           }
@@ -167,7 +181,7 @@ export const JunoProgrammer = () => {
     );
 
     return unsubscribeKiwiSyncer;
-  }, [configStore.output?.id, configStore.outputChannel]);
+  }, [configStore.output?.id, configStore.outputChannel, kiwiMidi]);
 
   return (
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">

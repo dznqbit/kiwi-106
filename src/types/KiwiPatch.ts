@@ -17,7 +17,12 @@ export const isDcoRange = (x: unknown): x is DcoRange => {
   return typeof x === "string" && ["16", "8", "4"].includes(x);
 };
 
-export type DcoWave = "off" | "ramp" | "pulse" | "ramp-and-pulse";
+const dcoWaves = ["off", "ramp", "pulse", "ramp-and-pulse"] as const;
+export type DcoWave = (typeof dcoWaves)[number];
+export const isDcoWave = (x: unknown): x is DcoWave => {
+  return typeof x === "string" && dcoWaves.includes(x);
+};
+
 export type PwmControlSource =
   | "manual"
   | "lfo1"
@@ -45,7 +50,7 @@ export interface KiwiPatch {
   volume: MidiCcValue;
 
   dcoRange: DcoRange;
-  dcoWave: MidiCcValue;
+  dcoWave: DcoWave;
   dcoPwmModAmount: MidiCcValue;
   dcoPwmControl: MidiCcValue;
   dcoLfoModAmount: MidiCcValue;

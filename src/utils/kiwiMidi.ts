@@ -9,7 +9,14 @@ import {
   isKiwi106GlobalDumpSysexMessage,
   isKiwi106GlobalDumpReceivedSysexMessage,
 } from "./sysexUtils";
-import { DcoRange, KiwiPatch, KiwiPatchAddress } from "../types/KiwiPatch";
+import {
+  DcoRange,
+  DcoWave,
+  isDcoRange,
+  isDcoWave,
+  KiwiPatch,
+  KiwiPatchAddress,
+} from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import {
@@ -17,11 +24,19 @@ import {
   parseKiwi106GlobalDumpCommand,
 } from "./kiwi106Sysex/globalDump";
 import { parseKiwi106PatchEditBufferSysexDump } from "./kiwi106Sysex/patchEditBufferDump";
+import { kiwiCcController } from "./kiwiCcController";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "16": [0, 31],
   "8": [32, 63],
   "4": [64, 127],
+};
+
+export const dcoWaveControlChangeValues: Record<DcoWave, MidiCcValue[]> = {
+  off: [0, 31],
+  ramp: [32, 63],
+  pulse: [64, 95],
+  "ramp-and-pulse": [96, 127],
 };
 
 export const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
@@ -89,6 +104,26 @@ export const buildKiwiMidi = ({
 
         output.sendControlChange(32, groupIndex);
         output.sendProgramChange(baseTenPatchNumber);
+      }
+    },
+
+    sendControlChange: <K extends keyof KiwiPatch>(
+      key: K,
+      value: KiwiPatch[K],
+    ) => {
+      let ccByte = undefined;
+
+      if (key === "dcoRange" && isDcoRange(value)) {
+        ccByte = dcoRangeControlChangeValues[value][0];
+      }
+
+      if (key === "dcoWave" && isDcoWave(value)) {
+        console.log("SendControlChange");
+        ccByte = dcoWaveControlChangeValues[value][0];
+      }
+
+      if (ccByte !== undefined) {
+        output.sendControlChange(kiwiCcController(key), ccByte);
       }
     },
 
