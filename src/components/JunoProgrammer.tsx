@@ -18,7 +18,7 @@ import {
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { isDcoRange, isDcoWave } from "../types/KiwiPatch";
+import { isDcoRange, isDcoWave, isLfoSource } from "../types/KiwiPatch";
 import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
@@ -171,6 +171,8 @@ export const JunoProgrammer = () => {
                 kiwiMidi?.sendControlChange("dcoRange", value);
               } else if (isDcoWave(value)) {
                 kiwiMidi?.sendControlChange("dcoWave", value);
+              } else if (isLfoSource(value)) {
+                kiwiMidi?.sendControlChange(k, value);
               } else if (isMidiCcValue(value)) {
                 channel.sendControlChange(kiwiCcController(k), value);
               }
