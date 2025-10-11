@@ -1,56 +1,24 @@
 import { Button, Stack, Text } from "@mantine/core";
-import { KiwiPatch } from "../types/KiwiPatch";
+import { isLfoSource, KiwiPatch, LfoSource } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
-
-export type LfoSource = "lfo1" | "lfo2";
 
 interface LfoSelectorButtonProps {
   property: keyof KiwiPatch;
   label?: string;
 }
 
-const lfoSelectRanges: Record<LfoSource, MidiCcValue[]> = {
-  lfo1: [0, 63],
-  lfo2: [64, 127],
-};
-
 export const LfoSelector = ({ property, label }: LfoSelectorButtonProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const lfoSelectValue = kiwiPatch[property];
+  const lfoSource = kiwiPatch[property];
 
-  if (!isMidiCcValue(lfoSelectValue)) {
-    throw new Error("Woah! can't set string from LfoSelector");
+  if (!isLfoSource(lfoSource)) {
+    throw new Error(`LfoSelector expected string source for "${property}"`);
   }
 
-  const ccValueToLfoSource = (ccValue: MidiCcValue): LfoSource => {
-    for (const [lfoSelectValue, [min, max]] of Object.entries(
-      lfoSelectRanges,
-    )) {
-      if (ccValue >= min && ccValue <= max) {
-        return lfoSelectValue as LfoSource;
-      }
-    }
-    return "lfo1"; // Default fallback
-  };
-
-  const lfoSource: LfoSource = ccValueToLfoSource(lfoSelectValue);
-
   const setLfoSource = (lfoSource: LfoSource) => {
-    const lfoSourceToCcValue = (lfoSource: LfoSource): MidiCcValue => {
-      const [min, _] = lfoSelectRanges[lfoSource];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
-
-      return midiCcValue;
-    };
-
-    const lfoSourceCcValue = lfoSourceToCcValue(lfoSource);
-    console.log("Setting LFO source", lfoSourceCcValue);
-    setKiwiPatchProperty(property, lfoSourceCcValue, {
+    console.log(`Setting ${property} LFO source`, lfoSource);
+    setKiwiPatchProperty(property, lfoSource, {
       updatedBy: "Editor Change",
     });
   };

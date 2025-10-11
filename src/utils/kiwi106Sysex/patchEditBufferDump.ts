@@ -1,9 +1,10 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
-import { KiwiPatch } from "../../types/KiwiPatch";
+import { KiwiPatch, LfoSource } from "../../types/KiwiPatch";
 import { MidiMessage } from "../../types/Midi";
-import { dcoRangeSysexValues } from "../kiwiMidi";
+import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
-import { isKiwi106SysexMessage } from "../sysexUtils";
+import { isKiwi106SysexMessage, pack12Bit } from "../sysexUtils";
+import { trimMidiCcValue } from "../trimMidiCcValue";
 
 /** Build the sysex DATA for a Patch Edit Buffer Dump
  * Omits:
@@ -11,7 +12,7 @@ import { isKiwi106SysexMessage } from "../sysexUtils";
  * - 2 null bytes
  */
 export const buildKiwi106PatchEditBufferSysexDump = (
-  _kiwiPatch: KiwiPatch,
+  _kiwiPatch: KiwiPatch
 ): number[] => {
   // This is the patch data sysex ONLY!
   // This skips the sysex headers and the "2 null bytes"
@@ -37,7 +38,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
 
 /** Parse a complete Midi Message into a kiwi106 Patch Edit Buffer Dump */
 export const parseKiwi106PatchEditBufferSysexDump = (
-  m: MidiMessage,
+  m: MidiMessage
 ): Kiwi106SysexPatchEditBufferDumpCommand => {
   if (!isKiwi106SysexMessage(m, "Patch Edit Buffer Dump")) {
     throw new Error("Message is not a Kiwi-106 Patch Edit Buffer Dump Command");
@@ -59,26 +60,54 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   const dcoRangeBytes = dataBytes[20] & 0b11;
   const dcoRange =
     objectKeys(dcoRangeSysexValues).find(
-      (k) => dcoRangeSysexValues[k] == dcoRangeBytes,
+      (k) => dcoRangeSysexValues[k] == dcoRangeBytes
     ) ?? "4";
+  const dcoWaveBytes = dataBytes[20] & 0b1100;
+  const dcoWave =
+    objectKeys(dcoWaveSysexValues).find(
+      (k) => dcoWaveSysexValues[k] == dcoWaveBytes
+    ) ?? "off";
 
-  // const dcoSawEnabled = dataBytes[20] & 0b100;
-  // const dcoWaveEnabled = dataBytes[20] & 0b1000;
+  // These values come over as a 12-bit amount, but we store as 7-bit
+  const dcoEnvelopeModAmount = trimMidiCcValue(
+    pack12Bit(dataBytes[21], dataBytes[22]) >> 5
+  );
+  const dcoLfoModAmount = trimMidiCcValue(
+    pack12Bit(dataBytes[23], dataBytes[24]) >> 5
+  );
+  const dcoBendAmount = trimMidiCcValue(
+    pack12Bit(dataBytes[25], dataBytes[26]) >> 5
+  );
+  const lfoModWheelAmount = trimMidiCcValue(
+    pack12Bit(dataBytes[27], dataBytes[28]) >> 5
+  );
+  const dcoPwmModAmount = trimMidiCcValue(
+    pack12Bit(dataBytes[29], dataBytes[30]) >> 5
+  );
 
+  // Byte 31 DCO Control
+  const dcoControlByte = dataBytes[31];
+  const pwmEnvelope = dcoControlByte & 0b0100_0000;
+  const dcoEnvelope = dcoControlByte & 0b0010_0000;
+  const pwmSource = dcoControlByte & 0b0001_1100;
+  const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
+  // docs suggest that there's an extra byte (???) that controls LFO Polarity control...
+  // but we're going to ignore that for now.
+  const dcoLfoSource: LfoSource = (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
+  
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
   // const portamentoTime = combine12BitToMidi(94, 95);
-
   const kiwiPatch: KiwiPatch = {
     patchName,
     portamentoTime: 0,
     volume: 0,
     dcoRange,
-    dcoWave: "off",
-    dcoPwmModAmount: 0,
+    dcoWave,
+    dcoPwmModAmount,
     dcoPwmControl: 0,
-    dcoLfoModAmount: 0,
-    dcoLfoSource: 0,
-    dcoEnvelopeModAmount: 0,
+    dcoLfoModAmount,
+    dcoLfoSource,
+    dcoEnvelopeModAmount,
     dcoEnvelopeSource: 0,
     lfoMode: 0,
     lfo1Wave: 0,
@@ -96,7 +125,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     vcfPitchFollow: 0,
     vcfHiPassCutoff: 0,
     vcfLfoModAmount: 0,
-    vcfLfoSource: 0,
+    vcfLfoSource: "lfo1",
     vcfEnvelopeModAmount: 0,
     vcfEnvelopeSource: 0,
     env1Attack: 0,
@@ -105,15 +134,15 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     env1Release: 0,
     chorusMode: 0,
     vcaLfoModAmount: 0,
-    vcaLfoSource: 0,
+    vcaLfoSource: "lfo1",
     vcaMode: 0,
     env2Attack: 0,
     env2Decay: 0,
     env2Sustain: 0,
     env2Release: 0,
-    dcoBendAmount: 0,
+    dcoBendAmount,
     vcfBendAmount: 0,
-    lfoModWheelAmount: 0,
+    lfoModWheelAmount,
     keyMode: 0,
     keyAssignDetune: 0,
     keyAssignDetuneMode: 0,

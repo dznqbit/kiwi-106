@@ -77,7 +77,7 @@ export const JunoProgrammer = () => {
                   return true;
                 }
               }
-            }) ?? "16";
+            }) ?? "off";
           setPatchProperty(patchKey, dcoWave, { updatedBy: "Control Change" });
         } else {
           setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });

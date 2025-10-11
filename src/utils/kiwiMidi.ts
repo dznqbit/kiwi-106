@@ -14,8 +14,10 @@ import {
   DcoWave,
   isDcoRange,
   isDcoWave,
+  isLfoSource,
   KiwiPatch,
   KiwiPatchAddress,
+  LfoSource,
 } from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
@@ -32,6 +34,12 @@ export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "4": [64, 127],
 };
 
+export const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
+  "16": 0b00,
+  "8": 0b01,
+  "4": 0b10,
+};
+
 export const dcoWaveControlChangeValues: Record<DcoWave, MidiCcValue[]> = {
   off: [0, 31],
   ramp: [32, 63],
@@ -39,10 +47,18 @@ export const dcoWaveControlChangeValues: Record<DcoWave, MidiCcValue[]> = {
   "ramp-and-pulse": [96, 127],
 };
 
-export const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
-  "16": 0b00,
-  "8": 0b01,
-  "4": 0b10,
+export const dcoWaveSysexValues: Record<DcoWave, MidiCcValue> = {
+  off: 0,
+  ramp: 4,
+  pulse: 8,
+  "ramp-and-pulse": 12,
+};
+
+const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
+  lfo1: [0, 63],
+  lfo2: [64, 127],
+  "lfo1-inverted": [],
+  "lfo2-inverted": [],
 };
 
 export const buildKiwiMidi = ({
@@ -118,8 +134,11 @@ export const buildKiwiMidi = ({
       }
 
       if (key === "dcoWave" && isDcoWave(value)) {
-        console.log("SendControlChange");
         ccByte = dcoWaveControlChangeValues[value][0];
+      }
+
+      if (key === "dcoLfoSource" && isLfoSource(value)) {
+        ccByte = dcoLfoSourceControlChangeValues[value][0];
       }
 
       if (ccByte !== undefined) {

@@ -20,8 +20,14 @@ export const isDcoRange = (x: unknown): x is DcoRange => {
 const dcoWaves = ["off", "ramp", "pulse", "ramp-and-pulse"] as const;
 export type DcoWave = (typeof dcoWaves)[number];
 export const isDcoWave = (x: unknown): x is DcoWave => {
-  return typeof x === "string" && dcoWaves.includes(x);
+  return typeof x === "string" && dcoWaves.includes(x as DcoWave);
 };
+
+const lfoSources = ["lfo1", "lfo2", "lfo1-inverted", "lfo2-inverted"] as const;
+export type LfoSource = (typeof lfoSources)[number];
+export const isLfoSource = (x: unknown): x is LfoSource => {
+  return typeof x === "string" && lfoSources.includes(x as LfoSource);
+}
 
 export type PwmControlSource =
   | "manual"
@@ -43,6 +49,7 @@ export type LfoWaveform =
   | "triangle"
   | "reverse-sawtooth"
   | "random";
+
 export interface KiwiPatch {
   patchName: string;
 
@@ -54,7 +61,7 @@ export interface KiwiPatch {
   dcoPwmModAmount: MidiCcValue;
   dcoPwmControl: MidiCcValue;
   dcoLfoModAmount: MidiCcValue;
-  dcoLfoSource: MidiCcValue;
+  dcoLfoSource: LfoSource;
   dcoEnvelopeModAmount: MidiCcValue;
   dcoEnvelopeSource: MidiCcValue;
 
@@ -76,7 +83,7 @@ export interface KiwiPatch {
   vcfPitchFollow: MidiCcValue;
   vcfHiPassCutoff: MidiCcValue;
   vcfLfoModAmount: MidiCcValue;
-  vcfLfoSource: MidiCcValue;
+  vcfLfoSource: LfoSource;
   vcfEnvelopeModAmount: MidiCcValue;
   vcfEnvelopeSource: MidiCcValue;
 
@@ -87,7 +94,7 @@ export interface KiwiPatch {
 
   chorusMode: MidiCcValue;
   vcaLfoModAmount: MidiCcValue;
-  vcaLfoSource: MidiCcValue;
+  vcaLfoSource: LfoSource;
   vcaMode: MidiCcValue;
 
   env2Attack: MidiCcValue;
