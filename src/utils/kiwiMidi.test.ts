@@ -3,6 +3,8 @@ import { buildKiwiMidi } from "./kiwiMidi";
 import { describe, expect, it, Mock, vi } from "vitest";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import { MidiMessage } from "../types/Midi";
+import { Kiwi106SysexPatchEditBufferDumpCommand } from "../types/Kiwi106Sysex";
+import { isKiwi106BufferDumpSysexMessage, pack12Bit, unpack12Bit } from "./sysexUtils";
 
 vi.mock("webmidi");
 
@@ -150,6 +152,64 @@ describe("kiwiMidi", () => {
         expect(data[22]).toBe(0b0000); // Int clock rate lo
       });
     });
+  });
+
+  describe("patchEditBufferDump", () => {
+    it("works", () => {
+      const { kiwiMidi } = subject();
+      const patchName = [
+        0x54, 0x65, 0x73, 0x74, 0x20, 0x50, 0x61, 0x74, 0x63, 0x68,  // "Test Patch"
+        0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,  // 10 spaces padding
+      ];
+      
+      const dcoWaveRangeByte = 0b00001100; // Ramp + Pulse, 16'
+      const dcoEnvelopeModBytes = unpack12Bit(0xFA3);
+      const dcoLfoModBytes = unpack12Bit(0xEB4);
+      const dcoBendBytes = unpack12Bit(0xC82);
+      const lfoModWheelBytes = unpack12Bit(0x1D6);
+      const dcoPwmModBytes = unpack12Bit(0x073);
+      // Normal PWM env, normal DCO env, LFO 1 PWM Source, DCO Env 1, DCO Lfo 2
+      const dcoControlByte = 0b0000110;
+
+      const patchEditBufferDumpMessage: MidiMessage = {
+        isSystemMessage: true,
+        isChannelMessage: false,
+        data: [
+          0xF0,             // Sysex header
+          0x00, 0x21, 0x16, // Kiwitechnics mfg id
+          0x60, 0x03,       // Kiwi106 identifier
+          0x00,             // Device ID, in practice always 0
+          0x04,             // Patch Edit Buffer dump
+          0x00, 0x00,       // Two null bytes per docs
+          ...patchName,     // 20 bytes of ASCII text
+          dcoWaveRangeByte,       // single byte 0000zyxx
+          ...dcoEnvelopeModBytes, // 2 byte 12-bit value
+          ...dcoLfoModBytes,      // 2 byte 12-bit value
+          ...dcoBendBytes,        // 2 byte 12-bit value
+          ...lfoModWheelBytes,    // 2 byte 12-bit value
+          ...dcoPwmModBytes,      // 2 byte 12-bit value
+          dcoControlByte,
+          0xF7,                   // Sysex footer
+        ]
+      };
+
+      const result = kiwiMidi.parseSysex(patchEditBufferDumpMessage);
+      expect(result.isValid).toBeTruthy();
+      expect(result.command).toEqual("Patch Edit Buffer Dump");
+      
+      if (result.command === "Patch Edit Buffer Dump") {
+        const kp = result.kiwiPatch;
+        expect(kp.patchName).toEqual("Test Patch");
+        expect(kp.dcoWave).toEqual("ramp-and-pulse");
+        expect(kp.dcoRange).toEqual("16");
+        expect(kp.dcoEnvelopeModAmount).toEqual(0xFA3 >> 5);
+        expect(kp.dcoLfoModAmount).toEqual(0xEB4 >> 5);
+        expect(kp.dcoBendAmount).toEqual(0xC82 >> 5);
+        expect(kp.lfoModWheelAmount).toEqual(0x1D6 >> 5);
+        expect(kp.dcoPwmModAmount).toEqual(0x073 >> 5);
+        expect(kp.dcoLfoSource).toEqual("lfo2");
+      }
+    })
   });
 
   describe("parseSysex", () => {

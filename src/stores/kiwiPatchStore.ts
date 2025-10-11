@@ -31,11 +31,11 @@ const blankKiwiPatchState: KiwiPatchState = {
     portamentoTime: 0,
     volume: 0,
     dcoRange: "16",
-    dcoWave: 0,
+    dcoWave: "off",
     dcoPwmModAmount: 0,
     dcoPwmControl: 0,
     dcoLfoModAmount: 0,
-    dcoLfoSource: 0,
+    dcoLfoSource: "lfo1",
     dcoEnvelopeModAmount: 0,
     dcoEnvelopeSource: 0,
 
@@ -57,7 +57,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     vcfPitchFollow: 0,
     vcfHiPassCutoff: 0,
     vcfLfoModAmount: 0,
-    vcfLfoSource: 0,
+    vcfLfoSource: "lfo1",
     vcfEnvelopeModAmount: 0,
     vcfEnvelopeSource: 0,
 
@@ -67,7 +67,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     env1Release: 0,
     chorusMode: 0,
     vcaLfoModAmount: 0,
-    vcaLfoSource: 0,
+    vcaLfoSource: "lfo1",
     vcaMode: 0,
 
     env2Attack: 0,

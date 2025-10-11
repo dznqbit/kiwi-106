@@ -14,6 +14,10 @@ export interface KiwiMidi {
   requestSysexPatchName(): void;
 
   sendProgramChange(patchAddress: KiwiPatchAddress | "manual"): void;
+  sendControlChange<K extends keyof KiwiPatch>(
+    key: K,
+    value: KiwiPatch[K],
+  ): void;
   sendSysexPatchBufferDump(kiwiPatch: KiwiPatch): void;
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
