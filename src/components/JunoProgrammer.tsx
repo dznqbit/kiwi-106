@@ -18,7 +18,12 @@ import {
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { isDcoRange, isDcoWave, isLfoSource } from "../types/KiwiPatch";
+import {
+  isDcoRange,
+  isDcoWave,
+  isLfoSource,
+  KiwiPatch,
+} from "../types/KiwiPatch";
 import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
@@ -167,19 +172,31 @@ export const JunoProgrammer = () => {
           for (const k of objectKeys(diff)) {
             const value = diff[k];
             if (value !== undefined) {
-              if (isDcoRange(value)) {
-                kiwiMidi?.sendControlChange("dcoRange", value);
-              } else if (isDcoWave(value)) {
-                kiwiMidi?.sendControlChange("dcoWave", value);
-              } else if (isLfoSource(value)) {
+              const props: Array<keyof KiwiPatch> = [
+                "dcoRange",
+                "dcoWave",
+                "dcoLfoSource",
+                "vcfLfoSource",
+                "vcaLfoSource"
+              ];
+
+              if (props.includes(k)) {
                 kiwiMidi?.sendControlChange(k, value);
               } else if (isMidiCcValue(value)) {
+                if (k === "dcoPwmControl") {
+                  console.log("Update pwm control to", value)
+                }
+
+                if (k === "dcoPwmModAmount") {
+                  console.log("Update pwm amount to", value);
+                }
+
                 channel.sendControlChange(kiwiCcController(k), value);
               }
             }
           }
         }
-      },
+      }
     );
 
     return unsubscribeKiwiSyncer;

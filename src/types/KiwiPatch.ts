@@ -27,28 +27,47 @@ const lfoSources = ["lfo1", "lfo2", "lfo1-inverted", "lfo2-inverted"] as const;
 export type LfoSource = (typeof lfoSources)[number];
 export const isLfoSource = (x: unknown): x is LfoSource => {
   return typeof x === "string" && lfoSources.includes(x as LfoSource);
-}
+};
 
-export type PwmControlSource =
-  | "manual"
-  | "lfo1"
-  | "lfo2"
-  | "env1"
-  | "env2"
-  | "env1-inverted"
-  | "env2-inverted";
-export type EnvelopeSource =
-  | "env1"
-  | "env2"
-  | "env1-inverted"
-  | "env2-inverted";
-export type LfoWaveform =
-  | "sine"
-  | "square"
-  | "sawtooth"
-  | "triangle"
-  | "reverse-sawtooth"
-  | "random";
+const pwmControlSources = [
+  "manual",
+  "lfo1",
+  "lfo2",
+  "env1",
+  "env2",
+  "env1-inverted",
+  "env2-inverted",
+] as const;
+export type PwmControlSource = (typeof pwmControlSources)[number];
+export const isPwmControlSource = (x: unknown): x is PwmControlSource => {
+  return (
+    typeof x === "string" && pwmControlSources.includes(x as PwmControlSource)
+  );
+};
+
+const envelopeSources = [
+  "env1",
+  "env2",
+  "env1-inverted",
+  "env2-inverted",
+] as const;
+export type EnvelopeSource = (typeof envelopeSources)[number];
+export const isEnvelopeSource = (x: unknown): x is EnvelopeSource => {
+  return typeof x === "string" && envelopeSources.includes(x as EnvelopeSource);
+};
+
+const lfoWaveforms = [
+  "sine",
+  "square",
+  "sawtooth",
+  "triangle",
+  "reverse-sawtooth",
+  "random",
+] as const;
+export type LfoWaveform = (typeof lfoWaveforms)[number];
+export const isLfoWaveform = (x: unknown): x is LfoWaveform => {
+  return typeof x === "string" && lfoWaveforms.includes(x as LfoWaveform);
+};
 
 export interface KiwiPatch {
   patchName: string;
@@ -59,7 +78,8 @@ export interface KiwiPatch {
   dcoRange: DcoRange;
   dcoWave: DcoWave;
   dcoPwmModAmount: MidiCcValue;
-  dcoPwmControl: MidiCcValue;
+  // Can select MAN, LFO1, LFO2, but not env?
+  dcoPwmControl: PwmControlSource;
   dcoLfoModAmount: MidiCcValue;
   dcoLfoSource: LfoSource;
   dcoEnvelopeModAmount: MidiCcValue;
@@ -71,6 +91,7 @@ export interface KiwiPatch {
   lfo1Delay: MidiCcValue;
   lfo2Wave: MidiCcValue;
   lfo2Rate: MidiCcValue;
+  // TODO: lfo2Delay seems to be busted over the control panel
   lfo2Delay: MidiCcValue;
   lfo1Mode: MidiCcValue;
   lfo2Mode: MidiCcValue;

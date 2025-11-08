@@ -15,9 +15,11 @@ import {
   isDcoRange,
   isDcoWave,
   isLfoSource,
+  isPwmControlSource,
   KiwiPatch,
   KiwiPatchAddress,
   LfoSource,
+  PwmControlSource,
 } from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
@@ -59,6 +61,19 @@ const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
   lfo2: [64, 127],
   "lfo1-inverted": [],
   "lfo2-inverted": [],
+};
+
+const pwmControlSourceControlChangeValues: Record<
+  PwmControlSource,
+  MidiCcValue[]
+> = {
+  manual: [0, 18],
+  lfo1: [19, 36],
+  lfo2: [37, 54],
+  env1: [55, 72],
+  env2: [73, 90],
+  "env1-inverted": [91, 108],
+  "env2-inverted": [109, 127],
 };
 
 export const buildKiwiMidi = ({
@@ -125,7 +140,7 @@ export const buildKiwiMidi = ({
 
     sendControlChange: <K extends keyof KiwiPatch>(
       key: K,
-      value: KiwiPatch[K],
+      value: KiwiPatch[K]
     ) => {
       let ccByte = undefined;
 
@@ -137,8 +152,15 @@ export const buildKiwiMidi = ({
         ccByte = dcoWaveControlChangeValues[value][0];
       }
 
-      if (key === "dcoLfoSource" && isLfoSource(value)) {
+      if (
+        ["dcoLfoSource", "vcfLfoSource", "vcaLfoSource"].includes(key) &&
+        isLfoSource(value)
+      ) {
         ccByte = dcoLfoSourceControlChangeValues[value][0];
+      }
+
+      if (key === "dcoPwmControl" && isPwmControlSource(value)) {
+        ccByte = pwmControlSourceControlChangeValues[value][0];
       }
 
       if (ccByte !== undefined) {
@@ -172,13 +194,12 @@ export const buildKiwiMidi = ({
     parseSysex: (message: MidiMessage) => {
       if (!isAnyKiwi106SysexMessage(message)) {
         throw new Error(
-          "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
+          "[kiwiMidi] could not interpret non-Kiwi106 sysex message"
         );
       }
 
       if (isKiwi106BufferDumpSysexMessage(message)) {
         const command = parseKiwi106PatchEditBufferSysexDump(message);
-        console.log("Patch Edit Buffer Dump", command);
         return command;
       }
 
@@ -199,7 +220,7 @@ export const buildKiwiMidi = ({
       }
 
       throw new Error(
-        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`,
+        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`
       );
     },
   };

@@ -42,7 +42,10 @@ export const unpack8Bit: (n: number) => [number, number] = (n) => {
   return [hi, lo];
 };
 
-/** Pack two bytes into a 12 bit value according to Kiwi106 docs */
+/** Pack two bytes into a 12 bit value according to Kiwi106 docs:
+ * Hi & Lo are combined to make single 12 bit command.
+ * 000xxxxx + 0yyyyyyy = 0000xxxx xyyyyyyy
+ */
 export const pack12Bit = (highByte: number, lowByte: number): number => {
   const hi = highByte & 0x1f; // 5 bits
   const lo = lowByte & 0x7f; // 7 bits

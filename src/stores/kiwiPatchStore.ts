@@ -33,7 +33,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     dcoRange: "16",
     dcoWave: "off",
     dcoPwmModAmount: 0,
-    dcoPwmControl: 0,
+    dcoPwmControl: "manual",
     dcoLfoModAmount: 0,
     dcoLfoSource: "lfo1",
     dcoEnvelopeModAmount: 0,

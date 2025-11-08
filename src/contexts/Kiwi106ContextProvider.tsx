@@ -150,9 +150,19 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
 
       try {
         const kiwi106Command = newKiwiMidi.parseSysex(e.message);
-        if (kiwi106Command.command === "Global Dump") {
-          setKiwiGlobalData(kiwi106Command.kiwiGlobalData);
+        switch (kiwi106Command.command) {
+          case "Global Dump":
+            setKiwiGlobalData(kiwi106Command.kiwiGlobalData);
+            break;
+          case "Patch Edit Buffer Dump":
+            console.log(`Received Sysex "${kiwi106Command.command}"`);
+            console.log(kiwi106Command.kiwiPatch);
+            break;
+          default:
+            console.log(`Received Sysex "${kiwi106Command.command}": noop`);
+            break;
         }
+
       } catch {
         return;
       }

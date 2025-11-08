@@ -1,5 +1,5 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
-import { KiwiPatch, LfoSource } from "../../types/KiwiPatch";
+import { KiwiPatch, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
 import { MidiMessage } from "../../types/Midi";
 import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
@@ -86,11 +86,38 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   );
 
   // Byte 31 DCO Control
+  // Byte ??: 0000000u
+  // Byte 31: 0vwxxxyz
+  // z = DCOENV(0=ENV1,1=ENV2)
+  // y = DCOLFO(0=LFO1,1=LFO2)
+  // xxx = PWM Source
+  // 000=Manual
+  // 001=LFO1
+  // 010=LFO2
+  // 011=ENV1
+  // 100=ENV2
+  // w = DCO ENV(0=Norm,1=Inverted)
+  // v = PWM ENV(0=Norm,1=Inverted)
+  // u = LFO POL(0=Norm,1=Inverted)
   const dcoControlByte = dataBytes[31];
-  const pwmEnvelope = dcoControlByte & 0b0100_0000;
+  console.log("DCO Control Byte", dcoControlByte.toString(2));
   const dcoEnvelope = dcoControlByte & 0b0010_0000;
-  const pwmSource = dcoControlByte & 0b0001_1100;
   const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
+  
+  const pwmEnvelope = dcoControlByte & 0b0100_0000;
+  const pwmSource = dcoControlByte & 0b0001_1100;
+  const pwmControlSourceMap: Record<number, PwmControlSource | undefined> = {
+    0b0000: "manual",
+    0b0001: "lfo1",
+    0b0010: "lfo2",
+    0b0011: "env1",
+    0b0100: "env2",
+    0b1011: "env1-inverted",
+    0b1100: "env2-inverted"
+  };
+
+  const dcoPwmControl: PwmControlSource = pwmControlSourceMap[(pwmEnvelope >> 3) & (pwmSource >> 2)] ?? "manual";
+
   // docs suggest that there's an extra byte (???) that controls LFO Polarity control...
   // but we're going to ignore that for now.
   const dcoLfoSource: LfoSource = (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
@@ -104,7 +131,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     dcoRange,
     dcoWave,
     dcoPwmModAmount,
-    dcoPwmControl: 0,
+    dcoPwmControl,
     dcoLfoModAmount,
     dcoLfoSource,
     dcoEnvelopeModAmount,
