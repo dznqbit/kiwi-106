@@ -101,8 +101,8 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   // u = LFO POL(0=Norm,1=Inverted)
   const dcoControlByte = dataBytes[31];
   console.log("DCO Control Byte", dcoControlByte.toString(2));
-  const dcoEnvelope = dcoControlByte & 0b0010_0000;
-  const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
+  // const dcoEnvelope = dcoControlByte & 0b0010_0000;
+  // const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
   
   const pwmEnvelope = dcoControlByte & 0b0100_0000;
   const pwmSource = dcoControlByte & 0b0001_1100;

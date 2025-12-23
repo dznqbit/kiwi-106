@@ -2,13 +2,10 @@ import _ from "lodash";
 import {
   kiwi106SysexCommandBytes,
   Kiwi106SysexCommandName,
-  Kiwi106SysexPatchEditBufferDumpCommand,
 } from "../types/Kiwi106Sysex";
 import { KiwiPatch } from "../types/KiwiPatch";
-import { MidiCcValue, MidiMessage } from "../types/Midi";
+import { MidiMessage } from "../types/Midi";
 import { dcoRangeSysexValues } from "./kiwiMidi";
-import { objectKeys } from "./objectKeys";
-import { trimMidiCcValue } from "./trimMidiCcValue";
 
 /** Packs a bunch of booleans into a single number */
 export const packBits = (...args: boolean[]) => {
@@ -461,146 +458,146 @@ export const kiwiPatchToSysexBytes = (kiwiPatch: KiwiPatch): number[] => {
 };
 
 /* THIS IS DEPRECATED IN FAVOR OF utils/kiwi106Sysex/patchEditBufferDump.ts */
-export const parseKiwi106PatchEditBufferDumpCommand = (
-  m: MidiMessage,
-): Kiwi106SysexPatchEditBufferDumpCommand => {
-  // Ensure it's a Kiwi 106 Patch Edit Buffer Dump Command
-  if (!isKiwi106BufferDumpSysexMessage(m)) {
-    throw new Error("Message is not a Kiwi-106 Patch Edit Buffer Dump Command");
-  }
+// export const parseKiwi106PatchEditBufferDumpCommand = (
+//   m: MidiMessage,
+// ): Kiwi106SysexPatchEditBufferDumpCommand => {
+//   // Ensure it's a Kiwi 106 Patch Edit Buffer Dump Command
+//   if (!isKiwi106BufferDumpSysexMessage(m)) {
+//     throw new Error("Message is not a Kiwi-106 Patch Edit Buffer Dump Command");
+//   }
 
-  const data = [...m.data];
+//   const data = [...m.data];
 
-  // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
-  const combine12BitToMidi = (hiIdx: number, loIdx: number): MidiCcValue => {
-    const hi = data[hiIdx] & 0x1f; // 5 bits
-    const lo = data[loIdx] & 0x7f; // 7 bits
-    const twelveBit = pack12Bit(hi, lo);
-    return trimMidiCcValue(twelveBit / 4096);
-  };
+//   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
+//   const combine12BitToMidi = (hiIdx: number, loIdx: number): MidiCcValue => {
+//     const hi = data[hiIdx] & 0x1f; // 5 bits
+//     const lo = data[loIdx] & 0x7f; // 7 bits
+//     const twelveBit = pack12Bit(hi, lo);
+//     return trimMidiCcValue(twelveBit / 4096);
+//   };
 
-  // Helper to convert single byte to MidiCcValue
-  const byteToMidi = (idx: number): MidiCcValue => {
-    return data[idx] as MidiCcValue;
-  };
+//   // Helper to convert single byte to MidiCcValue
+//   const byteToMidi = (idx: number): MidiCcValue => {
+//     return data[idx] as MidiCcValue;
+//   };
 
-  // Extract patch name (20 ASCII bytes)
-  const patchNameBytes = data.slice(10, 30);
-  const patchName = String.fromCharCode(...patchNameBytes)
-    .replace(/\0/g, "")
-    .trim();
+//   // Extract patch name (20 ASCII bytes)
+//   const patchNameBytes = data.slice(10, 30);
+//   const patchName = String.fromCharCode(...patchNameBytes)
+//     .replace(/\0/g, "")
+//     .trim();
 
-  // DCO Wave/Range contains range bits
-  const dcoRangeBytes = byteToMidi(30) & 0b11;
-  const dcoRange =
-    objectKeys(dcoRangeSysexValues).find(
-      (k) => dcoRangeSysexValues[k] == dcoRangeBytes,
-    ) ?? "4";
+//   // DCO Wave/Range contains range bits
+//   const dcoRangeBytes = byteToMidi(30) & 0b11;
+//   const dcoRange =
+//     objectKeys(dcoRangeSysexValues).find(
+//       (k) => dcoRangeSysexValues[k] == dcoRangeBytes,
+//     ) ?? "4";
 
-  const parseLfoWave = (n: number) => {
-    // Sysex bits
-    // 000=Sine
-    // 001=Triangle
-    // 010=Square
-    // 011=Saw
-    // 100=Reverse Saw
-    // 101=Random
+//   const parseLfoWave = (n: number) => {
+//     // Sysex bits
+//     // 000=Sine
+//     // 001=Triangle
+//     // 010=Square
+//     // 011=Saw
+//     // 100=Reverse Saw
+//     // 101=Random
 
-    // CC bits yy
-    // 'sine': [0, 15],
-    // 'triangle': [16, 31],
-    // 'sawtooth': [32, 63],
-    // 'reverse-sawtooth': [64, 95],
-    // 'square': [96, 111],
-    // 'random': [112, 127],
+//     // CC bits yy
+//     // 'sine': [0, 15],
+//     // 'triangle': [16, 31],
+//     // 'sawtooth': [32, 63],
+//     // 'reverse-sawtooth': [64, 95],
+//     // 'square': [96, 111],
+//     // 'random': [112, 127],
 
-    // Map sysex bits to CC bits
-    switch (
-      n & 0x07 // Extract lower 3 bits
-    ) {
-      case 0:
-        return 0; // Sine -> mid-range of 0-15
-      case 1:
-        return 16; // Triangle -> mid-range of 16-31
-      case 3:
-        return 32; // Saw -> mid-range of 32-47
-      case 4:
-        return 64; // Reverse Saw -> mid-range of 48-63
-      case 2:
-        return 96; // Square -> mid-range of 64-79
-      case 5:
-        return 112; // Random -> mid-range of 80-127
-    }
+//     // Map sysex bits to CC bits
+//     switch (
+//       n & 0x07 // Extract lower 3 bits
+//     ) {
+//       case 0:
+//         return 0; // Sine -> mid-range of 0-15
+//       case 1:
+//         return 16; // Triangle -> mid-range of 16-31
+//       case 3:
+//         return 32; // Saw -> mid-range of 32-47
+//       case 4:
+//         return 64; // Reverse Saw -> mid-range of 48-63
+//       case 2:
+//         return 96; // Square -> mid-range of 64-79
+//       case 5:
+//         return 112; // Random -> mid-range of 80-127
+//     }
 
-    return 0;
-  };
+//     return 0;
+//   };
 
-  // Create KiwiPatch object mapping SysEx data to patch parameters
-  const kiwiPatch: KiwiPatch = {
-    patchName,
-    portamentoTime: combine12BitToMidi(94, 95),
-    volume: combine12BitToMidi(89, 90), // VCA Level
+//   // Create KiwiPatch object mapping SysEx data to patch parameters
+//   const kiwiPatch: KiwiPatch = {
+//     patchName,
+//     portamentoTime: combine12BitToMidi(94, 95),
+//     volume: combine12BitToMidi(89, 90), // VCA Level
 
-    dcoRange,
-    dcoWave: byteToMidi(30), // DCO Wave/Range contains wave bits
-    dcoPwmModAmount: combine12BitToMidi(39, 40),
-    dcoPwmControl: byteToMidi(41), // DCO Control
-    dcoLfoModAmount: combine12BitToMidi(33, 34),
-    dcoLfoSource: byteToMidi(87), // LFO1 Control
-    dcoEnvelopeModAmount: combine12BitToMidi(31, 32),
-    dcoEnvelopeSource: byteToMidi(76), // Env Control
+//     dcoRange,
+//     dcoWave: byteToMidi(30), // DCO Wave/Range contains wave bits
+//     dcoPwmModAmount: combine12BitToMidi(39, 40),
+//     dcoPwmControl: byteToMidi(41), // DCO Control
+//     dcoLfoModAmount: combine12BitToMidi(33, 34),
+//     dcoLfoSource: byteToMidi(87), // LFO1 Control
+//     dcoEnvelopeModAmount: combine12BitToMidi(31, 32),
+//     dcoEnvelopeSource: byteToMidi(76), // Env Control
 
-    lfoMode: byteToMidi(87), // LFO1 Control
-    lfo1Wave: parseLfoWave(byteToMidi(77)),
-    lfo1Rate: combine12BitToMidi(78, 79),
-    lfo1Delay: combine12BitToMidi(80, 81),
-    lfo2Wave: parseLfoWave(byteToMidi(82)),
-    lfo2Rate: combine12BitToMidi(83, 84),
-    lfo2Delay: combine12BitToMidi(85, 86),
-    lfo1Mode: byteToMidi(87), // LFO1 Control
-    lfo2Mode: byteToMidi(113), // LFO2 Control
+//     lfoMode: byteToMidi(87), // LFO1 Control
+//     lfo1Wave: parseLfoWave(byteToMidi(77)),
+//     lfo1Rate: combine12BitToMidi(78, 79),
+//     lfo1Delay: combine12BitToMidi(80, 81),
+//     lfo2Wave: parseLfoWave(byteToMidi(82)),
+//     lfo2Rate: combine12BitToMidi(83, 84),
+//     lfo2Delay: combine12BitToMidi(85, 86),
+//     lfo1Mode: byteToMidi(87), // LFO1 Control
+//     lfo2Mode: byteToMidi(113), // LFO2 Control
 
-    subLevel: combine12BitToMidi(42, 43),
-    noiseLevel: combine12BitToMidi(44, 45),
+//     subLevel: combine12BitToMidi(42, 43),
+//     noiseLevel: combine12BitToMidi(44, 45),
 
-    vcfLowPassCutoff: combine12BitToMidi(47, 48),
-    vcfLowPassResonance: combine12BitToMidi(49, 50),
-    vcfPitchFollow: combine12BitToMidi(55, 56), // VCF Key Amount
-    vcfHiPassCutoff: byteToMidi(46), // HPF Level
-    vcfLfoModAmount: combine12BitToMidi(51, 52),
-    vcfLfoSource: byteToMidi(87), // LFO1 Control
-    vcfEnvelopeModAmount: combine12BitToMidi(53, 54),
-    vcfEnvelopeSource: byteToMidi(59), // VCF Control
+//     vcfLowPassCutoff: combine12BitToMidi(47, 48),
+//     vcfLowPassResonance: combine12BitToMidi(49, 50),
+//     vcfPitchFollow: combine12BitToMidi(55, 56), // VCF Key Amount
+//     vcfHiPassCutoff: byteToMidi(46), // HPF Level
+//     vcfLfoModAmount: combine12BitToMidi(51, 52),
+//     vcfLfoSource: byteToMidi(87), // LFO1 Control
+//     vcfEnvelopeModAmount: combine12BitToMidi(53, 54),
+//     vcfEnvelopeSource: byteToMidi(59), // VCF Control
 
-    env1Attack: combine12BitToMidi(60, 61),
-    env1Decay: combine12BitToMidi(62, 63),
-    env1Sustain: combine12BitToMidi(64, 65),
-    env1Release: combine12BitToMidi(66, 67),
+//     env1Attack: combine12BitToMidi(60, 61),
+//     env1Decay: combine12BitToMidi(62, 63),
+//     env1Sustain: combine12BitToMidi(64, 65),
+//     env1Release: combine12BitToMidi(66, 67),
 
-    chorusMode: byteToMidi(88), // Chorus Control
-    vcaLfoModAmount: combine12BitToMidi(91, 92),
-    vcaLfoSource: byteToMidi(87), // LFO1 Control
-    vcaMode: byteToMidi(93), // VCA Control
+//     chorusMode: byteToMidi(88), // Chorus Control
+//     vcaLfoModAmount: combine12BitToMidi(91, 92),
+//     vcaLfoSource: byteToMidi(87), // LFO1 Control
+//     vcaMode: byteToMidi(93), // VCA Control
 
-    env2Attack: combine12BitToMidi(68, 69),
-    env2Decay: combine12BitToMidi(70, 71),
-    env2Sustain: combine12BitToMidi(72, 73),
-    env2Release: combine12BitToMidi(74, 75),
+//     env2Attack: combine12BitToMidi(68, 69),
+//     env2Decay: combine12BitToMidi(70, 71),
+//     env2Sustain: combine12BitToMidi(72, 73),
+//     env2Release: combine12BitToMidi(74, 75),
 
-    dcoBendAmount: combine12BitToMidi(35, 36), // DCO Bend Mod Amount
-    vcfBendAmount: combine12BitToMidi(57, 58), // VCF Bend Mod Amount
-    lfoModWheelAmount: byteToMidi(105), // MW Control
+//     dcoBendAmount: combine12BitToMidi(35, 36), // DCO Bend Mod Amount
+//     vcfBendAmount: combine12BitToMidi(57, 58), // VCF Bend Mod Amount
+//     lfoModWheelAmount: byteToMidi(105), // MW Control
 
-    keyMode: byteToMidi(99), // Voice Mode
-    keyAssignDetune: combine12BitToMidi(100, 101), // Voice Detune Amount
-    keyAssignDetuneMode: byteToMidi(102), // Detune Control
-  };
+//     keyMode: byteToMidi(99), // Voice Mode
+//     keyAssignDetune: combine12BitToMidi(100, 101), // Voice Detune Amount
+//     keyAssignDetuneMode: byteToMidi(102), // Detune Control
+//   };
 
-  return {
-    message: m,
-    command: "Patch Edit Buffer Dump",
-    data: data.slice(8), // Skip header, start from first data byte
-    isValid: data[0] === 0xf0 && data[data.length - 1] === 0xf7,
-    kiwiPatch,
-  };
-};
+//   return {
+//     message: m,
+//     command: "Patch Edit Buffer Dump",
+//     data: data.slice(8), // Skip header, start from first data byte
+//     isValid: data[0] === 0xf0 && data[data.length - 1] === 0xf7,
+//     kiwiPatch,
+//   };
+// };

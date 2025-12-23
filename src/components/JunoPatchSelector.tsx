@@ -14,7 +14,7 @@ import { useKiwi106Context } from "../hooks/useKiwi106Context";
 // but it's the simplest way of getting shit done
 
 export const JunoPatchSelector = () => {
-  const { kiwiMidi } = useKiwi106Context();
+  const kiwi106Context = useKiwi106Context();
 
   // Even when in Manual mode, the Kiwi has a memory of the previous group/bank/patch
   const [group, setGroup] = useState<KiwiPatchIndex>(1);
@@ -61,8 +61,11 @@ export const JunoPatchSelector = () => {
   }, [isManual, group, bank, patch]);
 
   useEffect(() => {
-    kiwiMidi?.sendProgramChange(patchAddress ?? "manual");
-  }, [kiwiMidi, patchAddress]);
+    if (kiwi106Context.active) {
+      kiwi106Context.kiwiMidi.sendProgramChange(patchAddress ?? "manual");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kiwi106Context.active, patchAddress]);
 
   return (
     <Group align="flex-start" justify="center" gap="xs" p={0}>

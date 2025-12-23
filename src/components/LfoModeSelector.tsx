@@ -17,7 +17,6 @@ export const LfoModeSelector = ({ property, label }: LfoModeSelectorProps) => {
   }
 
   const setLfoMode = (lfoMode: LfoMode) => {
-    console.log(`Setting ${property} LFO mode`, lfoMode);
     setKiwiPatchProperty(property, lfoMode, {
       updatedBy: "Editor Change",
     });
