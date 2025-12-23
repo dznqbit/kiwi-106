@@ -39,15 +39,14 @@ const blankKiwiPatchState: KiwiPatchState = {
     dcoEnvelopeModAmount: 0,
     dcoEnvelopeSource: 0,
 
-    lfoMode: 0,
     lfo1Wave: 0,
     lfo1Rate: 0,
     lfo1Delay: 0,
     lfo2Wave: 0,
     lfo2Rate: 0,
     lfo2Delay: 0,
-    lfo1Mode: 0,
-    lfo2Mode: 0,
+    lfo1Mode: "normal",
+    lfo2Mode: "normal",
 
     subLevel: 0,
     noiseLevel: 0,

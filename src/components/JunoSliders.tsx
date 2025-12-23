@@ -7,6 +7,7 @@ import { LfoSelector } from "./LfoSelector";
 import { DcoRangeSelector } from "./DcoRangeSelector";
 import { PwmControlSelector } from "./PwmControlSelector";
 import { DcoWaveSelector } from "./DcoWaveSelector";
+import { LfoModeSelector } from "./LfoModeSelector";
 
 export const JunoSliders = () => {
   return (
@@ -23,6 +24,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="LFO1">
           <Group align="flex-start">
+            <LfoModeSelector label="MODE" property="lfo1Mode" />
             <WaveformSelector label="WAVE" property="lfo1Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo1Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo1Delay" />
@@ -31,6 +33,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="LFO2">
           <Group align="flex-start">
+            <LfoModeSelector label="MODE" property="lfo2Mode" />
             <WaveformSelector label="WAVE" property="lfo2Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo2Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo2Delay" />

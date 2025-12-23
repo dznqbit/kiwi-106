@@ -14,10 +14,12 @@ import {
   DcoWave,
   isDcoRange,
   isDcoWave,
+  isLfoMode,
   isLfoSource,
   isPwmControlSource,
   KiwiPatch,
   KiwiPatchAddress,
+  LfoMode,
   LfoSource,
   PwmControlSource,
 } from "../types/KiwiPatch";
@@ -54,6 +56,11 @@ export const dcoWaveSysexValues: Record<DcoWave, MidiCcValue> = {
   ramp: 4,
   pulse: 8,
   "ramp-and-pulse": 12,
+};
+
+export const lfoModeControlChangeValues: Record<LfoMode, MidiCcValue[]> = {
+  normal: [0, 63],
+  plus: [64, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -150,6 +157,10 @@ export const buildKiwiMidi = ({
 
       if (key === "dcoWave" && isDcoWave(value)) {
         ccByte = dcoWaveControlChangeValues[value][0];
+      }
+
+      if (["lfo1Mode", "lfo2Mode"].includes(key) && isLfoMode(value)) {
+        ccByte = lfoModeControlChangeValues[value][0];
       }
 
       if (

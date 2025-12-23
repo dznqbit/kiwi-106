@@ -17,15 +17,14 @@ const kiwiControllerValues: Record<keyof KiwiPatch, number> = {
   dcoEnvelopeModAmount: 0x0e,
   dcoEnvelopeSource: 0x0f,
 
-  lfoMode: 0x10,
   lfo1Wave: 0x12,
   lfo1Rate: 0x13,
   lfo1Delay: 0x14,
   lfo2Wave: 0x15,
   lfo2Rate: 0x16,
   lfo2Delay: 0x17,
-  lfo1Mode: 0x18,
-  lfo2Mode: 0x19,
+  lfo1Mode: 0x10,
+  lfo2Mode: 0x10,
 
   subLevel: 0x21,
   noiseLevel: 0x22,

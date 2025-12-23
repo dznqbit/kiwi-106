@@ -69,9 +69,14 @@ export const isLfoWaveform = (x: unknown): x is LfoWaveform => {
   return typeof x === "string" && lfoWaveforms.includes(x as LfoWaveform);
 };
 
+const lfoModes = ["normal", "plus"] as const;
+export type LfoMode = (typeof lfoModes)[number];
+export const isLfoMode = (x: unknown): x is LfoMode => {
+  return typeof x === "string" && lfoModes.includes(x as LfoMode);
+};
+
 export interface KiwiPatch {
   patchName: string;
-
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
@@ -85,16 +90,18 @@ export interface KiwiPatch {
   dcoEnvelopeModAmount: MidiCcValue;
   dcoEnvelopeSource: MidiCcValue;
 
-  lfoMode: MidiCcValue;
-  lfo1Wave: MidiCcValue;
+  lfo1Wave: MidiCcValue; // Can be tokenized
+  // TODO: lfo1SyncMode "free-running", "sync-2-notes", etc.
   lfo1Rate: MidiCcValue;
   lfo1Delay: MidiCcValue;
-  lfo2Wave: MidiCcValue;
+  lfo1Mode: LfoMode;
+
+  lfo2Wave: MidiCcValue; // Can be tokenized
+  // TODO: lfo2SyncMode "free-running", "sync-2-notes", etc.
   lfo2Rate: MidiCcValue;
   // TODO: lfo2Delay seems to be busted over the control panel
   lfo2Delay: MidiCcValue;
-  lfo1Mode: MidiCcValue;
-  lfo2Mode: MidiCcValue;
+  lfo2Mode: LfoMode;
 
   subLevel: MidiCcValue;
   noiseLevel: MidiCcValue;
@@ -106,17 +113,17 @@ export interface KiwiPatch {
   vcfLfoModAmount: MidiCcValue;
   vcfLfoSource: LfoSource;
   vcfEnvelopeModAmount: MidiCcValue;
-  vcfEnvelopeSource: MidiCcValue;
+  vcfEnvelopeSource: MidiCcValue; // Can be tokenized
 
   env1Attack: MidiCcValue;
   env1Decay: MidiCcValue;
   env1Sustain: MidiCcValue;
   env1Release: MidiCcValue;
 
-  chorusMode: MidiCcValue;
+  chorusMode: MidiCcValue; // Can be tokenized
   vcaLfoModAmount: MidiCcValue;
   vcaLfoSource: LfoSource;
-  vcaMode: MidiCcValue;
+  vcaMode: MidiCcValue; // Can be tokenized
 
   env2Attack: MidiCcValue;
   env2Decay: MidiCcValue;
@@ -127,7 +134,7 @@ export interface KiwiPatch {
   vcfBendAmount: MidiCcValue;
   lfoModWheelAmount: MidiCcValue;
 
-  keyMode: MidiCcValue;
+  keyMode: MidiCcValue; // Can be tokenized
   keyAssignDetune: MidiCcValue;
-  keyAssignDetuneMode: MidiCcValue;
+  keyAssignDetuneMode: MidiCcValue; // Can be tokenized
 }

@@ -1,5 +1,5 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
-import { KiwiPatch, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
+import { KiwiPatch, LfoMode, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
 import { MidiMessage } from "../../types/Midi";
 import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
@@ -122,8 +122,12 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   // but we're going to ignore that for now.
   const dcoLfoSource: LfoSource = (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
   
+  const lfo1Mode: LfoMode = (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
+  const lfo2Mode: LfoMode = (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
+
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
   // const portamentoTime = combine12BitToMidi(94, 95);
+  
   const kiwiPatch: KiwiPatch = {
     patchName,
     portamentoTime: 0,
@@ -136,15 +140,14 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     dcoLfoSource,
     dcoEnvelopeModAmount,
     dcoEnvelopeSource: 0,
-    lfoMode: 0,
     lfo1Wave: 0,
     lfo1Rate: 0,
     lfo1Delay: 0,
     lfo2Wave: 0,
     lfo2Rate: 0,
     lfo2Delay: 0,
-    lfo1Mode: 0,
-    lfo2Mode: 0,
+    lfo1Mode,
+    lfo2Mode,
     subLevel: 0,
     noiseLevel: 0,
     vcfLowPassCutoff: 0,

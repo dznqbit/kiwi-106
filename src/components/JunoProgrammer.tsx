@@ -21,7 +21,6 @@ import { JunoPatchSelector } from "./JunoPatchSelector";
 import {
   isDcoRange,
   isDcoWave,
-  isLfoSource,
   KiwiPatch,
 } from "../types/KiwiPatch";
 import {
@@ -173,18 +172,20 @@ export const JunoProgrammer = () => {
             const value = diff[k];
             if (value !== undefined) {
               const props: Array<keyof KiwiPatch> = [
+                "lfo1Mode",
+                "lfo2Mode",
                 "dcoRange",
                 "dcoWave",
                 "dcoLfoSource",
                 "vcfLfoSource",
-                "vcaLfoSource"
+                "vcaLfoSource",
               ];
 
               if (props.includes(k)) {
                 kiwiMidi?.sendControlChange(k, value);
               } else if (isMidiCcValue(value)) {
                 if (k === "dcoPwmControl") {
-                  console.log("Update pwm control to", value)
+                  console.log("Update pwm control to", value);
                 }
 
                 if (k === "dcoPwmModAmount") {
