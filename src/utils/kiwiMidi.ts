@@ -20,12 +20,14 @@ import {
   isLfoMode,
   isLfoSource,
   isPwmControlSource,
+  isVcaMode,
   KiwiPatch,
   KiwiPatchAddress,
   LfoMode,
   LfoSource,
   LfoWaveform,
   PwmControlSource,
+  VcaMode,
 } from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
@@ -81,6 +83,12 @@ export const chorusModeControlChangeValues: Record<ChorusMode, MidiCcValue[]> = 
   // NB: Spec claims c1=32-63 c2=64-127, but these ranges match what's on my board
   chorus1: [32, 80],
   chorus2: [81, 127],
+};
+
+export const vcaModeControlChangeValues: Record<VcaMode, MidiCcValue[]> = {
+  gate: [0, 31],
+  env1: [32, 63],
+  env2: [64, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -204,6 +212,10 @@ export const buildKiwiMidi = ({
       if (key === "chorusMode" && isChorusMode(value)) {
         ccByte = chorusModeControlChangeValues[value][0];
         console.log(`[sendControlChange] ${key} "${value}" ${ccByte}`)
+      }
+
+      if (key === "vcaMode" && isVcaMode(value)) {
+        ccByte = vcaModeControlChangeValues[value][0];
       }
 
       if (ccByte !== undefined) {

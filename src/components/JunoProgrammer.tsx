@@ -26,6 +26,7 @@ import {
   envelopeSourceControlChangeValues,
   lfoWaveformControlChangeValues,
   pwmControlSourceControlChangeValues,
+  vcaModeControlChangeValues,
 } from "../utils/kiwiMidi";
 import { controlChangeValue } from "../utils/controlChangeValue";
 
@@ -131,6 +132,14 @@ export const JunoProgrammer = () => {
             );
             break;
 
+          case "vcaMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, vcaModeControlChangeValues) ?? "env1",
+              options
+            );
+            break;
+
           default:
             setPatchProperty(patchKey, ccData, options);
         }
@@ -228,6 +237,7 @@ export const JunoProgrammer = () => {
                 "vcfLfoSource",
                 "vcaLfoSource",
                 "chorusMode",
+                "vcaMode",
               ];
 
               if (props.includes(k)) {

@@ -1,5 +1,12 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
-import { ChorusMode, KiwiPatch, LfoMode, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
+import {
+  ChorusMode,
+  KiwiPatch,
+  LfoMode,
+  LfoSource,
+  PwmControlSource,
+  VcaMode,
+} from "../../types/KiwiPatch";
 import { MidiMessage } from "../../types/Midi";
 import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
@@ -103,7 +110,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   console.log("DCO Control Byte", dcoControlByte.toString(2));
   // const dcoEnvelope = dcoControlByte & 0b0010_0000;
   // const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
-  
+
   const pwmEnvelope = dcoControlByte & 0b0100_0000;
   const pwmSource = dcoControlByte & 0b0001_1100;
   const pwmControlSourceMap: Record<number, PwmControlSource | undefined> = {
@@ -113,28 +120,40 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     0b0011: "env1",
     0b0100: "env2",
     0b1011: "env1-inverted",
-    0b1100: "env2-inverted"
+    0b1100: "env2-inverted",
   };
 
-  const dcoPwmControl: PwmControlSource = pwmControlSourceMap[(pwmEnvelope >> 3) & (pwmSource >> 2)] ?? "manual";
+  const dcoPwmControl: PwmControlSource =
+    pwmControlSourceMap[(pwmEnvelope >> 3) & (pwmSource >> 2)] ?? "manual";
 
   // docs suggest that there's an extra byte (???) that controls LFO Polarity control...
   // but we're going to ignore that for now.
-  const dcoLfoSource: LfoSource = (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
-  
-  const lfo1Mode: LfoMode = (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
+  const dcoLfoSource: LfoSource =
+    (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
+
+  const lfo1Mode: LfoMode =
+    (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
   const chorusModeMap: Record<number, ChorusMode> = {
-    0: 'off',
-    1: 'chorus1',
-    2: 'chorus2'
+    0: "off",
+    1: "chorus1",
+    2: "chorus2",
   };
   const chorusMode = chorusModeMap[dataBytes[78]];
 
-  const lfo2Mode: LfoMode = (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
+  const lfo2Mode: LfoMode =
+    (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
+
+  const vcaModeMap: Record<number, VcaMode> = {
+    0: "env1",
+    1: "gate",
+    2: "env2",
+    3: "gate"
+  };
+  const vcaMode: VcaMode = vcaModeMap[dataBytes[83] & 0b0000_0011];
 
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
   // const portamentoTime = combine12BitToMidi(94, 95);
-  
+
   const kiwiPatch: KiwiPatch = {
     patchName,
     portamentoTime: 0,
@@ -146,11 +165,11 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     dcoLfoModAmount,
     dcoLfoSource,
     dcoEnvelopeModAmount,
-    dcoEnvelopeSource: 'env1',
-    lfo1Wave: 'sine',
+    dcoEnvelopeSource: "env1",
+    lfo1Wave: "sine",
     lfo1Rate: 0,
     lfo1Delay: 0,
-    lfo2Wave: 'sine',
+    lfo2Wave: "sine",
     lfo2Rate: 0,
     lfo2Delay: 0,
     lfo1Mode,
@@ -164,7 +183,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     vcfLfoModAmount: 0,
     vcfLfoSource: "lfo1",
     vcfEnvelopeModAmount: 0,
-    vcfEnvelopeSource: 'env1',
+    vcfEnvelopeSource: "env1",
     env1Attack: 0,
     env1Decay: 0,
     env1Sustain: 0,
@@ -172,7 +191,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     chorusMode,
     vcaLfoModAmount: 0,
     vcaLfoSource: "lfo1",
-    vcaMode: 0,
+    vcaMode,
     env2Attack: 0,
     env2Decay: 0,
     env2Sustain: 0,

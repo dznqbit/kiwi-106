@@ -238,47 +238,50 @@ describe("kiwiMidi", () => {
   });
 
   describe("parseSysex", () => {
-    it("parses patch edit buffer dump command", () => {
-      const { kiwiMidi } = subject();
-
-      // "bogus" in neat formatting
-      const bogs = 0x00;
-
-      const patchName = [
-        0x54, 0x65, 0x73, 0x74, 0x20, 0x50, 0x61, 0x74, 0x63, 0x68, // "Test Patch"
-        0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, // 10 spaces padding
-      ];
-
-      const mockMessage: MidiMessage = {
-        isChannelMessage: false,
-        isSystemMessage: true,
-        data: [
-          ...patchEditBufferDumpPreludeData,
-          ...patchName,
-                                  bogs, bogs, bogs, bogs, // 16-23
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 24-31
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 32-39
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 40-47
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 48-55
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 56-63
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
-          bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 80-87
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 104-111
-        ],
-      };
-
-      const result = kiwiMidi.parseSysex(mockMessage);
-      expect(result.command).toBe("Patch Edit Buffer Dump");
-      if (result.command === "Patch Edit Buffer Dump") {
-        expect(result.kiwiPatch.patchName).toBe("Test Patch");
-        expect(result.kiwiPatch.lfo1Mode).toBe("plus");
-        expect(result.kiwiPatch.lfo2Mode).toBe("normal");
-        expect(result.kiwiPatch.chorusMode).toBe("chorus2");
-      }
-    });
+    describe("patch edit buffer dump", () => {
+      it("parses patch edit buffer dump command", () => {
+        const { kiwiMidi } = subject();
+  
+        // "bogus" in neat formatting
+        const bogs = 0x00;
+  
+        const patchName = [
+          0x54, 0x65, 0x73, 0x74, 0x20, 0x50, 0x61, 0x74, 0x63, 0x68, // "Test Patch"
+          0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, // 10 spaces padding
+        ];
+  
+        const mockMessage: MidiMessage = {
+          isChannelMessage: false,
+          isSystemMessage: true,
+          data: [
+            ...patchEditBufferDumpPreludeData,
+            ...patchName,
+                                    bogs, bogs, bogs, bogs, // 16-23
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 24-31
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 32-39
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 40-47
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 48-55
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 56-63
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
+            bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
+            bogs, bogs, bogs, 0x02, bogs, bogs, bogs, bogs, // 80-87
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
+            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 104-111
+          ],
+        };
+  
+        const result = kiwiMidi.parseSysex(mockMessage);
+        expect(result.command).toBe("Patch Edit Buffer Dump");
+        if (result.command === "Patch Edit Buffer Dump") {
+          expect(result.kiwiPatch.patchName).toBe("Test Patch");
+          expect(result.kiwiPatch.lfo1Mode).toBe("plus");
+          expect(result.kiwiPatch.lfo2Mode).toBe("normal");
+          expect(result.kiwiPatch.chorusMode).toBe("chorus2");
+          expect(result.kiwiPatch.vcaMode).toBe("env2");
+        }
+      });
+    })
 
     it("parses global dump command", () => {
       const { kiwiMidi } = subject();

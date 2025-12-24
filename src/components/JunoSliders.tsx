@@ -9,6 +9,7 @@ import { PwmControlSelector } from "./PwmControlSelector";
 import { DcoWaveSelector } from "./DcoWaveSelector";
 import { LfoModeSelector } from "./LfoModeSelector";
 import { ChorusModeSelector } from "./ChorusModeSelector";
+import { VcaModeSelector } from "./VcaModeSelector";
 
 export const JunoSliders = () => {
   return (
@@ -83,6 +84,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="VCA">
           <Group align="flex-start">
+            <VcaModeSelector label="MODE" property="vcaMode" />
             <LfoSelector label="LFO Source" property="vcaLfoSource" />
             <KiwiPatchPropertySlider label="LFO" property="vcaLfoModAmount" />
             <KiwiPatchPropertySlider label="LEVEL" property="volume" />
