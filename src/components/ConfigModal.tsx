@@ -39,7 +39,6 @@ export const ConfigModal = ({ opened, onClose }: ConfigModalProps) => {
 
   useEffect(() => {
     if (kiwi106Context.active) {
-      console.log("set the damn context");
       setLocalKiwiGlobalData(kiwi106Context.kiwiGlobalData);
     }
   }, [kiwi106Context]);

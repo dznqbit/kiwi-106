@@ -90,13 +90,13 @@ export interface KiwiPatch {
   dcoEnvelopeModAmount: MidiCcValue;
   dcoEnvelopeSource: MidiCcValue;
 
-  lfo1Wave: MidiCcValue; // Can be tokenized
+  lfo1Wave: LfoWaveform;
   // TODO: lfo1SyncMode "free-running", "sync-2-notes", etc.
   lfo1Rate: MidiCcValue;
   lfo1Delay: MidiCcValue;
   lfo1Mode: LfoMode;
 
-  lfo2Wave: MidiCcValue; // Can be tokenized
+  lfo2Wave: LfoWaveform;
   // TODO: lfo2SyncMode "free-running", "sync-2-notes", etc.
   lfo2Rate: MidiCcValue;
   // TODO: lfo2Delay seems to be busted over the control panel

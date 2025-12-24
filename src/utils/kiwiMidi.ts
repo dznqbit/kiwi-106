@@ -21,6 +21,7 @@ import {
   KiwiPatchAddress,
   LfoMode,
   LfoSource,
+  LfoWaveform,
   PwmControlSource,
 } from "../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
@@ -63,6 +64,15 @@ export const lfoModeControlChangeValues: Record<LfoMode, MidiCcValue[]> = {
   plus: [64, 127],
 };
 
+export const lfoWaveformControlChangeValues: Record<LfoWaveform, MidiCcValue[]> = {
+  sine: [0, 15],
+  triangle: [16, 31],
+  sawtooth: [32, 63],
+  "reverse-sawtooth": [64, 95],
+  square: [96, 111],
+  random: [112, 127],
+};
+
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
   lfo1: [0, 63],
   lfo2: [64, 127],
@@ -70,7 +80,7 @@ const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
   "lfo2-inverted": [],
 };
 
-const pwmControlSourceControlChangeValues: Record<
+export const pwmControlSourceControlChangeValues: Record<
   PwmControlSource,
   MidiCcValue[]
 > = {

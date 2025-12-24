@@ -11,22 +11,21 @@ import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
 import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 import { PatchNameEditor } from "./PatchNameEditor";
-import { isMidiCcValue } from "../types/Midi";
+import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
   isAnyKiwi106SysexMessage,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import {
-  isDcoRange,
-  isDcoWave,
-  KiwiPatch,
-} from "../types/KiwiPatch";
+import { KiwiPatch } from "../types/KiwiPatch";
 import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
+  lfoWaveformControlChangeValues,
+  pwmControlSourceControlChangeValues,
 } from "../utils/kiwiMidi";
+import { controlChangeValue } from "../utils/controlChangeValue";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -55,36 +54,66 @@ export const JunoProgrammer = () => {
     }
 
     const updatePatchFromControlChange = (e: ControlChangeMessageEvent) => {
+      // So it seems like we CAN detect the "Manual" PC event
+      // CC "All Notes Off"
+      // CC vcaMode
+      // CC vcfEnvelopeSource
+      // CC dcoPwmControl
+
       const [_, b1, b2] = e.data;
 
       const patchKey = kiwiPatchKey(b1);
       const ccData = trimMidiCcValue(b2);
+      const options = {
+        updatedBy: "Control Change" as const,
+      };
 
+      console.log(`[cc -> patch] ${patchKey} ${ccData}`);
       if (patchKey) {
-        if (patchKey === "dcoRange") {
-          const dcoRange =
-            Object.keys(dcoRangeControlChangeValues).find((k) => {
-              if (isDcoRange(k)) {
-                const [loBound, hiBound] = dcoRangeControlChangeValues[k];
-                if (ccData >= loBound && ccData <= hiBound) {
-                  return true;
-                }
-              }
-            }) ?? "16";
-          setPatchProperty(patchKey, dcoRange, { updatedBy: "Control Change" });
-        } else if (patchKey === "dcoWave") {
-          const dcoWave =
-            Object.keys(dcoWaveControlChangeValues).find((k) => {
-              if (isDcoWave(k)) {
-                const [loBound, hiBound] = dcoWaveControlChangeValues[k];
-                if (ccData >= loBound && ccData <= hiBound) {
-                  return true;
-                }
-              }
-            }) ?? "off";
-          setPatchProperty(patchKey, dcoWave, { updatedBy: "Control Change" });
-        } else {
-          setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        switch (patchKey) {
+          case "dcoPwmControl":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, pwmControlSourceControlChangeValues) ??
+                "manual",
+              options
+            );
+            break;
+
+          case "dcoRange":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, dcoRangeControlChangeValues) ?? "16",
+              options
+            );
+            break;
+
+          case "dcoWave":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, dcoWaveControlChangeValues) ?? "off",
+              options
+            );
+            break;
+
+          case "lfo1Mode":
+          case "lfo2Mode":
+            console.log(`[cc -> patch] ignoring ${patchKey}`);
+            break;
+
+          case "lfo1Wave":
+          case "lfo2Wave":
+            console.log(`[cc -> patch] Time for ${patchKey}`);
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, lfoWaveformControlChangeValues) ??
+                "sine",
+              options
+            );
+            break;
+
+          default:
+            setPatchProperty(patchKey, ccData, options);
         }
       } else {
         console.log("Received unknown", kiwiCcLabel(b1));

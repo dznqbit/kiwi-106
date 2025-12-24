@@ -244,14 +244,18 @@ describe("kiwiMidi", () => {
       // "bogus" in neat formatting
       const bogs = 0x00;
 
+      const patchName = [
+        0x54, 0x65, 0x73, 0x74, 0x20, 0x50, 0x61, 0x74, 0x63, 0x68, // "Test Patch"
+        0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, // 10 spaces padding
+      ];
+
       const mockMessage: MidiMessage = {
         isChannelMessage: false,
         isSystemMessage: true,
         data: [
           ...patchEditBufferDumpPreludeData,
-          0x01, 0x02, 0x03, 0xf7, bogs, bogs, bogs, bogs, // 0-7
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 8-15
-          bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 16-23
+          ...patchName,
+                                  bogs, bogs, bogs, bogs, // 16-23
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 24-31
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 32-39
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 40-47
@@ -269,6 +273,7 @@ describe("kiwiMidi", () => {
       const result = kiwiMidi.parseSysex(mockMessage);
       expect(result.command).toBe("Patch Edit Buffer Dump");
       if (result.command === "Patch Edit Buffer Dump") {
+        expect(result.kiwiPatch.patchName).toBe("Test Patch");
         expect(result.kiwiPatch.lfo1Mode).toBe("plus");
         expect(result.kiwiPatch.lfo2Mode).toBe("normal");
       }
