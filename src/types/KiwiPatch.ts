@@ -75,6 +75,12 @@ export const isLfoMode = (x: unknown): x is LfoMode => {
   return typeof x === "string" && lfoModes.includes(x as LfoMode);
 };
 
+const chorusModes = ["off", "chorus1", "chorus2"] as const;
+export type ChorusMode = (typeof chorusModes)[number];
+export const isChorusMode = (x: unknown): x is ChorusMode => {
+  return typeof x === "string" && chorusModes.includes(x as ChorusMode);
+};
+
 export interface KiwiPatch {
   patchName: string;
   portamentoTime: MidiCcValue;
@@ -120,7 +126,7 @@ export interface KiwiPatch {
   env1Sustain: MidiCcValue;
   env1Release: MidiCcValue;
 
-  chorusMode: MidiCcValue; // Can be tokenized
+  chorusMode: ChorusMode;
   vcaLfoModAmount: MidiCcValue;
   vcaLfoSource: LfoSource;
   vcaMode: MidiCcValue; // Can be tokenized

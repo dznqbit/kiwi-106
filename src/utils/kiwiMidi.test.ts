@@ -262,7 +262,7 @@ describe("kiwiMidi", () => {
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 48-55
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 56-63
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
-          bogs, bogs, bogs, bogs, bogs, 0x71, bogs, bogs, // 72-79
+          bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 80-87
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
           bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
@@ -276,6 +276,7 @@ describe("kiwiMidi", () => {
         expect(result.kiwiPatch.patchName).toBe("Test Patch");
         expect(result.kiwiPatch.lfo1Mode).toBe("plus");
         expect(result.kiwiPatch.lfo2Mode).toBe("normal");
+        expect(result.kiwiPatch.chorusMode).toBe("chorus2");
       }
     });
 

@@ -8,6 +8,7 @@ import { DcoRangeSelector } from "./DcoRangeSelector";
 import { PwmControlSelector } from "./PwmControlSelector";
 import { DcoWaveSelector } from "./DcoWaveSelector";
 import { LfoModeSelector } from "./LfoModeSelector";
+import { ChorusModeSelector } from "./ChorusModeSelector";
 
 export const JunoSliders = () => {
   return (
@@ -103,6 +104,12 @@ export const JunoSliders = () => {
             <KiwiPatchPropertySlider label="D" property="env2Decay" />
             <KiwiPatchPropertySlider label="S" property="env2Sustain" />
             <KiwiPatchPropertySlider label="R" property="env2Release" />
+          </Group>
+        </Kiwi106Fieldset>
+
+        <Kiwi106Fieldset legend="CHORUS">
+          <Group align="flex-start">
+            <ChorusModeSelector property="chorusMode" />
           </Group>
         </Kiwi106Fieldset>
       </Group>

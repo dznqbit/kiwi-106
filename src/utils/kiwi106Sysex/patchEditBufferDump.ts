@@ -1,5 +1,5 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
-import { KiwiPatch, LfoMode, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
+import { ChorusMode, KiwiPatch, LfoMode, LfoSource, PwmControlSource } from "../../types/KiwiPatch";
 import { MidiMessage } from "../../types/Midi";
 import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
@@ -123,6 +123,13 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   const dcoLfoSource: LfoSource = (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
   
   const lfo1Mode: LfoMode = (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
+  const chorusModeMap: Record<number, ChorusMode> = {
+    0: 'off',
+    1: 'chorus1',
+    2: 'chorus2'
+  };
+  const chorusMode = chorusModeMap[dataBytes[78]];
+
   const lfo2Mode: LfoMode = (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
 
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
@@ -162,7 +169,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     env1Decay: 0,
     env1Sustain: 0,
     env1Release: 0,
-    chorusMode: 0,
+    chorusMode,
     vcaLfoModAmount: 0,
     vcaLfoSource: "lfo1",
     vcaMode: 0,

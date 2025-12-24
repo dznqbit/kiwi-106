@@ -36,7 +36,6 @@ export const DcoWaveSelector = ({ property }: DcoWaveSelectorProps) => {
   };
 
   const setDcoWave = (wave: DcoWave) => {
-    console.log("Setting DCO wave", wave);
     setKiwiPatchProperty("dcoWave", wave, {
       updatedBy: "Editor Change",
     });

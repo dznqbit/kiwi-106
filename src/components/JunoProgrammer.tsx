@@ -20,6 +20,7 @@ import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
 import { KiwiPatch } from "../types/KiwiPatch";
 import {
+  chorusModeControlChangeValues,
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
   envelopeSourceControlChangeValues,
@@ -122,6 +123,14 @@ export const JunoProgrammer = () => {
             );
             break;
 
+          case "chorusMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, chorusModeControlChangeValues) ?? "off",
+              options
+            );
+            break;
+
           default:
             setPatchProperty(patchKey, ccData, options);
         }
@@ -218,6 +227,7 @@ export const JunoProgrammer = () => {
                 "dcoLfoSource",
                 "vcfLfoSource",
                 "vcaLfoSource",
+                "chorusMode",
               ];
 
               if (props.includes(k)) {

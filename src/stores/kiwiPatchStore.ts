@@ -64,7 +64,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     env1Decay: 0,
     env1Sustain: 0,
     env1Release: 0,
-    chorusMode: 0,
+    chorusMode: "off",
     vcaLfoModAmount: 0,
     vcaLfoSource: "lfo1",
     vcaMode: 0,

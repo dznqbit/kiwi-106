@@ -10,9 +10,11 @@ import {
   isKiwi106GlobalDumpReceivedSysexMessage,
 } from "./sysexUtils";
 import {
+  ChorusMode,
   DcoRange,
   DcoWave,
   EnvelopeSource,
+  isChorusMode,
   isDcoRange,
   isDcoWave,
   isLfoMode,
@@ -72,6 +74,13 @@ export const lfoWaveformControlChangeValues: Record<LfoWaveform, MidiCcValue[]> 
   "reverse-sawtooth": [64, 95],
   square: [96, 111],
   random: [112, 127],
+};
+
+export const chorusModeControlChangeValues: Record<ChorusMode, MidiCcValue[]> = {
+  off: [0, 31],
+  // NB: Spec claims c1=32-63 c2=64-127, but these ranges match what's on my board
+  chorus1: [32, 80],
+  chorus2: [81, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -190,6 +199,11 @@ export const buildKiwiMidi = ({
 
       if (key === "dcoPwmControl" && isPwmControlSource(value)) {
         ccByte = pwmControlSourceControlChangeValues[value][0];
+      }
+
+      if (key === "chorusMode" && isChorusMode(value)) {
+        ccByte = chorusModeControlChangeValues[value][0];
+        console.log(`[sendControlChange] ${key} "${value}" ${ccByte}`)
       }
 
       if (ccByte !== undefined) {
