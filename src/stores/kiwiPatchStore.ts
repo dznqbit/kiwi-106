@@ -37,7 +37,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     dcoLfoModAmount: 0,
     dcoLfoSource: "lfo1",
     dcoEnvelopeModAmount: 0,
-    dcoEnvelopeSource: 0,
+    dcoEnvelopeSource: 'env1',
 
     lfo1Wave: 'sine',
     lfo1Rate: 0,
@@ -58,7 +58,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     vcfLfoModAmount: 0,
     vcfLfoSource: "lfo1",
     vcfEnvelopeModAmount: 0,
-    vcfEnvelopeSource: 0,
+    vcfEnvelopeSource: 'env1',
 
     env1Attack: 0,
     env1Decay: 0,

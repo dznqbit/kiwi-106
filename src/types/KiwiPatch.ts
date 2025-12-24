@@ -88,7 +88,7 @@ export interface KiwiPatch {
   dcoLfoModAmount: MidiCcValue;
   dcoLfoSource: LfoSource;
   dcoEnvelopeModAmount: MidiCcValue;
-  dcoEnvelopeSource: MidiCcValue;
+  dcoEnvelopeSource: EnvelopeSource;
 
   lfo1Wave: LfoWaveform;
   // TODO: lfo1SyncMode "free-running", "sync-2-notes", etc.
@@ -113,7 +113,7 @@ export interface KiwiPatch {
   vcfLfoModAmount: MidiCcValue;
   vcfLfoSource: LfoSource;
   vcfEnvelopeModAmount: MidiCcValue;
-  vcfEnvelopeSource: MidiCcValue; // Can be tokenized
+  vcfEnvelopeSource: EnvelopeSource;
 
   env1Attack: MidiCcValue;
   env1Decay: MidiCcValue;

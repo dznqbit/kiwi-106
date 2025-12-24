@@ -11,7 +11,7 @@ import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
 import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 import { PatchNameEditor } from "./PatchNameEditor";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
+import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
   isAnyKiwi106SysexMessage,
@@ -22,6 +22,7 @@ import { KiwiPatch } from "../types/KiwiPatch";
 import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
+  envelopeSourceControlChangeValues,
   lfoWaveformControlChangeValues,
   pwmControlSourceControlChangeValues,
 } from "../utils/kiwiMidi";
@@ -103,11 +104,20 @@ export const JunoProgrammer = () => {
 
           case "lfo1Wave":
           case "lfo2Wave":
-            console.log(`[cc -> patch] Time for ${patchKey}`);
             setPatchProperty(
               patchKey,
               controlChangeValue(ccData, lfoWaveformControlChangeValues) ??
                 "sine",
+              options
+            );
+            break;
+
+          case "vcfEnvelopeSource":
+          case "dcoEnvelopeSource":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, envelopeSourceControlChangeValues) ??
+                "env1",
               options
             );
             break;

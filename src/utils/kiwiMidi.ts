@@ -12,6 +12,7 @@ import {
 import {
   DcoRange,
   DcoWave,
+  EnvelopeSource,
   isDcoRange,
   isDcoWave,
   isLfoMode,
@@ -91,6 +92,13 @@ export const pwmControlSourceControlChangeValues: Record<
   env2: [73, 90],
   "env1-inverted": [91, 108],
   "env2-inverted": [109, 127],
+};
+
+export const envelopeSourceControlChangeValues: Record<EnvelopeSource, MidiCcValue[]> = {
+  env1: [0, 31],
+  env2: [64, 95],
+  "env1-inverted": [32, 63],
+  "env2-inverted": [96, 127],
 };
 
 export const buildKiwiMidi = ({
