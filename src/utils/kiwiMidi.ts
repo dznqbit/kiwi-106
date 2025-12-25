@@ -17,11 +17,13 @@ import {
   isChorusMode,
   isDcoRange,
   isDcoWave,
+  isKeyAssignDetuneMode,
   isKeyMode,
   isLfoMode,
   isLfoSource,
   isPwmControlSource,
   isVcaMode,
+  KeyAssignDetuneMode,
   KeyMode,
   KiwiPatch,
   KiwiPatchAddress,
@@ -100,6 +102,11 @@ export const keyModeControlChangeValues: Record<KeyMode, MidiCcValue[]> = {
   "unison-staccato": [48, 63],
   "mono-legato": [64, 79],
   "mono-staccato": [80, 127],
+};
+
+export const keyAssignDetuneModeControlChangeValues: Record<KeyAssignDetuneMode, MidiCcValue[]> = {
+  "mono": [0, 63],
+  "all": [64, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -231,6 +238,10 @@ export const buildKiwiMidi = ({
 
       if (key === "keyMode" && isKeyMode(value)) {
         ccByte = keyModeControlChangeValues[value][0];
+      }
+
+      if (key === "keyAssignDetuneMode" && isKeyAssignDetuneMode(value)) {
+        ccByte = keyAssignDetuneModeControlChangeValues[value][0];
       }
 
       if (ccByte !== undefined) {

@@ -3,7 +3,7 @@ import { buildKiwiMidi } from "./kiwiMidi";
 import { describe, expect, it, Mock, vi } from "vitest";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import { MidiMessage } from "../types/Midi";
-import { unpack12Bit } from "./sysexUtils";
+import { pack12Bit, unpack12Bit } from "./sysexUtils";
 
 vi.mock("webmidi");
 
@@ -265,7 +265,7 @@ describe("kiwiMidi", () => {
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
             bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
             bogs, bogs, bogs, 0x02, bogs, bogs, bogs, bogs, // 80-87
-            bogs, 0x05, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
+            bogs, 0x05, 0x10, 0x20, 0x01, bogs, bogs, bogs, // 88-95
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 104-111
           ],
@@ -280,6 +280,8 @@ describe("kiwiMidi", () => {
           expect(result.kiwiPatch.chorusMode).toBe("chorus2");
           expect(result.kiwiPatch.vcaMode).toBe("env2");
           expect(result.kiwiPatch.keyMode).toBe("mono-staccato");
+          expect(result.kiwiPatch.keyAssignDetune).toBe(65);
+          expect(result.kiwiPatch.keyAssignDetuneMode).toBe("all");
         }
       });
     })

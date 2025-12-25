@@ -11,6 +11,7 @@ import { LfoModeSelector } from "./LfoModeSelector";
 import { ChorusModeSelector } from "./ChorusModeSelector";
 import { VcaModeSelector } from "./VcaModeSelector";
 import { KeyModeSelector } from "./KeyModeSelector";
+import { DetuneModeSelector } from "./DetuneModeSelector";
 
 export const JunoSliders = () => {
   return (
@@ -44,8 +45,10 @@ export const JunoSliders = () => {
         </Kiwi106Fieldset>
 
         <Kiwi106Fieldset legend="KEY MODE">
-          <Group>
+          <Group align="flex-start">
             <KeyModeSelector label="KEY MODE" property="keyMode" />
+            <DetuneModeSelector label="DETUNE MODE" property="keyAssignDetuneMode" />
+            <KiwiPatchPropertySlider label="DETUNE" property="keyAssignDetune" />
           </Group>
         </Kiwi106Fieldset>
 

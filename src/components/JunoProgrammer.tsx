@@ -24,6 +24,7 @@ import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
   envelopeSourceControlChangeValues,
+  keyAssignDetuneModeControlChangeValues,
   keyModeControlChangeValues,
   lfoWaveformControlChangeValues,
   pwmControlSourceControlChangeValues,
@@ -149,6 +150,14 @@ export const JunoProgrammer = () => {
             );
             break;
 
+          case "keyAssignDetuneMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, keyAssignDetuneModeControlChangeValues) ?? "unison-only",
+              options
+            );
+            break;
+
           default:
             setPatchProperty(patchKey, ccData, options);
         }
@@ -248,6 +257,7 @@ export const JunoProgrammer = () => {
                 "chorusMode",
                 "vcaMode",
                 "keyMode",
+                "keyAssignDetuneMode",
               ];
 
               if (props.includes(k)) {

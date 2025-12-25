@@ -1,6 +1,7 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   ChorusMode,
+  KeyAssignDetuneMode as DetuneMode,
   KeyMode,
   KiwiPatch,
   LfoMode,
@@ -77,20 +78,21 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     ) ?? "off";
 
   // These values come over as a 12-bit amount, but we store as 7-bit
+  const convert12bitTo7Bit = (n: number) => n >> 5
   const dcoEnvelopeModAmount = trimMidiCcValue(
-    pack12Bit(dataBytes[21], dataBytes[22]) >> 5
+    convert12bitTo7Bit(pack12Bit(dataBytes[21], dataBytes[22]))
   );
   const dcoLfoModAmount = trimMidiCcValue(
-    pack12Bit(dataBytes[23], dataBytes[24]) >> 5
+    convert12bitTo7Bit(pack12Bit(dataBytes[23], dataBytes[24]))
   );
   const dcoBendAmount = trimMidiCcValue(
-    pack12Bit(dataBytes[25], dataBytes[26]) >> 5
+    convert12bitTo7Bit(pack12Bit(dataBytes[25], dataBytes[26]))
   );
   const lfoModWheelAmount = trimMidiCcValue(
-    pack12Bit(dataBytes[27], dataBytes[28]) >> 5
+    convert12bitTo7Bit(pack12Bit(dataBytes[27], dataBytes[28]))
   );
   const dcoPwmModAmount = trimMidiCcValue(
-    pack12Bit(dataBytes[29], dataBytes[30]) >> 5
+    convert12bitTo7Bit(pack12Bit(dataBytes[29], dataBytes[30]))
   );
 
   // Byte 31 DCO Control
@@ -161,6 +163,13 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     5: "mono-staccato"
   }
   const keyMode: KeyMode = keyModeMap[dataBytes[89]];
+  const keyAssignDetune = trimMidiCcValue(convert12bitTo7Bit(pack12Bit(dataBytes[90], dataBytes[91])));
+  const keyAssignDetuneModeMap: Record<number, DetuneMode> = {
+    0: "mono",
+    1: "all"
+  }
+  const keyAssignDetuneMode = keyAssignDetuneModeMap[dataBytes[92]]
+
 
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
   // const portamentoTime = combine12BitToMidi(94, 95);
@@ -211,8 +220,8 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     vcfBendAmount: 0,
     lfoModWheelAmount,
     keyMode,
-    keyAssignDetune: 0,
-    keyAssignDetuneMode: 0,
+    keyAssignDetune,
+    keyAssignDetuneMode,
   };
 
   return {

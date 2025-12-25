@@ -80,7 +80,7 @@ const blankKiwiPatchState: KiwiPatchState = {
 
     keyMode: "poly1",
     keyAssignDetune: 0,
-    keyAssignDetuneMode: 0,
+    keyAssignDetuneMode: "mono",
   },
 };
 
