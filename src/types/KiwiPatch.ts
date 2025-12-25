@@ -101,9 +101,9 @@ export const isKeyMode = (x: unknown): x is KeyMode => {
 };
 
 const keyAssignDetuneModes = ["mono", "all"] as const;
-export type KeyAssignDetuneMode = (typeof keyAssignDetuneModes)[number];
-export const isKeyAssignDetuneMode = (x: unknown): x is KeyAssignDetuneMode => {
-  return typeof x === "string" && keyAssignDetuneModes.includes(x as KeyAssignDetuneMode);
+export type DetuneMode = (typeof keyAssignDetuneModes)[number];
+export const isKeyAssignDetuneMode = (x: unknown): x is DetuneMode => {
+  return typeof x === "string" && keyAssignDetuneModes.includes(x as DetuneMode);
 };
 
 export interface KiwiPatch {
@@ -167,5 +167,5 @@ export interface KiwiPatch {
 
   keyMode: KeyMode;
   keyAssignDetune: MidiCcValue;
-  keyAssignDetuneMode: KeyAssignDetuneMode;
+  keyAssignDetuneMode: DetuneMode;
 }

@@ -1,6 +1,6 @@
 import { Button, Center, Stack, Text } from "@mantine/core";
 import {
-  KeyAssignDetuneMode,
+  DetuneMode,
   KiwiPatch,
   isKeyAssignDetuneMode,
 } from "../types/KiwiPatch";
@@ -25,7 +25,7 @@ export const DetuneModeSelector = ({
     );
   }
 
-  const setDetuneMode = (detuneMode: KeyAssignDetuneMode) => {
+  const setDetuneMode = (detuneMode: DetuneMode) => {
     setKiwiPatchProperty(property, detuneMode, {
       updatedBy: "Editor Change",
     });
@@ -56,7 +56,7 @@ export const DetuneModeSelector = ({
 
 interface DetuneModeButtonProps {
   label?: string;
-  detuneMode: KeyAssignDetuneMode;
+  detuneMode: DetuneMode;
   isSelected?: boolean;
   onClick: () => void;
   size?: "xs" | "sm" | "md" | "lg" | "xl";

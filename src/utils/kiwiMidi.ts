@@ -23,7 +23,7 @@ import {
   isLfoSource,
   isPwmControlSource,
   isVcaMode,
-  KeyAssignDetuneMode,
+  DetuneMode,
   KeyMode,
   KiwiPatch,
   KiwiPatchAddress,
@@ -104,7 +104,7 @@ export const keyModeControlChangeValues: Record<KeyMode, MidiCcValue[]> = {
   "mono-staccato": [80, 127],
 };
 
-export const keyAssignDetuneModeControlChangeValues: Record<KeyAssignDetuneMode, MidiCcValue[]> = {
+export const keyAssignDetuneModeControlChangeValues: Record<DetuneMode, MidiCcValue[]> = {
   "mono": [0, 63],
   "all": [64, 127],
 };

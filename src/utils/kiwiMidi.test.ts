@@ -2,8 +2,8 @@ import { WebMidi } from "webmidi";
 import { buildKiwiMidi } from "./kiwiMidi";
 import { describe, expect, it, Mock, vi } from "vitest";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
-import { MidiMessage } from "../types/Midi";
-import { pack12Bit, unpack12Bit } from "./sysexUtils";
+import { MidiCcValue, MidiMessage } from "../types/Midi";
+import { unpack12Bit } from "./sysexUtils";
 
 vi.mock("webmidi");
 
@@ -250,21 +250,54 @@ describe("kiwiMidi", () => {
           0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, // 10 spaces padding
         ];
   
+        // We store patch data as 7 bit (for now), but many messages are in 12-bit format
+        const convert7BitTo12Bit = (n: number) => n << 5;
+
+        // Invert the "c2b" helper from patchEditBufferDump
+        const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n))
+        
         const mockMessage: MidiMessage = {
           isChannelMessage: false,
           isSystemMessage: true,
           data: [
             ...patchEditBufferDumpPreludeData,
             ...patchName,
-                                    bogs, bogs, bogs, bogs, // 16-23
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 24-31
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 32-39
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 40-47
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 48-55
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 56-63
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
-            bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
-            bogs, bogs, bogs, 0x02, bogs, bogs, bogs, bogs, // 80-87
+            0b0000_1101,  // 20 DCO Wave
+            ...b2c(88),   // 21-22 DCO Env Hi/Lo
+            ...b2c(77),   // 23-24 DCO LFO Hi/Lo
+            ...b2c(66),   // 25-26 DCO Bend Mod Amount
+            ...b2c(55),   // 27-28 DCO Bend LFO Mod
+            ...b2c(44),   // 29-30 DCO Pwm Amount
+            0b0111_0000,  // 31 DCO Control
+            ...b2c(33),   // 32-33 Sub Level
+            ...b2c(22),   // 34-35 Noise level
+            2,            // HPF level
+            ...b2c(11),   // VCF Cutoff level            
+            ...b2c(23),   // VCF Resonance level
+            ...b2c(34),   // VCF LFO Amount
+            ...b2c(45),   // VCF ENV amount
+            ...b2c(56),   // VCF Key Follow Amount
+            ...b2c(67),   // VCF Bend Mod Amount
+            0b0000_1111,  // VCF Control
+            ...b2c(78),   // ENV1 A
+            ...b2c(89),   // ENV1 D
+            ...b2c(98),   // ENV1 S
+            ...b2c(101),  // ENV1 R
+            ...b2c(74),   // ENV2 A
+            ...b2c(85),   // ENV2 D
+            ...b2c(96),   // ENV2 S
+            ...b2c(102),  // 64-65 ENV2 R
+            0,            // Env Control (Not Used ??)
+            0b0000_0101,  // LFO1 Wave
+            ...b2c(103),  // LFO1 Rate
+            ...b2c(104),  // LFO1 Delay
+            0b0000_0011,  // LFO2 Wave
+            ...b2c(105),  // LFO2 Rate
+            ...b2c(106),  // LFO2 Delay
+            0x71,         // LFO1 Control
+            0x02,         // Chorus Control
+            ...b2c(107),  // VCA level
+            bogs, bogs, 0x02, bogs, bogs, bogs, bogs, // 80-87
             bogs, 0x05, 0x10, 0x20, 0x01, bogs, bogs, bogs, // 88-95
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 104-111
@@ -275,6 +308,47 @@ describe("kiwiMidi", () => {
         expect(result.command).toBe("Patch Edit Buffer Dump");
         if (result.command === "Patch Edit Buffer Dump") {
           expect(result.kiwiPatch.patchName).toBe("Test Patch");
+          expect(result.kiwiPatch.dcoWave).toBe("ramp-and-pulse");
+          expect(result.kiwiPatch.dcoRange).toBe("8");
+          expect(result.kiwiPatch.dcoEnvelopeModAmount).toBe(88);
+          expect(result.kiwiPatch.dcoLfoModAmount).toBe(77);
+          expect(result.kiwiPatch.dcoBendAmount).toBe(66);
+          // TODO: dcoBendLfoAmount
+          // expect(result.kiwiPatch.dcoBendAmount).toBe(55);
+          expect(result.kiwiPatch.dcoPwmModAmount).toBe(44);
+          expect(result.kiwiPatch.dcoEnvelopeSource).toBe("env1-inverted")
+          expect(result.kiwiPatch.dcoPwmControl).toBe("env2-inverted")
+          expect(result.kiwiPatch.subLevel).toBe(33)
+          expect(result.kiwiPatch.noiseLevel).toBe(22)
+          expect(result.kiwiPatch.vcfHiPassCutoff).toBe(2)
+          expect(result.kiwiPatch.vcfLowPassCutoff).toBe(11)
+          expect(result.kiwiPatch.vcfLowPassResonance).toBe(23)
+          expect(result.kiwiPatch.vcfLfoModAmount).toBe(34)
+          expect(result.kiwiPatch.vcfEnvelopeModAmount).toBe(45)
+          expect(result.kiwiPatch.vcfPitchFollow).toBe(56)
+          expect(result.kiwiPatch.vcfBendAmount).toBe(67)
+          expect(result.kiwiPatch.vcfEnvelopeSource).toBe("env2")
+          expect(result.kiwiPatch.vcfLfoSource).toBe("lfo2-inverted")
+          expect(result.kiwiPatch.env1Attack).toBe(78)
+          expect(result.kiwiPatch.env1Decay).toBe(89)
+          expect(result.kiwiPatch.env1Sustain).toBe(98)
+          expect(result.kiwiPatch.env1Release).toBe(101)
+          expect(result.kiwiPatch.env2Attack).toBe(74)
+          expect(result.kiwiPatch.env2Decay).toBe(85)
+          expect(result.kiwiPatch.env2Sustain).toBe(96)
+          expect(result.kiwiPatch.env2Release).toBe(102)
+          expect(result.kiwiPatch.lfo1Wave).toBe('random')
+          expect(result.kiwiPatch.lfo1Rate).toBe(103)
+          expect(result.kiwiPatch.lfo1Delay).toBe(104)
+          expect(result.kiwiPatch.lfo2Wave).toBe('sawtooth')
+          expect(result.kiwiPatch.lfo2Rate).toBe(105)
+          expect(result.kiwiPatch.lfo2Delay).toBe(106)
+          
+          // VCA level not on KiwiPatch?!?!?
+          // expect(result.kiwiPatch.vcaLevel).toBe(107)
+
+          // expect(result.kiwiPatch.dcoPwmModAmount).toBe(44);
+
           expect(result.kiwiPatch.lfo1Mode).toBe("plus");
           expect(result.kiwiPatch.lfo2Mode).toBe("normal");
           expect(result.kiwiPatch.chorusMode).toBe("chorus2");
@@ -282,6 +356,7 @@ describe("kiwiMidi", () => {
           expect(result.kiwiPatch.keyMode).toBe("mono-staccato");
           expect(result.kiwiPatch.keyAssignDetune).toBe(65);
           expect(result.kiwiPatch.keyAssignDetuneMode).toBe("all");
+
         }
       });
     })

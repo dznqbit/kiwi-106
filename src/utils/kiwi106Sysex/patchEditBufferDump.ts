@@ -1,7 +1,8 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   ChorusMode,
-  KeyAssignDetuneMode as DetuneMode,
+  DetuneMode as DetuneMode,
+  EnvelopeSource,
   KeyMode,
   KiwiPatch,
   LfoMode,
@@ -77,28 +78,24 @@ export const parseKiwi106PatchEditBufferSysexDump = (
       (k) => dcoWaveSysexValues[k] == dcoWaveBytes
     ) ?? "off";
 
-  // These values come over as a 12-bit amount, but we store as 7-bit
-  const convert12bitTo7Bit = (n: number) => n >> 5
-  const dcoEnvelopeModAmount = trimMidiCcValue(
-    convert12bitTo7Bit(pack12Bit(dataBytes[21], dataBytes[22]))
-  );
-  const dcoLfoModAmount = trimMidiCcValue(
-    convert12bitTo7Bit(pack12Bit(dataBytes[23], dataBytes[24]))
-  );
-  const dcoBendAmount = trimMidiCcValue(
-    convert12bitTo7Bit(pack12Bit(dataBytes[25], dataBytes[26]))
-  );
-  const lfoModWheelAmount = trimMidiCcValue(
-    convert12bitTo7Bit(pack12Bit(dataBytes[27], dataBytes[28]))
-  );
-  const dcoPwmModAmount = trimMidiCcValue(
-    convert12bitTo7Bit(pack12Bit(dataBytes[29], dataBytes[30]))
-  );
+  // Sysex values come over as a 12-bit amount, but we store as 7-bit (for now)
+  const convert12bitTo7Bit = (n: number) => n >> 5;
+
+  // Consolidate repetitive operation for handling 2-byte sysex values
+  const c2b = (b1: number, b2: number) =>
+    trimMidiCcValue(convert12bitTo7Bit(pack12Bit(b1, b2)));
+
+  const dcoEnvelopeModAmount = c2b(dataBytes[21], dataBytes[22]);
+  const dcoLfoModAmount = c2b(dataBytes[23], dataBytes[24]);
+  const dcoBendAmount = c2b(dataBytes[25], dataBytes[26]);
+  const lfoModWheelAmount = c2b(dataBytes[27], dataBytes[28]);
+  const dcoPwmModAmount = c2b(dataBytes[29], dataBytes[30]);
 
   // Byte 31 DCO Control
   // Byte ??: 0000000u
   // Byte 31: 0vwxxxyz
-  // z = DCOENV(0=ENV1,1=ENV2)
+  // w = DCO ENV (0=Norm,1=Inverted)
+  // z = DCO ENV (0=ENV1,1=ENV2)
   // y = DCOLFO(0=LFO1,1=LFO2)
   // xxx = PWM Source
   // 000=Manual
@@ -106,53 +103,33 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   // 010=LFO2
   // 011=ENV1
   // 100=ENV2
-  // w = DCO ENV(0=Norm,1=Inverted)
   // v = PWM ENV(0=Norm,1=Inverted)
   // u = LFO POL(0=Norm,1=Inverted)
   const dcoControlByte = dataBytes[31];
-  console.log("DCO Control Byte", dcoControlByte.toString(2));
-  // const dcoEnvelope = dcoControlByte & 0b0010_0000;
-  // const dcoEnvelopeSource = dcoControlByte & 0b0000_0001;
-
-  const pwmEnvelope = dcoControlByte & 0b0100_0000;
-  const pwmSource = dcoControlByte & 0b0001_1100;
-  const pwmControlSourceMap: Record<number, PwmControlSource | undefined> = {
-    0b0000: "manual",
-    0b0001: "lfo1",
-    0b0010: "lfo2",
-    0b0011: "env1",
-    0b0100: "env2",
-    0b1011: "env1-inverted",
-    0b1100: "env2-inverted",
+  const dcoEnvelopeMap: Record<number, EnvelopeSource> = {
+    0: "env1",
+    1: "env2",
+    32: "env1-inverted",
+    33: "env2-inverted",
   };
+  const dcoEnvelopeSource: EnvelopeSource =
+    dcoEnvelopeMap[dcoControlByte & 0b0010_0001];
 
-  const dcoPwmControl: PwmControlSource =
-    pwmControlSourceMap[(pwmEnvelope >> 3) & (pwmSource >> 2)] ?? "manual";
-
-  // docs suggest that there's an extra byte (???) that controls LFO Polarity control...
-  // but we're going to ignore that for now.
   const dcoLfoSource: LfoSource =
     (dcoControlByte & 0b0000_0010) === 0 ? "lfo1" : "lfo2";
 
-  const lfo1Mode: LfoMode =
-    (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
-  const chorusModeMap: Record<number, ChorusMode> = {
-    0: "off",
-    1: "chorus1",
-    2: "chorus2",
+  const pwmControlSourceMap: Record<number, PwmControlSource | undefined> = {
+    0b0000_0000: "manual",
+    0b0000_0100: "lfo1",
+    0b0000_1000: "lfo2",
+    0b0000_1100: "env1",
+    0b0001_0000: "env2",
+    0b0100_1100: "env1-inverted",
+    0b0101_0000: "env2-inverted",
   };
-  const chorusMode = chorusModeMap[dataBytes[78]];
 
-  const lfo2Mode: LfoMode =
-    (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
-
-  const vcaModeMap: Record<number, VcaMode> = {
-    0: "env1",
-    1: "gate",
-    2: "env2",
-    3: "gate"
-  };
-  const vcaMode: VcaMode = vcaModeMap[dataBytes[83] & 0b0000_0011];
+  const dcoPwmControl: PwmControlSource =
+    pwmControlSourceMap[dcoControlByte & 0b0101_1100] ?? "manual";
 
   const keyModeMap: Record<number, KeyMode> = {
     0: "poly1",
@@ -160,24 +137,115 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     2: "unison-legato",
     3: "unison-legato",
     4: "mono-legato",
-    5: "mono-staccato"
-  }
+    5: "mono-staccato",
+  };
   const keyMode: KeyMode = keyModeMap[dataBytes[89]];
-  const keyAssignDetune = trimMidiCcValue(convert12bitTo7Bit(pack12Bit(dataBytes[90], dataBytes[91])));
+  const keyAssignDetune = c2b(dataBytes[90], dataBytes[91]);
+
   const keyAssignDetuneModeMap: Record<number, DetuneMode> = {
     0: "mono",
-    1: "all"
-  }
-  const keyAssignDetuneMode = keyAssignDetuneModeMap[dataBytes[92]]
+    1: "all",
+  };
+  const keyAssignDetuneMode = keyAssignDetuneModeMap[dataBytes[92]];
 
+  const subLevel = c2b(dataBytes[32], dataBytes[33]);
+  const noiseLevel = c2b(dataBytes[34], dataBytes[35]);
+  const vcfHiPassCutoff = trimMidiCcValue(dataBytes[36] & 0b11); // HPF Level (2 bits)
+  const vcfLowPassCutoff = c2b(dataBytes[37], dataBytes[38]);
+  const vcfLowPassResonance = c2b(dataBytes[39], dataBytes[40]);
+  const vcfLfoModAmount = c2b(dataBytes[41], dataBytes[42]);
+  const vcfEnvelopeModAmount = c2b(dataBytes[43], dataBytes[44]);
+  const vcfPitchFollow = c2b(dataBytes[45], dataBytes[46]);
+  const vcfBendAmount = c2b(dataBytes[47], dataBytes[48]);
 
-  // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
-  // const portamentoTime = combine12BitToMidi(94, 95);
+  // 0000wxyz
+  // w = LFO(0=Norm,1=Inverted)
+  // y = VCFLFO(0=LFO1,1=LFO2)
+  // x = Env(0=Norm,1=Inverted)
+  // z = VCFEnv(0=Env1,1=ENV2)
+  const vcfControlByte = dataBytes[49];
+  const vcfLfoSourceMap: Record<number, LfoSource> = {
+    0b0000_0000: "lfo1",
+    0b0000_0010: "lfo2",
+    0b0000_1000: "lfo1-inverted",
+    0b0000_1010: "lfo2-inverted",
+  };
+  const vcfLfoSource: LfoSource = vcfLfoSourceMap[vcfControlByte & 0b0000_1010];
+  const vcfEnvelopeSourceMap: Record<number, EnvelopeSource> = {
+    0: "env1",
+    1: "env2",
+    4: "env1-inverted",
+    5: "env2-inverted",
+  };
+  const vcfEnvelopeSource = vcfEnvelopeSourceMap[vcfControlByte & 0b0000_0001];
+
+  const env1Attack = c2b(dataBytes[50], dataBytes[51]);
+  const env1Decay = c2b(dataBytes[52], dataBytes[53]);
+  const env1Sustain = c2b(dataBytes[54], dataBytes[55]);
+  const env1Release = c2b(dataBytes[56], dataBytes[57]);
+
+  const env2Attack = c2b(dataBytes[58], dataBytes[59]);
+  const env2Decay = c2b(dataBytes[60], dataBytes[61]);
+  const env2Sustain = c2b(dataBytes[62], dataBytes[63]);
+  const env2Release = c2b(dataBytes[64], dataBytes[65]);
+
+  const lfoWaveformMap: Record<
+    number,
+    "sine" | "triangle" | "sawtooth" | "reverse-sawtooth" | "square" | "random"
+  > = {
+    0: "sine",
+    1: "triangle",
+    2: "square",
+    3: "sawtooth",
+    4: "reverse-sawtooth",
+    5: "random",
+  };
+  const lfo1Wave = lfoWaveformMap[dataBytes[67] & 0b111] ?? "sine";
+  const lfo1Rate = c2b(dataBytes[68], dataBytes[69]);
+  const lfo1Delay = c2b(dataBytes[70], dataBytes[71]);
+  const lfo1Mode: LfoMode =
+    (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
+
+  const lfo2Wave = lfoWaveformMap[dataBytes[72] & 0b111] ?? "sine";
+  const lfo2Rate = c2b(dataBytes[73], dataBytes[74]);
+  const lfo2Delay = c2b(dataBytes[75], dataBytes[76]);
+
+  const chorusModeMap: Record<number, ChorusMode> = {
+    0: "off",
+    1: "chorus1",
+    2: "chorus2",
+  };
+  const chorusMode = chorusModeMap[dataBytes[78]];
+
+  const volume = c2b(dataBytes[79], dataBytes[80]);
+  const vcaLfoModAmount = c2b(dataBytes[81], dataBytes[82]);
+
+  const vcaModeMap: Record<number, VcaMode> = {
+    0: "env1",
+    1: "gate",
+    2: "env2",
+    3: "gate",
+  };
+  const vcaMode: VcaMode = vcaModeMap[dataBytes[83] & 0b0000_0011];
+
+  const vcaControlByte = dataBytes[83];
+  const vcaLfoSourceMap: Record<number, LfoSource> = {
+    0: "lfo1",
+    4: "lfo2",
+    16: "lfo1-inverted",
+    20: "lfo2-inverted",
+  };
+  const vcaLfoSource = vcaLfoSourceMap[vcaControlByte & 0b0001_0100];
+
+  const portamentoTime = c2b(dataBytes[84], dataBytes[85]);
+
+  const lfo2Mode: LfoMode =
+    (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
 
   const kiwiPatch: KiwiPatch = {
     patchName,
-    portamentoTime: 0,
-    volume: 0,
+    portamentoTime,
+    volume,
     dcoRange,
     dcoWave,
     dcoPwmModAmount,
@@ -185,39 +253,39 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     dcoLfoModAmount,
     dcoLfoSource,
     dcoEnvelopeModAmount,
-    dcoEnvelopeSource: "env1",
-    lfo1Wave: "sine",
-    lfo1Rate: 0,
-    lfo1Delay: 0,
-    lfo2Wave: "sine",
-    lfo2Rate: 0,
-    lfo2Delay: 0,
+    dcoEnvelopeSource,
+    lfo1Wave,
+    lfo1Rate,
+    lfo1Delay,
+    lfo2Wave,
+    lfo2Rate,
+    lfo2Delay,
     lfo1Mode,
     lfo2Mode,
-    subLevel: 0,
-    noiseLevel: 0,
-    vcfLowPassCutoff: 0,
-    vcfLowPassResonance: 0,
-    vcfPitchFollow: 0,
-    vcfHiPassCutoff: 0,
-    vcfLfoModAmount: 0,
-    vcfLfoSource: "lfo1",
-    vcfEnvelopeModAmount: 0,
-    vcfEnvelopeSource: "env1",
-    env1Attack: 0,
-    env1Decay: 0,
-    env1Sustain: 0,
-    env1Release: 0,
+    subLevel,
+    noiseLevel,
+    vcfLowPassCutoff,
+    vcfLowPassResonance,
+    vcfPitchFollow,
+    vcfHiPassCutoff,
+    vcfLfoModAmount,
+    vcfLfoSource,
+    vcfEnvelopeModAmount,
+    vcfEnvelopeSource,
+    env1Attack,
+    env1Decay,
+    env1Sustain,
+    env1Release,
     chorusMode,
-    vcaLfoModAmount: 0,
-    vcaLfoSource: "lfo1",
+    vcaLfoModAmount,
+    vcaLfoSource,
     vcaMode,
-    env2Attack: 0,
-    env2Decay: 0,
-    env2Sustain: 0,
-    env2Release: 0,
+    env2Attack,
+    env2Decay,
+    env2Sustain,
+    env2Release,
     dcoBendAmount,
-    vcfBendAmount: 0,
+    vcfBendAmount,
     lfoModWheelAmount,
     keyMode,
     keyAssignDetune,
