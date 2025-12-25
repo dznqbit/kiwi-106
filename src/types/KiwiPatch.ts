@@ -87,6 +87,19 @@ export const isVcaMode = (x: unknown): x is VcaMode => {
   return typeof x === "string" && vcaModes.includes(x as VcaMode);
 };
 
+const keyModes = [
+  "poly1",
+  "poly2",
+  "unison-legato",
+  "unison-staccato",
+  "mono-legato",
+  "mono-staccato",
+] as const;
+export type KeyMode = (typeof keyModes)[number];
+export const isKeyMode = (x: unknown): x is KeyMode => {
+  return typeof x === "string" && keyModes.includes(x as KeyMode);
+};
+
 export interface KiwiPatch {
   patchName: string;
   portamentoTime: MidiCcValue;
@@ -146,7 +159,7 @@ export interface KiwiPatch {
   vcfBendAmount: MidiCcValue;
   lfoModWheelAmount: MidiCcValue;
 
-  keyMode: MidiCcValue; // Can be tokenized
+  keyMode: KeyMode;
   keyAssignDetune: MidiCcValue;
   keyAssignDetuneMode: MidiCcValue; // Can be tokenized
 }

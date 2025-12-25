@@ -1,6 +1,7 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   ChorusMode,
+  KeyMode,
   KiwiPatch,
   LfoMode,
   LfoSource,
@@ -151,6 +152,16 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   };
   const vcaMode: VcaMode = vcaModeMap[dataBytes[83] & 0b0000_0011];
 
+  const keyModeMap: Record<number, KeyMode> = {
+    0: "poly1",
+    1: "poly2",
+    2: "unison-legato",
+    3: "unison-legato",
+    4: "mono-legato",
+    5: "mono-staccato"
+  }
+  const keyMode: KeyMode = keyModeMap[dataBytes[89]];
+
   // Helper to combine hi/lo bytes into 12-bit value and convert to MidiCcValue
   // const portamentoTime = combine12BitToMidi(94, 95);
 
@@ -199,7 +210,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
     dcoBendAmount,
     vcfBendAmount: 0,
     lfoModWheelAmount,
-    keyMode: 0,
+    keyMode,
     keyAssignDetune: 0,
     keyAssignDetuneMode: 0,
   };

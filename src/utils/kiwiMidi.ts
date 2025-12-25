@@ -17,10 +17,12 @@ import {
   isChorusMode,
   isDcoRange,
   isDcoWave,
+  isKeyMode,
   isLfoMode,
   isLfoSource,
   isPwmControlSource,
   isVcaMode,
+  KeyMode,
   KiwiPatch,
   KiwiPatchAddress,
   LfoMode,
@@ -89,6 +91,15 @@ export const vcaModeControlChangeValues: Record<VcaMode, MidiCcValue[]> = {
   gate: [0, 31],
   env1: [32, 63],
   env2: [64, 127],
+};
+
+export const keyModeControlChangeValues: Record<KeyMode, MidiCcValue[]> = {
+  poly1: [0, 15],
+  poly2: [16, 31],
+  "unison-legato": [32, 47],
+  "unison-staccato": [48, 63],
+  "mono-legato": [64, 79],
+  "mono-staccato": [80, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -216,6 +227,10 @@ export const buildKiwiMidi = ({
 
       if (key === "vcaMode" && isVcaMode(value)) {
         ccByte = vcaModeControlChangeValues[value][0];
+      }
+
+      if (key === "keyMode" && isKeyMode(value)) {
+        ccByte = keyModeControlChangeValues[value][0];
       }
 
       if (ccByte !== undefined) {

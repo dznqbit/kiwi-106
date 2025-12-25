@@ -265,7 +265,7 @@ describe("kiwiMidi", () => {
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 64-71
             bogs, bogs, bogs, bogs, bogs, 0x71, 0x02, bogs, // 72-79
             bogs, bogs, bogs, 0x02, bogs, bogs, bogs, bogs, // 80-87
-            bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
+            bogs, 0x05, bogs, bogs, bogs, bogs, bogs, bogs, // 88-95
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, 0x70, // 96-103
             bogs, bogs, bogs, bogs, bogs, bogs, bogs, bogs, // 104-111
           ],
@@ -279,6 +279,7 @@ describe("kiwiMidi", () => {
           expect(result.kiwiPatch.lfo2Mode).toBe("normal");
           expect(result.kiwiPatch.chorusMode).toBe("chorus2");
           expect(result.kiwiPatch.vcaMode).toBe("env2");
+          expect(result.kiwiPatch.keyMode).toBe("mono-staccato");
         }
       });
     })

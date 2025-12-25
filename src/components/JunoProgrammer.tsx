@@ -24,6 +24,7 @@ import {
   dcoRangeControlChangeValues,
   dcoWaveControlChangeValues,
   envelopeSourceControlChangeValues,
+  keyModeControlChangeValues,
   lfoWaveformControlChangeValues,
   pwmControlSourceControlChangeValues,
   vcaModeControlChangeValues,
@@ -140,6 +141,14 @@ export const JunoProgrammer = () => {
             );
             break;
 
+          case "keyMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, keyModeControlChangeValues) ?? "poly1",
+              options
+            );
+            break;
+
           default:
             setPatchProperty(patchKey, ccData, options);
         }
@@ -238,6 +247,7 @@ export const JunoProgrammer = () => {
                 "vcaLfoSource",
                 "chorusMode",
                 "vcaMode",
+                "keyMode",
               ];
 
               if (props.includes(k)) {

@@ -10,13 +10,14 @@ import { DcoWaveSelector } from "./DcoWaveSelector";
 import { LfoModeSelector } from "./LfoModeSelector";
 import { ChorusModeSelector } from "./ChorusModeSelector";
 import { VcaModeSelector } from "./VcaModeSelector";
+import { KeyModeSelector } from "./KeyModeSelector";
 
 export const JunoSliders = () => {
   return (
     <Container size="xl">
-      <Group>
+      <Group align="flex-start">
         <Kiwi106Fieldset legend="BEND">
-          <Group>
+          <Group align="flex-start">
             <KiwiPatchPropertySlider label="DCO" property="dcoBendAmount" />
             <KiwiPatchPropertySlider label="VCF" property="vcfBendAmount" />
             <KiwiPatchPropertySlider label="LFO" property="lfoModWheelAmount" />
@@ -39,6 +40,12 @@ export const JunoSliders = () => {
             <WaveformSelector label="WAVE" property="lfo2Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo2Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo2Delay" />
+          </Group>
+        </Kiwi106Fieldset>
+
+        <Kiwi106Fieldset legend="KEY MODE">
+          <Group>
+            <KeyModeSelector label="KEY MODE" property="keyMode" />
           </Group>
         </Kiwi106Fieldset>
 

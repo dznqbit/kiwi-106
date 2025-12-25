@@ -78,7 +78,7 @@ const blankKiwiPatchState: KiwiPatchState = {
     vcfBendAmount: 0,
     lfoModWheelAmount: 0,
 
-    keyMode: 0,
+    keyMode: "poly1",
     keyAssignDetune: 0,
     keyAssignDetuneMode: 0,
   },
