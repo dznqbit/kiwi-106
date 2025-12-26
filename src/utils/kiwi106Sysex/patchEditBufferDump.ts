@@ -10,10 +10,10 @@ import {
   PwmControlSource,
   VcaMode,
 } from "../../types/KiwiPatch";
-import { MidiMessage } from "../../types/Midi";
+import { MidiCcValue, MidiMessage } from "../../types/Midi";
 import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
-import { isKiwi106SysexMessage, pack12Bit } from "../sysexUtils";
+import { isKiwi106SysexMessage, pack12Bit, unpack12Bit } from "../sysexUtils";
 import { trimMidiCcValue } from "../trimMidiCcValue";
 
 /** Build the sysex DATA for a Patch Edit Buffer Dump
@@ -22,28 +22,36 @@ import { trimMidiCcValue } from "../trimMidiCcValue";
  * - 2 null bytes
  */
 export const buildKiwi106PatchEditBufferSysexDump = (
-  _kiwiPatch: KiwiPatch
+  kiwiPatch: KiwiPatch
 ): number[] => {
-  // This is the patch data sysex ONLY!
+  const b2a = (a: MidiCcValue[], b: MidiCcValue[], i: number) => {
+    for (let j = 0; j < b.length; j++) {
+      a[i + j] = b[j];
+    }
+  };
+
+  // Convert 7-bit MIDI CC values to 12-bit sysex values (inverse of parse's convert12bitTo7Bit)
+  const convert7BitTo12Bit = (n: number) => n << 5;
+  const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n)).map(trimMidiCcValue)
+
+  const ccv = trimMidiCcValue
+  // THIS IS THE PATCH DATA ONLY!
   // This skips the sysex headers and the "2 null bytes"
-  const simplePatchDumpSysex: number[] = [
-    // "yahoo"
-    121, 97, 104, 111, 111,
+  const patchDumpSysex: MidiCcValue[] = new Array(128).fill(0);
 
-    0x73, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-    0x20, 0x20, 0x20, 0x0c, 0x00, 0x00, 0x01, 0x00, 0x1f, 0x68, 0x00, 0x00,
-    0x1a, 0x22, 0x00, 0x00, 0x00, 0x02, 0x30, 0x00, 0x12, 0x34, 0x00, 0x00,
-    0x03, 0x6c, 0x00, 0x00, 0x01, 0x70, 0x00, 0x20, 0x00, 0x00, 0x00, 0x0c,
-    0x54, 0x1f, 0x63, 0x00, 0x00, 0x00, 0x14, 0x03, 0x44, 0x13, 0x6f, 0x00,
-    0x00, 0x00, 0x02, 0x14, 0x2c, 0x17, 0x3c, 0x00, 0x0d, 0x41, 0x11, 0x44,
-    0x00, 0x00, 0x1c, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-  ];
+  const patchNameBytes = [...new Array(20)].map((_, i) => {
+    const cc = kiwiPatch.patchName.charCodeAt(i);
+    return Number.isNaN(cc) ? 32 : trimMidiCcValue(cc);
+  });
+  b2a(patchDumpSysex, patchNameBytes, 0);
+  patchDumpSysex[20] = ccv(dcoRangeSysexValues[kiwiPatch.dcoRange] | dcoWaveSysexValues[kiwiPatch.dcoWave]);
+  b2a(patchDumpSysex, b2c(kiwiPatch.dcoEnvelopeModAmount), 21);
+  b2a(patchDumpSysex, b2c(kiwiPatch.dcoLfoModAmount), 23);
+  b2a(patchDumpSysex, b2c(kiwiPatch.dcoBendAmount), 25);
+  b2a(patchDumpSysex, b2c(kiwiPatch.lfoModWheelAmount), 27);
+  b2a(patchDumpSysex, b2c(kiwiPatch.dcoPwmModAmount), 29);
 
-  return simplePatchDumpSysex;
+  return patchDumpSysex;
 };
 
 /** Parse a complete Midi Message into a kiwi106 Patch Edit Buffer Dump */

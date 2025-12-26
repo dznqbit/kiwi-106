@@ -4,6 +4,7 @@ import { describe, expect, it, Mock, vi } from "vitest";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import { MidiCcValue, MidiMessage } from "../types/Midi";
 import { unpack12Bit } from "./sysexUtils";
+import { KiwiPatch } from "../types/KiwiPatch";
 
 vi.mock("webmidi");
 
@@ -154,21 +155,39 @@ describe("kiwiMidi", () => {
   });
 
   const patchEditBufferDumpPreludeData = [
-      0xf0, // Sysex header
-      0x00,
-      0x21,
-      0x16, // Kiwitechnics mfg id
-      0x60,
-      0x03, // Kiwi106 identifier
-      0x00, // Device ID, in practice always 0
-      0x04, // Patch Edit Buffer dump
-      0x00,
-      0x00, // Two null bytes per docs
+    0xf0, // Sysex header
+    0x00,
+    0x21,
+    0x16, // Kiwitechnics mfg id
+    0x60,
+    0x03, // Kiwi106 identifier
+    0x00, // Device ID, in practice always 0
+    0x04, // Patch Edit Buffer dump
+    0x00,
+    0x00, // Two null bytes per docs
   ];
 
-  describe("patchEditBufferDump", () => {
+  describe("sendSysexPatchBufferDump", () => {
     it("works", () => {
-      const { kiwiMidi } = subject();
+      // We store patch data as 7 bit (for now), but many messages are in 12-bit format
+      const convert7BitTo12Bit = (n: number) => n << 5;
+      // Invert the "c2b" helper from patchEditBufferDump
+      const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n));
+
+      const { kiwiMidi, output } = subject();
+      const bogs = 0;
+      const kiwiPatch: KiwiPatch = {
+        patchName: "Test Patch",
+        dcoWave: "ramp-and-pulse",
+        dcoRange: "8",
+        dcoEnvelopeModAmount: 88,
+        dcoLfoModAmount: 77,
+        dcoBendAmount: 66,
+        lfoModWheelAmount: 55,
+        dcoPwmModAmount: 44,
+      };
+
+      kiwiMidi.sendSysexPatchBufferDump(kiwiPatch);
       const patchName = [
         0x54,
         0x65,
@@ -191,49 +210,76 @@ describe("kiwiMidi", () => {
         0x20,
         0x20, // 10 spaces padding
       ];
-
-      const dcoWaveRangeByte = 0b00001100; // Ramp + Pulse, 16'
-      const dcoEnvelopeModBytes = unpack12Bit(0xfa3);
-      const dcoLfoModBytes = unpack12Bit(0xeb4);
-      const dcoBendBytes = unpack12Bit(0xc82);
-      const lfoModWheelBytes = unpack12Bit(0x1d6);
-      const dcoPwmModBytes = unpack12Bit(0x073);
-      // Normal PWM env, normal DCO env, LFO 1 PWM Source, DCO Env 1, DCO Lfo 2
-      const dcoControlByte = 0b0000110;
-
-      const patchEditBufferDumpMessage: MidiMessage = {
-        isSystemMessage: true,
-        isChannelMessage: false,
-        data: [
-          ...patchEditBufferDumpPreludeData,
-          ...patchName, // 20 bytes of ASCII text
-          dcoWaveRangeByte, // single byte 0000zyxx
-          ...dcoEnvelopeModBytes, // 2 byte 12-bit value
-          ...dcoLfoModBytes, // 2 byte 12-bit value
-          ...dcoBendBytes, // 2 byte 12-bit value
-          ...lfoModWheelBytes, // 2 byte 12-bit value
-          ...dcoPwmModBytes, // 2 byte 12-bit value
-          dcoControlByte,
-          0xf7, // Sysex footer
-        ],
-      };
-
-      const result = kiwiMidi.parseSysex(patchEditBufferDumpMessage);
-      expect(result.isValid).toBeTruthy();
-      expect(result.command).toEqual("Patch Edit Buffer Dump");
-
-      if (result.command === "Patch Edit Buffer Dump") {
-        const kp = result.kiwiPatch;
-        expect(kp.patchName).toEqual("Test Patch");
-        expect(kp.dcoWave).toEqual("ramp-and-pulse");
-        expect(kp.dcoRange).toEqual("16");
-        expect(kp.dcoEnvelopeModAmount).toEqual(0xfa3 >> 5);
-        expect(kp.dcoLfoModAmount).toEqual(0xeb4 >> 5);
-        expect(kp.dcoBendAmount).toEqual(0xc82 >> 5);
-        expect(kp.lfoModWheelAmount).toEqual(0x1d6 >> 5);
-        expect(kp.dcoPwmModAmount).toEqual(0x073 >> 5);
-        expect(kp.dcoLfoSource).toEqual("lfo2");
-      }
+      expect(output.sendSysex).toHaveBeenCalledWith(
+        [0x00, 0x21, 0x16],
+        [
+          0x60,
+          0x03, // Kiwi106 identifier
+          0x00, // Device ID, in practice always 0
+          0x04, // Patch Edit Buffer dump
+          0x00,
+          0x00, // Two null bytes per docs
+          ...patchName,
+          0b0000_1101, // 20 DCO Wave/Range
+          ...b2c(88), // 21-22 DCO Env Hi/Lo
+          ...b2c(77), // 23-24 DCO LFO Hi/Lo
+          ...b2c(66), // 25-26 DCO Bend Mod Amount
+          ...b2c(55), // 27-28 DCO Bend LFO Mod
+          ...b2c(44), // 29-30 DCO Pwm Amount
+          0b0111_0000, // 31 DCO Control
+          ...b2c(33), // 32-33 Sub Level
+          ...b2c(22), // 34-35 Noise level
+          2, // 36 HPF level
+          ...b2c(11), // 37-38 VCF Cutoff level
+          ...b2c(23), // 39-40 VCF Resonance level
+          ...b2c(34), // 41-42 VCF LFO Amount
+          ...b2c(45), // 43-44 VCF ENV amount
+          ...b2c(56), // 45-46 VCF Key Follow Amount
+          ...b2c(67), // 47-48 VCF Bend Mod Amount
+          0b0000_1111, // 49 VCF Control
+          ...b2c(78), // 50-51 ENV1 A
+          ...b2c(89), // 52-53 ENV1 D
+          ...b2c(98), // 54-55 ENV1 S
+          ...b2c(101), // 56-57 ENV1 R
+          ...b2c(74), // 58-59 ENV2 A
+          ...b2c(85), // 60-61 ENV2 D
+          ...b2c(96), // 62-63 ENV2 S
+          ...b2c(102), // 64-65 ENV2 R
+          0, // 66 Env Control (Not Used ??)
+          0b0000_0101, // 67 LFO1 Wave
+          ...b2c(103), // 68-69 LFO1 Rate
+          ...b2c(104), // 70-71 LFO1 Delay
+          0b0000_0011, // 72 LFO2 Wave
+          ...b2c(105), // 73-74 LFO2 Rate
+          ...b2c(106), // 75-76 LFO2 Delay
+          0x71, // 77 LFO1 Control PARTIAL IMPLEMENETD
+          0x02, // 78 Chorus Control
+          ...b2c(107), // 79-80 VCA level
+          ...b2c(111), // 81-82 VCA LFO Mod Amount
+          0x02, // 83 VCA Control
+          ...b2c(121), // 84-85 Portamento Rate
+          bogs, // 86 Portamento Control
+          bogs, // 87 Load Sequence
+          bogs, // 88 Load Pattern
+          0x05, // 89 Voice Mode
+          0x10,
+          0x20, // 90-91 Voice Detune
+          0x01, // 92 Detune Control
+          bogs, // 93 Arp Control NOT IMPLEMENTED
+          bogs, // 94 Aftertouch Control NOT IMPLEMENTED
+          bogs, // 95 MW Control (I forget what MW is, again) NOT IMPLEMENTED
+          bogs, // 96 Midi Control NOT IMPLEMENTED
+          bogs,
+          bogs, // 97-98 Patch Clock Tempo NOT IMPLEMENTED
+          bogs, // 99 Arp Clock Divide NOT IMPLEMENTED
+          bogs, // 100 Seq Control NOT IMPLEMENTED
+          bogs, // 101 Seq Transpose NOT IMPLEMENTED
+          bogs, // 102 Dynamics Control NOT IMPLEMENTED
+          0x70, // 103 LFO2 Control PARTIAL IMPLEMENTED
+          bogs, // 104 Seq Clock Divide NOT IMPLEMENTED IMPLEMENETD
+          // 105-127 Not used, all set to 0
+        ]
+      );
     });
   });
 
@@ -241,86 +287,106 @@ describe("kiwiMidi", () => {
     describe("patch edit buffer dump", () => {
       it("parses patch edit buffer dump command", () => {
         const { kiwiMidi } = subject();
-  
+
         // "bogus" in neat formatting
         const bogs = 0x00;
-  
+
         const patchName = [
-          0x54, 0x65, 0x73, 0x74, 0x20, 0x50, 0x61, 0x74, 0x63, 0x68, // "Test Patch"
-          0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, // 10 spaces padding
+          0x54,
+          0x65,
+          0x73,
+          0x74,
+          0x20,
+          0x50,
+          0x61,
+          0x74,
+          0x63,
+          0x68, // "Test Patch"
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20,
+          0x20, // 10 spaces padding
         ];
-  
+
         // We store patch data as 7 bit (for now), but many messages are in 12-bit format
         const convert7BitTo12Bit = (n: number) => n << 5;
 
         // Invert the "c2b" helper from patchEditBufferDump
-        const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n))
-        
+        const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n));
+
         const mockMessage: MidiMessage = {
           isChannelMessage: false,
           isSystemMessage: true,
           data: [
             ...patchEditBufferDumpPreludeData,
             ...patchName,
-            0b0000_1101,  // 20 DCO Wave
-            ...b2c(88),   // 21-22 DCO Env Hi/Lo
-            ...b2c(77),   // 23-24 DCO LFO Hi/Lo
-            ...b2c(66),   // 25-26 DCO Bend Mod Amount
-            ...b2c(55),   // 27-28 DCO Bend LFO Mod
-            ...b2c(44),   // 29-30 DCO Pwm Amount
-            0b0111_0000,  // 31 DCO Control
-            ...b2c(33),   // 32-33 Sub Level
-            ...b2c(22),   // 34-35 Noise level
-            2,            // 36 HPF level
-            ...b2c(11),   // 37-38 VCF Cutoff level
-            ...b2c(23),   // 39-40 VCF Resonance level
-            ...b2c(34),   // 41-42 VCF LFO Amount
-            ...b2c(45),   // 43-44 VCF ENV amount
-            ...b2c(56),   // 45-46 VCF Key Follow Amount
-            ...b2c(67),   // 47-48 VCF Bend Mod Amount
-            0b0000_1111,  // 49 VCF Control
-            ...b2c(78),   // 50-51 ENV1 A
-            ...b2c(89),   // 52-53 ENV1 D
-            ...b2c(98),   // 54-55 ENV1 S
-            ...b2c(101),  // 56-57 ENV1 R
-            ...b2c(74),   // 58-59 ENV2 A
-            ...b2c(85),   // 60-61 ENV2 D
-            ...b2c(96),   // 62-63 ENV2 S
-            ...b2c(102),  // 64-65 ENV2 R
-            0,            // 66 Env Control (Not Used ??)
-            0b0000_0101,  // 67 LFO1 Wave
-            ...b2c(103),  // 68-69 LFO1 Rate
-            ...b2c(104),  // 70-71 LFO1 Delay
-            0b0000_0011,  // 72 LFO2 Wave
-            ...b2c(105),  // 73-74 LFO2 Rate
-            ...b2c(106),  // 75-76 LFO2 Delay
-            0x71,         // 77 LFO1 Control PARTIAL IMPLEMENETD
-            0x02,         // 78 Chorus Control
-            ...b2c(107),  // 79-80 VCA level
-            ...b2c(111),  // 81-82 VCA LFO Mod Amount
-            0x02,         // 83 VCA Control
-            ...b2c(121),  // 84-85 Portamento Rate
-            bogs,         // 86 Portamento Control
-            bogs,         // 87 Load Sequence
-            bogs,         // 88 Load Pattern
-            0x05,         // 89 Voice Mode
-            0x10, 0x20,   // 90-91 Voice Detune
-            0x01,         // 92 Detune Control
-            bogs,         // 93 Arp Control NOT IMPLEMENTED
-            bogs,         // 94 Aftertouch Control NOT IMPLEMENTED
-            bogs,         // 95 MW Control (I forget what MW is, again) NOT IMPLEMENTED
-            bogs,         // 96 Midi Control NOT IMPLEMENTED
-            bogs, bogs,   // 97-98 Patch Clock Tempo NOT IMPLEMENTED
-            bogs,         // 99 Arp Clock Divide NOT IMPLEMENTED
-            bogs,         // 100 Seq Control NOT IMPLEMENTED
-            bogs,         // 101 Seq Transpose NOT IMPLEMENTED
-            bogs,         // 102 Dynamics Control NOT IMPLEMENTED
-            0x70,         // 103 LFO2 Control PARTIAL IMPLEMENTED
-            bogs,         // 104 Seq Clock Divide NOT IMPLEMENTED IMPLEMENETD
-                          // 105-127 Not used, all set to 0
+            0b0000_1101, // 20 DCO Wave
+            ...b2c(88), // 21-22 DCO Env Hi/Lo
+            ...b2c(77), // 23-24 DCO LFO Hi/Lo
+            ...b2c(66), // 25-26 DCO Bend Mod Amount
+            ...b2c(55), // 27-28 DCO Bend LFO Mod
+            ...b2c(44), // 29-30 DCO Pwm Amount
+            0b0111_0000, // 31 DCO Control
+            ...b2c(33), // 32-33 Sub Level
+            ...b2c(22), // 34-35 Noise level
+            2, // 36 HPF level
+            ...b2c(11), // 37-38 VCF Cutoff level
+            ...b2c(23), // 39-40 VCF Resonance level
+            ...b2c(34), // 41-42 VCF LFO Amount
+            ...b2c(45), // 43-44 VCF ENV amount
+            ...b2c(56), // 45-46 VCF Key Follow Amount
+            ...b2c(67), // 47-48 VCF Bend Mod Amount
+            0b0000_1111, // 49 VCF Control
+            ...b2c(78), // 50-51 ENV1 A
+            ...b2c(89), // 52-53 ENV1 D
+            ...b2c(98), // 54-55 ENV1 S
+            ...b2c(101), // 56-57 ENV1 R
+            ...b2c(74), // 58-59 ENV2 A
+            ...b2c(85), // 60-61 ENV2 D
+            ...b2c(96), // 62-63 ENV2 S
+            ...b2c(102), // 64-65 ENV2 R
+            0, // 66 Env Control (Not Used ??)
+            0b0000_0101, // 67 LFO1 Wave
+            ...b2c(103), // 68-69 LFO1 Rate
+            ...b2c(104), // 70-71 LFO1 Delay
+            0b0000_0011, // 72 LFO2 Wave
+            ...b2c(105), // 73-74 LFO2 Rate
+            ...b2c(106), // 75-76 LFO2 Delay
+            0x71, // 77 LFO1 Control PARTIAL IMPLEMENETD
+            0x02, // 78 Chorus Control
+            ...b2c(107), // 79-80 VCA level
+            ...b2c(111), // 81-82 VCA LFO Mod Amount
+            0x02, // 83 VCA Control
+            ...b2c(121), // 84-85 Portamento Rate
+            bogs, // 86 Portamento Control
+            bogs, // 87 Load Sequence
+            bogs, // 88 Load Pattern
+            0x05, // 89 Voice Mode
+            0x10,
+            0x20, // 90-91 Voice Detune
+            0x01, // 92 Detune Control
+            bogs, // 93 Arp Control NOT IMPLEMENTED
+            bogs, // 94 Aftertouch Control NOT IMPLEMENTED
+            bogs, // 95 MW Control (I forget what MW is, again) NOT IMPLEMENTED
+            bogs, // 96 Midi Control NOT IMPLEMENTED
+            bogs,
+            bogs, // 97-98 Patch Clock Tempo NOT IMPLEMENTED
+            bogs, // 99 Arp Clock Divide NOT IMPLEMENTED
+            bogs, // 100 Seq Control NOT IMPLEMENTED
+            bogs, // 101 Seq Transpose NOT IMPLEMENTED
+            bogs, // 102 Dynamics Control NOT IMPLEMENTED
+            0x70, // 103 LFO2 Control PARTIAL IMPLEMENTED
+            bogs, // 104 Seq Clock Divide NOT IMPLEMENTED IMPLEMENETD
+            // 105-127 Not used, all set to 0
           ],
         };
-  
+
         const result = kiwiMidi.parseSysex(mockMessage);
         expect(result.command).toBe("Patch Edit Buffer Dump");
         if (result.command === "Patch Edit Buffer Dump") {
@@ -333,37 +399,37 @@ describe("kiwiMidi", () => {
           // TODO: dcoBendLfoAmount
           // expect(result.kiwiPatch.dcoBendAmount).toBe(55);
           expect(result.kiwiPatch.dcoPwmModAmount).toBe(44);
-          expect(result.kiwiPatch.dcoEnvelopeSource).toBe("env1-inverted")
-          expect(result.kiwiPatch.dcoPwmControl).toBe("env2-inverted")
-          expect(result.kiwiPatch.subLevel).toBe(33)
-          expect(result.kiwiPatch.noiseLevel).toBe(22)
-          expect(result.kiwiPatch.vcfHiPassCutoff).toBe(2)
-          expect(result.kiwiPatch.vcfLowPassCutoff).toBe(11)
-          expect(result.kiwiPatch.vcfLowPassResonance).toBe(23)
-          expect(result.kiwiPatch.vcfLfoModAmount).toBe(34)
-          expect(result.kiwiPatch.vcfEnvelopeModAmount).toBe(45)
-          expect(result.kiwiPatch.vcfPitchFollow).toBe(56)
-          expect(result.kiwiPatch.vcfBendAmount).toBe(67)
-          expect(result.kiwiPatch.vcfEnvelopeSource).toBe("env2")
-          expect(result.kiwiPatch.vcfLfoSource).toBe("lfo2-inverted")
-          expect(result.kiwiPatch.env1Attack).toBe(78)
-          expect(result.kiwiPatch.env1Decay).toBe(89)
-          expect(result.kiwiPatch.env1Sustain).toBe(98)
-          expect(result.kiwiPatch.env1Release).toBe(101)
-          expect(result.kiwiPatch.env2Attack).toBe(74)
-          expect(result.kiwiPatch.env2Decay).toBe(85)
-          expect(result.kiwiPatch.env2Sustain).toBe(96)
-          expect(result.kiwiPatch.env2Release).toBe(102)
-          expect(result.kiwiPatch.lfo1Wave).toBe('random')
-          expect(result.kiwiPatch.lfo1Rate).toBe(103)
-          expect(result.kiwiPatch.lfo1Delay).toBe(104)
-          expect(result.kiwiPatch.lfo2Wave).toBe('sawtooth')
-          expect(result.kiwiPatch.lfo2Rate).toBe(105)
-          expect(result.kiwiPatch.lfo2Delay).toBe(106)
-          
-          expect(result.kiwiPatch.volume).toBe(107)
-          expect(result.kiwiPatch.vcaLfoModAmount).toBe(111)
-          expect(result.kiwiPatch.portamentoTime).toBe(121)
+          expect(result.kiwiPatch.dcoEnvelopeSource).toBe("env1-inverted");
+          expect(result.kiwiPatch.dcoPwmControl).toBe("env2-inverted");
+          expect(result.kiwiPatch.subLevel).toBe(33);
+          expect(result.kiwiPatch.noiseLevel).toBe(22);
+          expect(result.kiwiPatch.vcfHiPassCutoff).toBe(2);
+          expect(result.kiwiPatch.vcfLowPassCutoff).toBe(11);
+          expect(result.kiwiPatch.vcfLowPassResonance).toBe(23);
+          expect(result.kiwiPatch.vcfLfoModAmount).toBe(34);
+          expect(result.kiwiPatch.vcfEnvelopeModAmount).toBe(45);
+          expect(result.kiwiPatch.vcfPitchFollow).toBe(56);
+          expect(result.kiwiPatch.vcfBendAmount).toBe(67);
+          expect(result.kiwiPatch.vcfEnvelopeSource).toBe("env2");
+          expect(result.kiwiPatch.vcfLfoSource).toBe("lfo2-inverted");
+          expect(result.kiwiPatch.env1Attack).toBe(78);
+          expect(result.kiwiPatch.env1Decay).toBe(89);
+          expect(result.kiwiPatch.env1Sustain).toBe(98);
+          expect(result.kiwiPatch.env1Release).toBe(101);
+          expect(result.kiwiPatch.env2Attack).toBe(74);
+          expect(result.kiwiPatch.env2Decay).toBe(85);
+          expect(result.kiwiPatch.env2Sustain).toBe(96);
+          expect(result.kiwiPatch.env2Release).toBe(102);
+          expect(result.kiwiPatch.lfo1Wave).toBe("random");
+          expect(result.kiwiPatch.lfo1Rate).toBe(103);
+          expect(result.kiwiPatch.lfo1Delay).toBe(104);
+          expect(result.kiwiPatch.lfo2Wave).toBe("sawtooth");
+          expect(result.kiwiPatch.lfo2Rate).toBe(105);
+          expect(result.kiwiPatch.lfo2Delay).toBe(106);
+
+          expect(result.kiwiPatch.volume).toBe(107);
+          expect(result.kiwiPatch.vcaLfoModAmount).toBe(111);
+          expect(result.kiwiPatch.portamentoTime).toBe(121);
           // expect(result.kiwiPatch.portamentoMode).toBe("on")
 
           // expect(result.kiwiPatch.dcoPwmModAmount).toBe(44);
@@ -375,10 +441,9 @@ describe("kiwiMidi", () => {
           expect(result.kiwiPatch.keyMode).toBe("mono-staccato");
           expect(result.kiwiPatch.keyAssignDetune).toBe(65);
           expect(result.kiwiPatch.keyAssignDetuneMode).toBe("all");
-
         }
       });
-    })
+    });
 
     it("parses global dump command", () => {
       const { kiwiMidi } = subject();

@@ -39,7 +39,7 @@ import {
   buildKiwi106GlobalDumpSysexData,
   parseKiwi106GlobalDumpCommand,
 } from "./kiwi106Sysex/globalDump";
-import { parseKiwi106PatchEditBufferSysexDump } from "./kiwi106Sysex/patchEditBufferDump";
+import { buildKiwi106PatchEditBufferSysexDump, parseKiwi106PatchEditBufferSysexDump } from "./kiwi106Sysex/patchEditBufferDump";
 import { kiwiCcController } from "./kiwiCcController";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
@@ -250,7 +250,7 @@ export const buildKiwiMidi = ({
     },
 
     sendSysexPatchBufferDump: (kiwiPatch: KiwiPatch) => {
-      const dataBytes = kiwiPatchToSysexBytes(kiwiPatch);
+      const dataBytes = buildKiwi106PatchEditBufferSysexDump(kiwiPatch)
 
       output.sendSysex(kiwiTechnicsSysexId, [
         ...kiwi106Identifier,
