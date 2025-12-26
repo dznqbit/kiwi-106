@@ -108,6 +108,8 @@ export const isKeyAssignDetuneMode = (x: unknown): x is DetuneMode => {
 
 export interface KiwiPatch {
   patchName: string;
+  // TODO:
+  // portamentoMode: PortamentoMode;
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 
