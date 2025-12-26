@@ -185,6 +185,17 @@ describe("kiwiMidi", () => {
         dcoBendAmount: 66,
         lfoModWheelAmount: 55,
         dcoPwmModAmount: 44,
+        dcoEnvelopeSource: "env1-inverted",
+        dcoPwmControl: "env2-inverted",
+        subLevel: 33,
+        noiseLevel: 22,
+        vcfHiPassCutoff: 2,
+        vcfLowPassCutoff: 11,
+        vcfLowPassResonance: 23,
+        vcfLfoModAmount: 34,
+        vcfEnvelopeModAmount: 45,
+        vcfPitchFollow: 56,
+        vcfBendAmount: 67,
       };
 
       kiwiMidi.sendSysexPatchBufferDump(kiwiPatch);

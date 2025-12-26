@@ -1,6 +1,8 @@
 import { Kiwi106SysexPatchEditBufferDumpCommand } from "../../types/Kiwi106Sysex";
 import {
   ChorusMode,
+  DcoRange,
+  DcoWave,
   DetuneMode as DetuneMode,
   EnvelopeSource,
   KeyMode,
@@ -11,10 +13,95 @@ import {
   VcaMode,
 } from "../../types/KiwiPatch";
 import { MidiCcValue, MidiMessage } from "../../types/Midi";
-import { dcoRangeSysexValues, dcoWaveSysexValues } from "../kiwiMidi";
 import { objectKeys } from "../objectKeys";
 import { isKiwi106SysexMessage, pack12Bit, unpack12Bit } from "../sysexUtils";
 import { trimMidiCcValue } from "../trimMidiCcValue";
+
+const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
+  "16": 0b00,
+  "8": 0b01,
+  "4": 0b10,
+};
+
+const dcoWaveSysexValues: Record<DcoWave, MidiCcValue> = {
+  off: 0,
+  ramp: 4,
+  pulse: 8,
+  "ramp-and-pulse": 12,
+};
+
+const dcoEnvelopeSysexValues: Record<EnvelopeSource, MidiCcValue> = {
+  "env1": 0b0000_0000,
+  "env2": 0b0000_0001,
+  "env1-inverted": 0b0010_0000,
+  "env2-inverted": 0b0010_0001,
+};
+
+const pwmControlSourceSysexValues: Record<PwmControlSource, MidiCcValue> = {
+  "manual": 0b0000_0000,
+  "lfo1": 0b0000_0100,
+  "lfo2": 0b0000_1000,
+  "env1": 0b0000_1100,
+  "env2": 0b0001_0000,
+  "env1-inverted": 0b0100_1100,
+  "env2-inverted": 0b0101_0000,
+};
+
+const keyModeSysexValues: Record<KeyMode, MidiCcValue> = {
+  "poly1": 0,
+  "poly2": 1,
+  "unison-legato": 2,
+  "mono-legato": 4,
+  "mono-staccato": 5,
+};
+
+const keyAssignDetuneModeSysexValues: Record<DetuneMode, MidiCcValue> = {
+  "mono": 0,
+  "all": 1,
+};
+
+const vcfLfoSourceSysexValues: Record<LfoSource, MidiCcValue> = {
+  "lfo1": 0b0000_0000,
+  "lfo2": 0b0000_0010,
+  "lfo1-inverted": 0b0000_1000,
+  "lfo2-inverted": 0b0000_1010,
+};
+
+const vcfEnvelopeSourceSysexValues: Record<EnvelopeSource, MidiCcValue> = {
+  "env1": 0,
+  "env2": 1,
+  "env1-inverted": 4,
+  "env2-inverted": 5,
+};
+
+type LfoWave = "sine" | "triangle" | "sawtooth" | "reverse-sawtooth" | "square" | "random";
+const lfoWaveformSysexValues: Record<LfoWave, MidiCcValue> = {
+  "sine": 0,
+  "triangle": 1,
+  "square": 2,
+  "sawtooth": 3,
+  "reverse-sawtooth": 4,
+  "random": 5,
+};
+
+const chorusModeSysexValues: Record<ChorusMode, MidiCcValue> = {
+  "off": 0,
+  "chorus1": 1,
+  "chorus2": 2,
+};
+
+const vcaModeSysexValues: Record<VcaMode, MidiCcValue> = {
+  "env1": 0,
+  "gate": 1,
+  "env2": 2,
+};
+
+const vcaLfoSourceSysexValues: Record<LfoSource, MidiCcValue> = {
+  "lfo1": 0,
+  "lfo2": 4,
+  "lfo1-inverted": 16,
+  "lfo2-inverted": 20,
+};
 
 /** Build the sysex DATA for a Patch Edit Buffer Dump
  * Omits:
@@ -50,6 +137,16 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   b2a(patchDumpSysex, b2c(kiwiPatch.dcoBendAmount), 25);
   b2a(patchDumpSysex, b2c(kiwiPatch.lfoModWheelAmount), 27);
   b2a(patchDumpSysex, b2c(kiwiPatch.dcoPwmModAmount), 29);
+  patchDumpSysex[31] = trimMidiCcValue(dcoEnvelopeSysexValues[kiwiPatch.dcoEnvelopeSource] | pwmControlSourceSysexValues[kiwiPatch.dcoPwmControl])
+  b2a(patchDumpSysex, b2c(kiwiPatch.subLevel), 32);
+  b2a(patchDumpSysex, b2c(kiwiPatch.noiseLevel), 34);
+  patchDumpSysex[36] = kiwiPatch.vcfHiPassCutoff;
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfLowPassCutoff), 37);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfLowPassResonance), 39);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfLfoModAmount), 41);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfEnvelopeModAmount), 43);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfPitchFollow), 45);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcfBendAmount), 47);
 
   return patchDumpSysex;
 };

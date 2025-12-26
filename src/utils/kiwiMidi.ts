@@ -3,7 +3,6 @@ import { type KiwiMidi } from "../types/KiwiMidi";
 import {
   kiwi106Identifier,
   kiwiTechnicsSysexId,
-  kiwiPatchToSysexBytes,
   isKiwi106BufferDumpSysexMessage,
   isAnyKiwi106SysexMessage,
   isKiwi106GlobalDumpSysexMessage,
@@ -48,24 +47,11 @@ export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
   "4": [64, 127],
 };
 
-export const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
-  "16": 0b00,
-  "8": 0b01,
-  "4": 0b10,
-};
-
 export const dcoWaveControlChangeValues: Record<DcoWave, MidiCcValue[]> = {
   off: [0, 31],
   ramp: [32, 63],
   pulse: [64, 95],
   "ramp-and-pulse": [96, 127],
-};
-
-export const dcoWaveSysexValues: Record<DcoWave, MidiCcValue> = {
-  off: 0,
-  ramp: 4,
-  pulse: 8,
-  "ramp-and-pulse": 12,
 };
 
 export const lfoModeControlChangeValues: Record<LfoMode, MidiCcValue[]> = {
