@@ -107,7 +107,7 @@ export const keyAssignDetuneModeControlChangeValues: Record<
   all: [64, 127],
 };
 
-const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
+export const lfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
   lfo1: [0, 63],
   lfo2: [64, 127],
   "lfo1-inverted": [],
@@ -225,7 +225,7 @@ export const buildKiwiMidi = ({
         ["dcoLfoSource", "vcfLfoSource", "vcaLfoSource"].includes(key) &&
         isLfoSource(value)
       ) {
-        ccByte = dcoLfoSourceControlChangeValues[value][0];
+        ccByte = lfoSourceControlChangeValues[value][0];
       }
 
       if (key === "dcoPwmControl" && isPwmControlSource(value)) {
