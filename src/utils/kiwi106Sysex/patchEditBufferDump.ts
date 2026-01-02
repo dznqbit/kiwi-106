@@ -28,7 +28,7 @@ const c2b = (b1: number, b2: number) =>
   ccv(convert12bitTo7Bit(pack12Bit(b1, b2)));
 
 const invertRecord = <K extends string | number, V extends string | number>(
-  record: Record<K, V>
+  record: Record<K, V>,
 ): Record<V, K> => {
   const inverted = {} as Record<V, K>;
   for (const key in record) {
@@ -176,7 +176,7 @@ const sysexToDetuneMode = invertRecord(detuneModeSysexValues);
  * - 2 null bytes
  */
 export const buildKiwi106PatchEditBufferSysexDump = (
-  kiwiPatch: KiwiPatch
+  kiwiPatch: KiwiPatch,
 ): number[] => {
   const b2a = (a: MidiCcValue[], b: MidiCcValue[], i: number) => {
     for (let j = 0; j < b.length; j++) {
@@ -199,7 +199,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   b2a(patchDumpSysex, patchNameBytes, 0);
   patchDumpSysex[20] = ccv(
     dcoRangeSysexValues[kiwiPatch.dcoRange] |
-      dcoWaveSysexValues[kiwiPatch.dcoWave]
+      dcoWaveSysexValues[kiwiPatch.dcoWave],
   );
   b2a(patchDumpSysex, b2c(kiwiPatch.dcoEnvelopeModAmount), 21);
   b2a(patchDumpSysex, b2c(kiwiPatch.dcoLfoModAmount), 23);
@@ -209,7 +209,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   patchDumpSysex[31] = ccv(
     dcoEnvelopeSysexValues[kiwiPatch.dcoEnvelopeSource] |
       pwmControlSourceSysexValues[kiwiPatch.dcoPwmControl] |
-      dcoLfoSourceSysexValues[kiwiPatch.dcoLfoSource]
+      dcoLfoSourceSysexValues[kiwiPatch.dcoLfoSource],
   );
   b2a(patchDumpSysex, b2c(kiwiPatch.subLevel), 32);
   b2a(patchDumpSysex, b2c(kiwiPatch.noiseLevel), 34);
@@ -223,7 +223,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   // VCF Control - combines vcfLfoSource and vcfEnvelopeSource
   patchDumpSysex[49] = ccv(
     vcfLfoSourceSysexValues[kiwiPatch.vcfLfoSource] |
-      vcfEnvelopeSourceSysexValues[kiwiPatch.vcfEnvelopeSource]
+      vcfEnvelopeSourceSysexValues[kiwiPatch.vcfEnvelopeSource],
   );
   b2a(patchDumpSysex, b2c(kiwiPatch.env1Attack), 50);
   b2a(patchDumpSysex, b2c(kiwiPatch.env1Decay), 52);
@@ -248,7 +248,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   // VCA Control combines vcaLfoSource and vcaMode
   patchDumpSysex[83] = ccv(
     vcaLfoSourceSysexValues[kiwiPatch.vcaLfoSource] |
-      vcaModeSysexValues[kiwiPatch.vcaMode]
+      vcaModeSysexValues[kiwiPatch.vcaMode],
   );
   b2a(patchDumpSysex, b2c(kiwiPatch.portamentoTime), 84);
   patchDumpSysex[86] = portamentoModeSysexValues[kiwiPatch.portamentoMode];
@@ -261,7 +261,7 @@ export const buildKiwi106PatchEditBufferSysexDump = (
 
 /** Parse a complete Midi Message into a kiwi106 Patch Edit Buffer Dump */
 export const parseKiwi106PatchEditBufferSysexDump = (
-  m: MidiMessage
+  m: MidiMessage,
 ): Kiwi106SysexPatchEditBufferDumpCommand => {
   if (!isKiwi106SysexMessage(m, "Patch Edit Buffer Dump")) {
     throw new Error("Message is not a Kiwi-106 Patch Edit Buffer Dump Command");
