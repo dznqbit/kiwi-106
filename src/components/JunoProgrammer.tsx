@@ -82,7 +82,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, pwmControlSourceControlChangeValues) ??
                 "manual",
-              options
+              options,
             );
             break;
 
@@ -90,7 +90,7 @@ export const JunoProgrammer = () => {
             setPatchProperty(
               patchKey,
               controlChangeValue(ccData, dcoRangeControlChangeValues) ?? "16",
-              options
+              options,
             );
             break;
 
@@ -98,7 +98,7 @@ export const JunoProgrammer = () => {
             setPatchProperty(
               patchKey,
               controlChangeValue(ccData, dcoWaveControlChangeValues) ?? "off",
-              options
+              options,
             );
             break;
 
@@ -107,7 +107,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, lfoSourceControlChangeValues) ??
                 "lfo1",
-              options
+              options,
             );
             break;
 
@@ -122,7 +122,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, lfoWaveformControlChangeValues) ??
                 "sine",
-              options
+              options,
             );
             break;
 
@@ -132,7 +132,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, envelopeSourceControlChangeValues) ??
                 "env1",
-              options
+              options,
             );
             break;
 
@@ -141,7 +141,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, lfoSourceControlChangeValues) ??
                 "lfo1",
-              options
+              options,
             );
             break;
 
@@ -150,7 +150,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, lfoSourceControlChangeValues) ??
                 "lfo1",
-              options
+              options,
             );
             break;
 
@@ -159,7 +159,7 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(ccData, chorusModeControlChangeValues) ??
                 "off",
-              options
+              options,
             );
             break;
 
@@ -167,7 +167,7 @@ export const JunoProgrammer = () => {
             setPatchProperty(
               patchKey,
               controlChangeValue(ccData, vcaModeControlChangeValues) ?? "env1",
-              options
+              options,
             );
             break;
 
@@ -175,7 +175,7 @@ export const JunoProgrammer = () => {
             setPatchProperty(
               patchKey,
               controlChangeValue(ccData, keyModeControlChangeValues) ?? "poly1",
-              options
+              options,
             );
             break;
 
@@ -184,9 +184,9 @@ export const JunoProgrammer = () => {
               patchKey,
               controlChangeValue(
                 ccData,
-                keyAssignDetuneModeControlChangeValues
+                keyAssignDetuneModeControlChangeValues,
               ) ?? "unison-only",
-              options
+              options,
             );
             break;
 
@@ -308,7 +308,7 @@ export const JunoProgrammer = () => {
             }
           }
         }
-      }
+      },
     );
 
     return unsubscribeKiwiSyncer;
