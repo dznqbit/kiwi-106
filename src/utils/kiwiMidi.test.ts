@@ -182,6 +182,7 @@ describe("kiwiMidi", () => {
         dcoRange: "8",
         dcoEnvelopeModAmount: 88,
         dcoLfoModAmount: 77,
+        dcoLfoSource: "lfo2",
         dcoBendAmount: 66,
         lfoModWheelAmount: 55,
         dcoPwmModAmount: 44,
@@ -265,7 +266,7 @@ describe("kiwiMidi", () => {
           ...b2c(66), // 25-26 DCO Bend Mod Amount
           ...b2c(55), // 27-28 DCO Bend LFO Mod
           ...b2c(44), // 29-30 DCO Pwm Amount
-          0b0111_0000, // 31 DCO Control
+          0b0111_0010, // 31 DCO Control
           ...b2c(33), // 32-33 Sub Level
           ...b2c(22), // 34-35 Noise level
           2, // 36 HPF level
