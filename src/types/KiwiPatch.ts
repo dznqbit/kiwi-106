@@ -110,7 +110,7 @@ export const isKeyAssignDetuneMode = (x: unknown): x is DetuneMode => {
 
 const portamentoModes = ["off", "on"] as const;
 export type PortamentoMode = (typeof portamentoModes)[number];
-export const isPortamentoMode = (x: unknown): x is DetuneMode => {
+export const isPortamentoMode = (x: unknown): x is PortamentoMode => {
   return typeof x === "string" && portamentoModes.includes(x as PortamentoMode);
 };
 

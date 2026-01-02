@@ -228,7 +228,6 @@ export const buildKiwiMidi = ({
 
       if (key === "chorusMode" && isChorusMode(value)) {
         ccByte = chorusModeControlChangeValues[value][0];
-        console.log(`[sendControlChange] ${key} "${value}" ${ccByte}`);
       }
 
       if (key === "vcaMode" && isVcaMode(value)) {
