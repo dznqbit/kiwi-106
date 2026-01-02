@@ -16,10 +16,12 @@ import {
   isChorusMode,
   isDcoRange,
   isDcoWave,
+  isEnvelopeSource,
   isKeyAssignDetuneMode,
   isKeyMode,
   isLfoMode,
   isLfoSource,
+  isLfoWaveform,
   isPwmControlSource,
   isVcaMode,
   DetuneMode,
@@ -211,6 +213,10 @@ export const buildKiwiMidi = ({
         ccByte = dcoWaveControlChangeValues[value][0];
       }
 
+      if (["lfo1Wave", "lfo2Wave"].includes(key) && isLfoWaveform(value)) {
+        ccByte = lfoWaveformControlChangeValues[value][0];
+      }
+
       if (["lfo1Mode", "lfo2Mode"].includes(key) && isLfoMode(value)) {
         ccByte = lfoModeControlChangeValues[value][0];
       }
@@ -224,6 +230,13 @@ export const buildKiwiMidi = ({
 
       if (key === "dcoPwmControl" && isPwmControlSource(value)) {
         ccByte = pwmControlSourceControlChangeValues[value][0];
+      }
+
+      if (
+        ["dcoEnvelopeSource", "vcfEnvelopeSource"].includes(key) &&
+        isEnvelopeSource(value)
+      ) {
+        ccByte = envelopeSourceControlChangeValues[value][0];
       }
 
       if (key === "chorusMode" && isChorusMode(value)) {
