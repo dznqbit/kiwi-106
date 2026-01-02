@@ -9,6 +9,8 @@ import {
   KiwiPatch,
   LfoMode,
   LfoSource,
+  LfoWaveform,
+  PortamentoMode,
   PwmControlSource,
   VcaMode,
 } from "../../types/KiwiPatch";
@@ -16,6 +18,18 @@ import { MidiCcValue, MidiMessage } from "../../types/Midi";
 import { objectKeys } from "../objectKeys";
 import { isKiwi106SysexMessage, pack12Bit, unpack12Bit } from "../sysexUtils";
 import { trimMidiCcValue } from "../trimMidiCcValue";
+
+const ccv = trimMidiCcValue
+
+const invertRecord = <K extends string | number, V extends string | number>(
+  record: Record<K, V>
+): Record<V, K> => {
+  const inverted = {} as Record<V, K>;
+  for (const key in record) {
+    inverted[record[key]] = key;
+  }
+  return inverted;
+};
 
 const dcoRangeSysexValues: Record<DcoRange, MidiCcValue> = {
   "16": 0b00,
@@ -74,8 +88,7 @@ const vcfEnvelopeSourceSysexValues: Record<EnvelopeSource, MidiCcValue> = {
   "env2-inverted": 5,
 };
 
-type LfoWave = "sine" | "triangle" | "sawtooth" | "reverse-sawtooth" | "square" | "random";
-const lfoWaveformSysexValues: Record<LfoWave, MidiCcValue> = {
+const lfoWaveformSysexValues: Record<LfoWaveform, MidiCcValue> = {
   "sine": 0,
   "triangle": 1,
   "square": 2,
@@ -84,11 +97,20 @@ const lfoWaveformSysexValues: Record<LfoWave, MidiCcValue> = {
   "random": 5,
 };
 
+const lfoModeSysexValues: Record<LfoMode, MidiCcValue> = {
+  "normal": 0,
+  "plus": 1,
+}
+
+const sysexToLfoMode = invertRecord(lfoModeSysexValues);
+
 const chorusModeSysexValues: Record<ChorusMode, MidiCcValue> = {
   "off": 0,
   "chorus1": 1,
   "chorus2": 2,
 };
+
+const sysexToChorusMode = invertRecord(chorusModeSysexValues);
 
 const vcaModeSysexValues: Record<VcaMode, MidiCcValue> = {
   "env1": 0,
@@ -96,12 +118,30 @@ const vcaModeSysexValues: Record<VcaMode, MidiCcValue> = {
   "env2": 2,
 };
 
+const sysexToVcaMode = invertRecord(vcaModeSysexValues);
+
 const vcaLfoSourceSysexValues: Record<LfoSource, MidiCcValue> = {
   "lfo1": 0,
   "lfo2": 4,
   "lfo1-inverted": 16,
   "lfo2-inverted": 20,
 };
+
+const sysexToVcaLfoSource = invertRecord(vcaLfoSourceSysexValues);
+
+const portamentoModeSysexValues: Record<PortamentoMode, MidiCcValue> = {
+  "off": 0,
+  "on": 1,
+}
+
+const sysexToPortamentoMode = invertRecord(portamentoModeSysexValues);
+
+const detuneModeSysexValues: Record<DetuneMode, MidiCcValue> = {
+  "mono": 0,
+  "all": 1,
+}
+
+const sysexToDetuneMode = invertRecord(detuneModeSysexValues);
 
 /** Build the sysex DATA for a Patch Edit Buffer Dump
  * Omits:
@@ -121,7 +161,6 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   const convert7BitTo12Bit = (n: number) => n << 5;
   const b2c = (n: MidiCcValue) => unpack12Bit(convert7BitTo12Bit(n)).map(trimMidiCcValue)
 
-  const ccv = trimMidiCcValue
   // THIS IS THE PATCH DATA ONLY!
   // This skips the sysex headers and the "2 null bytes"
   const patchDumpSysex: MidiCcValue[] = new Array(128).fill(0);
@@ -147,7 +186,37 @@ export const buildKiwi106PatchEditBufferSysexDump = (
   b2a(patchDumpSysex, b2c(kiwiPatch.vcfEnvelopeModAmount), 43);
   b2a(patchDumpSysex, b2c(kiwiPatch.vcfPitchFollow), 45);
   b2a(patchDumpSysex, b2c(kiwiPatch.vcfBendAmount), 47);
-
+  // VCF Control - combines vcfLfoSource and vcfEnvelopeSource
+  const vcfEnvBit = kiwiPatch.vcfEnvelopeSource.includes("env2") ? 1 : 0;
+  patchDumpSysex[49] = trimMidiCcValue(vcfLfoSourceSysexValues[kiwiPatch.vcfLfoSource] | vcfEnvBit);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env1Attack), 50);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env1Decay), 52);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env1Sustain), 54);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env1Release), 56);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env2Attack), 58);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env2Decay), 60);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env2Sustain), 62);
+  b2a(patchDumpSysex, b2c(kiwiPatch.env2Release), 64);
+  patchDumpSysex[67] = ccv(lfoWaveformSysexValues[kiwiPatch.lfo1Wave]);
+  b2a(patchDumpSysex, b2c(kiwiPatch.lfo1Rate), 68);
+  b2a(patchDumpSysex, b2c(kiwiPatch.lfo1Delay), 70);
+  patchDumpSysex[72] = ccv(lfoWaveformSysexValues[kiwiPatch.lfo2Wave]);
+  b2a(patchDumpSysex, b2c(kiwiPatch.lfo2Rate), 73);
+  b2a(patchDumpSysex, b2c(kiwiPatch.lfo2Delay), 75);
+  // Byte 77 LFO control
+  // Partially implemented - we only allow free running for now
+  patchDumpSysex[77] = lfoModeSysexValues[kiwiPatch.lfo1Mode];
+  patchDumpSysex[78] = chorusModeSysexValues[kiwiPatch.chorusMode];
+  b2a(patchDumpSysex, b2c(kiwiPatch.volume), 79);
+  b2a(patchDumpSysex, b2c(kiwiPatch.vcaLfoModAmount), 81);
+  // VCA Control combines vcaLfoSource and vcaMode
+  patchDumpSysex[83] = ccv(vcaLfoSourceSysexValues[kiwiPatch.vcaLfoSource] | vcaModeSysexValues[kiwiPatch.vcaMode]);
+  b2a(patchDumpSysex, b2c(kiwiPatch.portamentoTime), 84);
+  patchDumpSysex[86] = portamentoModeSysexValues[kiwiPatch.portamentoMode];
+  patchDumpSysex[89] = keyModeSysexValues[kiwiPatch.keyMode];
+  b2a(patchDumpSysex, b2c(kiwiPatch.keyAssignDetune), 90);
+  patchDumpSysex[92] = detuneModeSysexValues[kiwiPatch.keyAssignDetuneMode];
+  patchDumpSysex[103] = lfoModeSysexValues[kiwiPatch.lfo2Mode];
   return patchDumpSysex;
 };
 
@@ -160,7 +229,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   }
 
   // Slice out the sysex header + 2 null bytes and now we can use the same indices from buildKiwi106PatchEditBufferSysexDump
-  const dataBytes = m.data.slice(10);
+  const dataBytes = m.data.slice(10).map(ccv);
 
   // Extract patch name (20 ASCII bytes)
   const patchNameBytes = dataBytes.slice(0, 20);
@@ -246,12 +315,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   };
   const keyMode: KeyMode = keyModeMap[dataBytes[89]];
   const keyAssignDetune = c2b(dataBytes[90], dataBytes[91]);
-
-  const keyAssignDetuneModeMap: Record<number, DetuneMode> = {
-    0: "mono",
-    1: "all",
-  };
-  const keyAssignDetuneMode = keyAssignDetuneModeMap[dataBytes[92]];
+  const keyAssignDetuneMode = sysexToDetuneMode[dataBytes[92]];
 
   const subLevel = c2b(dataBytes[32], dataBytes[33]);
   const noiseLevel = c2b(dataBytes[34], dataBytes[35]);
@@ -308,19 +372,14 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   const lfo1Wave = lfoWaveformMap[dataBytes[67] & 0b111] ?? "sine";
   const lfo1Rate = c2b(dataBytes[68], dataBytes[69]);
   const lfo1Delay = c2b(dataBytes[70], dataBytes[71]);
-  const lfo1Mode: LfoMode =
-    (dataBytes[77] & 0b0000_0001) === 1 ? "plus" : "normal";
+
+  const lfo1Mode = sysexToLfoMode[trimMidiCcValue(dataBytes[77] & 0b0000_0001)];
 
   const lfo2Wave = lfoWaveformMap[dataBytes[72] & 0b111] ?? "sine";
   const lfo2Rate = c2b(dataBytes[73], dataBytes[74]);
   const lfo2Delay = c2b(dataBytes[75], dataBytes[76]);
 
-  const chorusModeMap: Record<number, ChorusMode> = {
-    0: "off",
-    1: "chorus1",
-    2: "chorus2",
-  };
-  const chorusMode = chorusModeMap[dataBytes[78]];
+  const chorusMode = sysexToChorusMode[trimMidiCcValue(dataBytes[78])];
 
   const volume = c2b(dataBytes[79], dataBytes[80]);
   const vcaLfoModAmount = c2b(dataBytes[81], dataBytes[82]);
@@ -343,6 +402,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   const vcaLfoSource = vcaLfoSourceMap[vcaControlByte & 0b0001_0100];
 
   const portamentoTime = c2b(dataBytes[84], dataBytes[85]);
+  const portamentoMode = sysexToPortamentoMode[dataBytes[86]];
 
   const lfo2Mode: LfoMode =
     (dataBytes[103] & 0b0000_0001) === 1 ? "plus" : "normal";
@@ -350,6 +410,7 @@ export const parseKiwi106PatchEditBufferSysexDump = (
   const kiwiPatch: KiwiPatch = {
     patchName,
     portamentoTime,
+    portamentoMode,
     volume,
     dcoRange,
     dcoWave,

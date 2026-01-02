@@ -106,10 +106,15 @@ export const isKeyAssignDetuneMode = (x: unknown): x is DetuneMode => {
   return typeof x === "string" && keyAssignDetuneModes.includes(x as DetuneMode);
 };
 
+const portamentoModes = ["off", "on"] as const;
+export type PortamentoMode = (typeof portamentoModes)[number];
+export const isPortamentoMode = (x: unknown): x is DetuneMode => {
+  return typeof x === "string" && portamentoModes.includes(x as PortamentoMode);
+};
+
 export interface KiwiPatch {
   patchName: string;
-  // TODO:
-  // portamentoMode: PortamentoMode;
+  portamentoMode: PortamentoMode;
   portamentoTime: MidiCcValue;
   volume: MidiCcValue;
 

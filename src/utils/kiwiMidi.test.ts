@@ -196,6 +196,34 @@ describe("kiwiMidi", () => {
         vcfEnvelopeModAmount: 45,
         vcfPitchFollow: 56,
         vcfBendAmount: 67,
+        vcfEnvelopeSource: "env2",
+        vcfLfoSource: "lfo1-inverted",
+        env1Attack: 78,
+        env1Decay: 89,
+        env1Sustain: 98,
+        env1Release: 101,
+        env2Attack: 74,
+        env2Decay: 85,
+        env2Sustain: 96,
+        env2Release: 102,
+        lfo1Wave: 'random',
+        lfo1Rate: 103,
+        lfo1Delay: 104,
+        lfo1Mode: 'plus',
+        lfo2Wave: 'sawtooth',
+        lfo2Rate: 105,
+        lfo2Delay: 106,
+        lfo2Mode: "plus",
+        chorusMode: "chorus2",
+        volume: 107,
+        vcaLfoSource: "lfo1-inverted",
+        vcaLfoModAmount: 111,
+        vcaMode: "env2",
+        portamentoMode: "on",
+        portamentoTime: 121,
+        keyMode: "mono-staccato",
+        keyAssignDetune: 122,
+        keyAssignDetuneMode: "all",
       };
 
       kiwiMidi.sendSysexPatchBufferDump(kiwiPatch);
@@ -247,14 +275,14 @@ describe("kiwiMidi", () => {
           ...b2c(45), // 43-44 VCF ENV amount
           ...b2c(56), // 45-46 VCF Key Follow Amount
           ...b2c(67), // 47-48 VCF Bend Mod Amount
-          0b0000_1111, // 49 VCF Control
+          0b0000_1001, // 49 VCF Control (ENV2, inverted LFO1)
           ...b2c(78), // 50-51 ENV1 A
           ...b2c(89), // 52-53 ENV1 D
           ...b2c(98), // 54-55 ENV1 S
           ...b2c(101), // 56-57 ENV1 R
           ...b2c(74), // 58-59 ENV2 A
-          ...b2c(85), // 60-61 ENV2 D
-          ...b2c(96), // 62-63 ENV2 S
+          ...b2c(85),   // 60-61 ENV2 D
+          ...b2c(96),  // 62-63 ENV2 S
           ...b2c(102), // 64-65 ENV2 R
           0, // 66 Env Control (Not Used ??)
           0b0000_0101, // 67 LFO1 Wave
@@ -263,19 +291,18 @@ describe("kiwiMidi", () => {
           0b0000_0011, // 72 LFO2 Wave
           ...b2c(105), // 73-74 LFO2 Rate
           ...b2c(106), // 75-76 LFO2 Delay
-          0x71, // 77 LFO1 Control PARTIAL IMPLEMENETD
-          0x02, // 78 Chorus Control
+          0b0000_0001, // 77 LFO1 Control PARTIAL IMPLEMENETD
+          0x02,        // 78 Chorus Control
           ...b2c(107), // 79-80 VCA level
           ...b2c(111), // 81-82 VCA LFO Mod Amount
-          0x02, // 83 VCA Control
+          0b0001_0010, // 83 VCA Control (inverted LFO1, Env2)
           ...b2c(121), // 84-85 Portamento Rate
-          bogs, // 86 Portamento Control
-          bogs, // 87 Load Sequence
-          bogs, // 88 Load Pattern
-          0x05, // 89 Voice Mode
-          0x10,
-          0x20, // 90-91 Voice Detune
-          0x01, // 92 Detune Control
+          1,           // 86 Portamento Control
+          bogs,        // 87 Load Sequence
+          bogs,        // 88 Load Pattern
+          0x05,        // 89 Voice Mode (mono staccato)
+          ...b2c(122), // 90-91 Voice Detune
+          0x01,        // 92 Detune Control (all)
           bogs, // 93 Arp Control NOT IMPLEMENTED
           bogs, // 94 Aftertouch Control NOT IMPLEMENTED
           bogs, // 95 MW Control (I forget what MW is, again) NOT IMPLEMENTED
@@ -286,9 +313,9 @@ describe("kiwiMidi", () => {
           bogs, // 100 Seq Control NOT IMPLEMENTED
           bogs, // 101 Seq Transpose NOT IMPLEMENTED
           bogs, // 102 Dynamics Control NOT IMPLEMENTED
-          0x70, // 103 LFO2 Control PARTIAL IMPLEMENTED
+          0b0000_0001, // 103 LFO2 Control PARTIAL IMPLEMENTED
           bogs, // 104 Seq Clock Divide NOT IMPLEMENTED IMPLEMENETD
-          // 105-127 Not used, all set to 0
+          ...[...new Array(23)].map(_ => 0) // 105-127 Not used, all set to 0
         ]
       );
     });
@@ -375,7 +402,7 @@ describe("kiwiMidi", () => {
             ...b2c(111), // 81-82 VCA LFO Mod Amount
             0x02, // 83 VCA Control
             ...b2c(121), // 84-85 Portamento Rate
-            bogs, // 86 Portamento Control
+            1,    // 86 Portamento Control
             bogs, // 87 Load Sequence
             bogs, // 88 Load Pattern
             0x05, // 89 Voice Mode
@@ -441,7 +468,7 @@ describe("kiwiMidi", () => {
           expect(result.kiwiPatch.volume).toBe(107);
           expect(result.kiwiPatch.vcaLfoModAmount).toBe(111);
           expect(result.kiwiPatch.portamentoTime).toBe(121);
-          // expect(result.kiwiPatch.portamentoMode).toBe("on")
+          expect(result.kiwiPatch.portamentoMode).toBe("on")
 
           // expect(result.kiwiPatch.dcoPwmModAmount).toBe(44);
 

@@ -27,7 +27,7 @@ const blankKiwiPatchState: KiwiPatchState = {
   updatedBy: undefined,
   kiwiPatch: {
     patchName: "Default",
-
+    portamentoMode: "off",
     portamentoTime: 0,
     volume: 0,
     dcoRange: "16",
