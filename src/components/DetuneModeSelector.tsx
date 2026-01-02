@@ -21,7 +21,7 @@ export const DetuneModeSelector = ({
 
   if (!isKeyAssignDetuneMode(detuneMode)) {
     throw new Error(
-      `Woah! DetuneModeSelector for ${property} cannot handle ${detuneMode}`
+      `Woah! DetuneModeSelector for ${property} cannot handle ${detuneMode}`,
     );
   }
 

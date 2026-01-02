@@ -5,7 +5,7 @@ import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import _ from "lodash";
 
 interface EnvelopeSelectorButtonProps {
-  property: 'dcoEnvelopeSource' | 'vcfEnvelopeSource';
+  property: "dcoEnvelopeSource" | "vcfEnvelopeSource";
   label?: string;
 }
 

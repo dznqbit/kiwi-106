@@ -38,7 +38,10 @@ import {
   buildKiwi106GlobalDumpSysexData,
   parseKiwi106GlobalDumpCommand,
 } from "./kiwi106Sysex/globalDump";
-import { buildKiwi106PatchEditBufferSysexDump, parseKiwi106PatchEditBufferSysexDump } from "./kiwi106Sysex/patchEditBufferDump";
+import {
+  buildKiwi106PatchEditBufferSysexDump,
+  parseKiwi106PatchEditBufferSysexDump,
+} from "./kiwi106Sysex/patchEditBufferDump";
 import { kiwiCcController } from "./kiwiCcController";
 
 export const dcoRangeControlChangeValues: Record<DcoRange, MidiCcValue[]> = {
@@ -59,7 +62,10 @@ export const lfoModeControlChangeValues: Record<LfoMode, MidiCcValue[]> = {
   plus: [64, 127],
 };
 
-export const lfoWaveformControlChangeValues: Record<LfoWaveform, MidiCcValue[]> = {
+export const lfoWaveformControlChangeValues: Record<
+  LfoWaveform,
+  MidiCcValue[]
+> = {
   sine: [0, 15],
   triangle: [16, 31],
   sawtooth: [32, 63],
@@ -68,12 +74,13 @@ export const lfoWaveformControlChangeValues: Record<LfoWaveform, MidiCcValue[]> 
   random: [112, 127],
 };
 
-export const chorusModeControlChangeValues: Record<ChorusMode, MidiCcValue[]> = {
-  off: [0, 31],
-  // NB: Spec claims c1=32-63 c2=64-127, but these ranges match what's on my board
-  chorus1: [32, 80],
-  chorus2: [81, 127],
-};
+export const chorusModeControlChangeValues: Record<ChorusMode, MidiCcValue[]> =
+  {
+    off: [0, 31],
+    // NB: Spec claims c1=32-63 c2=64-127, but these ranges match what's on my board
+    chorus1: [32, 80],
+    chorus2: [81, 127],
+  };
 
 export const vcaModeControlChangeValues: Record<VcaMode, MidiCcValue[]> = {
   gate: [0, 31],
@@ -90,9 +97,12 @@ export const keyModeControlChangeValues: Record<KeyMode, MidiCcValue[]> = {
   "mono-staccato": [80, 127],
 };
 
-export const keyAssignDetuneModeControlChangeValues: Record<DetuneMode, MidiCcValue[]> = {
-  "mono": [0, 63],
-  "all": [64, 127],
+export const keyAssignDetuneModeControlChangeValues: Record<
+  DetuneMode,
+  MidiCcValue[]
+> = {
+  mono: [0, 63],
+  all: [64, 127],
 };
 
 const dcoLfoSourceControlChangeValues: Record<LfoSource, MidiCcValue[]> = {
@@ -115,7 +125,10 @@ export const pwmControlSourceControlChangeValues: Record<
   "env2-inverted": [109, 127],
 };
 
-export const envelopeSourceControlChangeValues: Record<EnvelopeSource, MidiCcValue[]> = {
+export const envelopeSourceControlChangeValues: Record<
+  EnvelopeSource,
+  MidiCcValue[]
+> = {
   env1: [0, 31],
   env2: [64, 95],
   "env1-inverted": [32, 63],
@@ -186,7 +199,7 @@ export const buildKiwiMidi = ({
 
     sendControlChange: <K extends keyof KiwiPatch>(
       key: K,
-      value: KiwiPatch[K]
+      value: KiwiPatch[K],
     ) => {
       let ccByte = undefined;
 
@@ -215,7 +228,7 @@ export const buildKiwiMidi = ({
 
       if (key === "chorusMode" && isChorusMode(value)) {
         ccByte = chorusModeControlChangeValues[value][0];
-        console.log(`[sendControlChange] ${key} "${value}" ${ccByte}`)
+        console.log(`[sendControlChange] ${key} "${value}" ${ccByte}`);
       }
 
       if (key === "vcaMode" && isVcaMode(value)) {
@@ -236,7 +249,7 @@ export const buildKiwiMidi = ({
     },
 
     sendSysexPatchBufferDump: (kiwiPatch: KiwiPatch) => {
-      const dataBytes = buildKiwi106PatchEditBufferSysexDump(kiwiPatch)
+      const dataBytes = buildKiwi106PatchEditBufferSysexDump(kiwiPatch);
 
       output.sendSysex(kiwiTechnicsSysexId, [
         ...kiwi106Identifier,
@@ -261,7 +274,7 @@ export const buildKiwiMidi = ({
     parseSysex: (message: MidiMessage) => {
       if (!isAnyKiwi106SysexMessage(message)) {
         throw new Error(
-          "[kiwiMidi] could not interpret non-Kiwi106 sysex message"
+          "[kiwiMidi] could not interpret non-Kiwi106 sysex message",
         );
       }
 
@@ -287,7 +300,7 @@ export const buildKiwiMidi = ({
       }
 
       throw new Error(
-        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`
+        `[kiwiMidi] unsupport sysex command 0x${message.data.map((n) => n.toString(16))}`,
       );
     },
   };

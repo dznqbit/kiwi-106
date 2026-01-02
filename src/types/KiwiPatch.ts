@@ -103,7 +103,9 @@ export const isKeyMode = (x: unknown): x is KeyMode => {
 const keyAssignDetuneModes = ["mono", "all"] as const;
 export type DetuneMode = (typeof keyAssignDetuneModes)[number];
 export const isKeyAssignDetuneMode = (x: unknown): x is DetuneMode => {
-  return typeof x === "string" && keyAssignDetuneModes.includes(x as DetuneMode);
+  return (
+    typeof x === "string" && keyAssignDetuneModes.includes(x as DetuneMode)
+  );
 };
 
 const portamentoModes = ["off", "on"] as const;

@@ -14,7 +14,7 @@ export const KeyModeSelector = ({ property, label }: KeyModeSelectorProps) => {
 
   if (!isKeyMode(keyMode)) {
     throw new Error(
-      `Woah! KeyModeSelector for ${property} cannot handle ${keyMode}`
+      `Woah! KeyModeSelector for ${property} cannot handle ${keyMode}`,
     );
   }
 

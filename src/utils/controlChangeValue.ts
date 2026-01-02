@@ -4,7 +4,7 @@ import { objectKeys } from "./objectKeys";
 
 export const controlChangeValue = <V extends KiwiPatch[keyof KiwiPatch]>(
   ccData: MidiCcValue,
-  ccValues: Record<V, MidiCcValue[]>
+  ccValues: Record<V, MidiCcValue[]>,
 ): V | undefined => {
   return objectKeys(ccValues).find((k) => {
     const [loBound, hiBound] = ccValues[k];

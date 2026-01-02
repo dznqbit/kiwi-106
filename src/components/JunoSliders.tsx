@@ -47,8 +47,14 @@ export const JunoSliders = () => {
         <Kiwi106Fieldset legend="KEY MODE">
           <Group align="flex-start">
             <KeyModeSelector label="KEY MODE" property="keyMode" />
-            <DetuneModeSelector label="DETUNE MODE" property="keyAssignDetuneMode" />
-            <KiwiPatchPropertySlider label="DETUNE" property="keyAssignDetune" />
+            <DetuneModeSelector
+              label="DETUNE MODE"
+              property="keyAssignDetuneMode"
+            />
+            <KiwiPatchPropertySlider
+              label="DETUNE"
+              property="keyAssignDetune"
+            />
           </Group>
         </Kiwi106Fieldset>
 

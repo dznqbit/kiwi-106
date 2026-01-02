@@ -162,7 +162,6 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
             console.log(`Received Sysex "${kiwi106Command.command}": noop`);
             break;
         }
-
       } catch {
         return;
       }

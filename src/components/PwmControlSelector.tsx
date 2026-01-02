@@ -21,7 +21,7 @@ export const PwmControlSelector = ({
 
   if (!isPwmControlSource(pwmControl)) {
     throw new Error(
-      `Woah! PwmControlSelector for ${property} cannot handle ${pwmControl}`
+      `Woah! PwmControlSelector for ${property} cannot handle ${pwmControl}`,
     );
   }
 
