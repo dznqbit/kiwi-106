@@ -5,6 +5,7 @@ const kiwiControllerValues: Record<keyof KiwiPatch, number> = {
   // THIS IS A TYPESCRIPT HACK AND DOES NOT WORK, FIX ME
   patchName: 0x00,
 
+  portamentoMode: 0x05,
   portamentoTime: 0x05,
   volume: 0x07,
 
