@@ -1,60 +1,28 @@
 import { Stack, Text } from "@mantine/core";
-import { LfoWaveform, KiwiPatch } from "../types/KiwiPatch";
+import { LfoWaveform, isLfoWaveform } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { WaveformButton } from "./WaveformButton";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import _ from "lodash";
 
 interface WaveformSelectorProps {
-  property: keyof KiwiPatch;
+  property: "lfo1Wave" | "lfo2Wave";
   label?: string;
 }
-
-const waveformRanges: Record<LfoWaveform, MidiCcValue[]> = {
-  sine: [0, 15],
-  triangle: [16, 31],
-  sawtooth: [32, 63],
-  "reverse-sawtooth": [64, 95],
-  square: [96, 111],
-  random: [112, 127],
-};
 
 export const WaveformSelector = ({
   property,
   label,
 }: WaveformSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const waveformCcValue = kiwiPatch[property];
+  const waveform = kiwiPatch[property];
 
-  if (!isMidiCcValue(waveformCcValue)) {
-    throw new Error("Woah! can't set string from WaveformSelector");
+  if (!isLfoWaveform(waveform)) {
+    throw new Error(`Woah! WaveformSelector cannot handle ${waveform}`);
   }
 
-  const ccValueToWaveform = (ccValue: MidiCcValue): LfoWaveform => {
-    for (const [waveform, [min, max]] of Object.entries(waveformRanges)) {
-      if (ccValue >= min && ccValue <= max) {
-        return waveform as LfoWaveform;
-      }
-    }
-    return "sine"; // Default fallback
-  };
-
-  const waveform: LfoWaveform = ccValueToWaveform(waveformCcValue);
-
   const setWaveform = (waveform: LfoWaveform) => {
-    const waveformToCcValue = (waveform: LfoWaveform): MidiCcValue => {
-      const [min, _] = waveformRanges[waveform];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
-
-      return midiCcValue;
-    };
-
-    const waveformCcValue = waveformToCcValue(waveform);
-    setKiwiPatchProperty(property, waveformCcValue, {
+    setKiwiPatchProperty(property, waveform, {
       updatedBy: "Editor Change",
     });
   };

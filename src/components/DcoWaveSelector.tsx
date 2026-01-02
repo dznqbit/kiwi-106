@@ -1,41 +1,16 @@
 import { Group, Stack } from "@mantine/core";
-import { DcoWave, KiwiPatch } from "../types/KiwiPatch";
+import { DcoWave } from "../types/KiwiPatch";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import { JunoButton } from "./JunoButton";
 import { WaveformIcon } from "./WaveformIcon";
 
 interface DcoWaveSelectorProps {
-  property: keyof KiwiPatch;
+  property: "dcoWave";
 }
-
-// Based on SysEx docs: 0000zyxx where y=Saw(Ramp) On/Off, z=Pulse(PWM) On/Off
-// Mapping DcoWave types to MIDI CC ranges
-const dcoWaveRanges: Record<DcoWave, MidiCcValue[]> = {
-  off: [0, 31], // PWM=0, Ramp=0 (zy=00)
-  ramp: [32, 63], // PWM=0, Ramp=1 (zy=01)
-  pulse: [64, 95], // PWM=1, Ramp=0 (zy=10)
-  "ramp-and-pulse": [96, 127], // PWM=1, Ramp=1 (zy=11)
-};
 
 export const DcoWaveSelector = ({ property }: DcoWaveSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const dcoWaveValue = kiwiPatch[property];
-
-  if (!isMidiCcValue(dcoWaveValue)) {
-    throw new Error("Woah! can't set string from DcoWaveSelector");
-  }
-
-  const ccValueToDcoWave = (ccValue: MidiCcValue): DcoWave => {
-    for (const [waveValue, [min, max]] of Object.entries(dcoWaveRanges)) {
-      if (ccValue >= min && ccValue <= max) {
-        return waveValue as DcoWave;
-      }
-    }
-    return "off"; // Default fallback
-  };
-
-  const dcoWave: DcoWave = ccValueToDcoWave(dcoWaveValue);
+  const dcoWave = kiwiPatch[property];
 
   const isPwmOn = dcoWave === "pulse" || dcoWave === "ramp-and-pulse";
   const isRampOn = dcoWave === "ramp" || dcoWave === "ramp-and-pulse";
@@ -61,19 +36,7 @@ export const DcoWaveSelector = ({ property }: DcoWaveSelectorProps) => {
   };
 
   const setDcoWave = (wave: DcoWave) => {
-    const waveToCcValue = (wave: DcoWave): MidiCcValue => {
-      const [min, _] = dcoWaveRanges[wave];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
-
-      return midiCcValue;
-    };
-
-    const dcoWaveCcValue = waveToCcValue(wave);
-    console.log("Setting DCO wave", wave, dcoWaveCcValue);
-    setKiwiPatchProperty(property, dcoWaveCcValue, {
+    setKiwiPatchProperty("dcoWave", wave, {
       updatedBy: "Editor Change",
     });
   };

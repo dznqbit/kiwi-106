@@ -1,60 +1,32 @@
 import { Button, Stack, Text } from "@mantine/core";
-import { PwmControlSource, KiwiPatch } from "../types/KiwiPatch";
+import {
+  PwmControlSource,
+  KiwiPatch,
+  isPwmControlSource,
+} from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 
 interface PwmControlSelectorProps {
   property: keyof KiwiPatch;
   label?: string;
 }
 
-const pwmControlRanges: Record<PwmControlSource, MidiCcValue[]> = {
-  manual: [0, 18],
-  lfo1: [19, 36],
-  lfo2: [37, 54],
-  env1: [55, 72],
-  env2: [73, 90],
-  "env1-inverted": [91, 108],
-  "env2-inverted": [109, 127],
-};
-
 export const PwmControlSelector = ({
   property,
   label,
 }: PwmControlSelectorProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const pwmControlCcValue = kiwiPatch[property];
+  const pwmControl = kiwiPatch[property];
 
-  if (!isMidiCcValue(pwmControlCcValue)) {
-    throw new Error("Woah! can't set string from PwmControlSelector");
+  if (!isPwmControlSource(pwmControl)) {
+    throw new Error(
+      `Woah! PwmControlSelector for ${property} cannot handle ${pwmControl}`,
+    );
   }
 
-  const ccValueToPwmControl = (ccValue: MidiCcValue): PwmControlSource => {
-    for (const [pwmControl, [min, max]] of Object.entries(pwmControlRanges)) {
-      if (ccValue >= min && ccValue <= max) {
-        return pwmControl as PwmControlSource;
-      }
-    }
-    return "manual"; // Default fallback
-  };
-
-  const pwmControl: PwmControlSource = ccValueToPwmControl(pwmControlCcValue);
-
   const setPwmControl = (pwmControl: PwmControlSource) => {
-    const pwmControlToCcValue = (pwmControl: PwmControlSource): MidiCcValue => {
-      const [min, _] = pwmControlRanges[pwmControl];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
-
-      return midiCcValue;
-    };
-
-    const pwmControlCcValue = pwmControlToCcValue(pwmControl);
-    console.log("Setting PWM control", pwmControlCcValue);
-    setKiwiPatchProperty(property, pwmControlCcValue, {
+    setKiwiPatchProperty(property, pwmControl, {
       updatedBy: "Editor Change",
     });
   };

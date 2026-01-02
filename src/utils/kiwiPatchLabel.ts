@@ -14,7 +14,6 @@ export const labelMapping: Record<keyof KiwiPatch, string> = {
   dcoEnvelopeModAmount: "DCO Envelope Mod Amount",
   dcoEnvelopeSource: "DCO Envelope Source",
 
-  lfoMode: "LFO Mode",
   lfo1Wave: "LFO 1 Wave",
   lfo1Rate: "LFO 1 Rate",
   lfo1Delay: "LFO 1 Delay",

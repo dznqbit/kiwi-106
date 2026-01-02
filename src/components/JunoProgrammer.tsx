@@ -18,8 +18,20 @@ import {
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { isDcoRange } from "../types/KiwiPatch";
-import { dcoRangeControlChangeValues } from "../utils/kiwiMidi";
+import { KiwiPatch } from "../types/KiwiPatch";
+import {
+  chorusModeControlChangeValues,
+  lfoSourceControlChangeValues,
+  dcoRangeControlChangeValues,
+  dcoWaveControlChangeValues,
+  envelopeSourceControlChangeValues,
+  keyAssignDetuneModeControlChangeValues,
+  keyModeControlChangeValues,
+  lfoWaveformControlChangeValues,
+  pwmControlSourceControlChangeValues,
+  vcaModeControlChangeValues,
+} from "../utils/kiwiMidi";
+import { controlChangeValue } from "../utils/controlChangeValue";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -48,25 +60,138 @@ export const JunoProgrammer = () => {
     }
 
     const updatePatchFromControlChange = (e: ControlChangeMessageEvent) => {
+      // Seems like we can detect presses of the "Manual" button:
+      // CC "All Notes Off"
+      // CC vcaMode
+      // CC vcfEnvelopeSource
+      // CC dcoPwmControl
+
       const [_, b1, b2] = e.data;
 
       const patchKey = kiwiPatchKey(b1);
       const ccData = trimMidiCcValue(b2);
+      const options = {
+        updatedBy: "Control Change" as const,
+      };
 
+      console.log(`[cc -> patch] ${patchKey} ${ccData}`);
       if (patchKey) {
-        if (patchKey === "dcoRange") {
-          const dcoRange =
-            Object.keys(dcoRangeControlChangeValues).find((k) => {
-              if (isDcoRange(k)) {
-                const [loBound, hiBound] = dcoRangeControlChangeValues[k];
-                if (ccData >= loBound && ccData <= hiBound) {
-                  return true;
-                }
-              }
-            }) ?? "16";
-          setPatchProperty(patchKey, dcoRange, { updatedBy: "Control Change" });
-        } else {
-          setPatchProperty(patchKey, ccData, { updatedBy: "Control Change" });
+        switch (patchKey) {
+          case "dcoPwmControl":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, pwmControlSourceControlChangeValues) ??
+                "manual",
+              options,
+            );
+            break;
+
+          case "dcoRange":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, dcoRangeControlChangeValues) ?? "16",
+              options,
+            );
+            break;
+
+          case "dcoWave":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, dcoWaveControlChangeValues) ?? "off",
+              options,
+            );
+            break;
+
+          case "dcoLfoSource":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, lfoSourceControlChangeValues) ??
+                "lfo1",
+              options,
+            );
+            break;
+
+          case "lfo1Mode":
+          case "lfo2Mode":
+            console.log(`[cc -> patch] ignoring ${patchKey}`);
+            break;
+
+          case "lfo1Wave":
+          case "lfo2Wave":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, lfoWaveformControlChangeValues) ??
+                "sine",
+              options,
+            );
+            break;
+
+          case "vcfEnvelopeSource":
+          case "dcoEnvelopeSource":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, envelopeSourceControlChangeValues) ??
+                "env1",
+              options,
+            );
+            break;
+
+          case "vcfLfoSource":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, lfoSourceControlChangeValues) ??
+                "lfo1",
+              options,
+            );
+            break;
+
+          case "vcaLfoSource":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, lfoSourceControlChangeValues) ??
+                "lfo1",
+              options,
+            );
+            break;
+
+          case "chorusMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, chorusModeControlChangeValues) ??
+                "off",
+              options,
+            );
+            break;
+
+          case "vcaMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, vcaModeControlChangeValues) ?? "env1",
+              options,
+            );
+            break;
+
+          case "keyMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(ccData, keyModeControlChangeValues) ?? "poly1",
+              options,
+            );
+            break;
+
+          case "keyAssignDetuneMode":
+            setPatchProperty(
+              patchKey,
+              controlChangeValue(
+                ccData,
+                keyAssignDetuneModeControlChangeValues,
+              ) ?? "unison-only",
+              options,
+            );
+            break;
+
+          default:
+            setPatchProperty(patchKey, ccData, options);
         }
       } else {
         console.log("Received unknown", kiwiCcLabel(b1));
@@ -151,14 +276,34 @@ export const JunoProgrammer = () => {
           const channel = output.channels[configStore.outputChannel];
 
           for (const k of objectKeys(diff)) {
-            if (diff[k] !== undefined) {
-              if (isDcoRange(diff[k])) {
-                channel.sendControlChange(
-                  kiwiCcController(k),
-                  dcoRangeControlChangeValues[diff[k]],
-                );
-              } else if (isMidiCcValue(diff[k])) {
-                channel.sendControlChange(kiwiCcController(k), diff[k]);
+            const value = diff[k];
+            if (value !== undefined) {
+              const props: Array<keyof KiwiPatch> = [
+                "lfo1Mode",
+                "lfo2Mode",
+                "dcoRange",
+                "dcoWave",
+                "dcoLfoSource",
+                "vcfLfoSource",
+                "vcaLfoSource",
+                "chorusMode",
+                "vcaMode",
+                "keyMode",
+                "keyAssignDetuneMode",
+              ];
+
+              if (props.includes(k)) {
+                kiwiMidi?.sendControlChange(k, value);
+              } else if (isMidiCcValue(value)) {
+                if (k === "dcoPwmControl") {
+                  console.log("Update pwm control to", value);
+                }
+
+                if (k === "dcoPwmModAmount") {
+                  console.log("Update pwm amount to", value);
+                }
+
+                channel.sendControlChange(kiwiCcController(k), value);
               }
             }
           }
@@ -167,7 +312,7 @@ export const JunoProgrammer = () => {
     );
 
     return unsubscribeKiwiSyncer;
-  }, [configStore.output?.id, configStore.outputChannel]);
+  }, [configStore.output?.id, configStore.outputChannel, kiwiMidi]);
 
   return (
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">

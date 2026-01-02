@@ -1,60 +1,27 @@
 import { Button, Stack, Text } from "@mantine/core";
-import { EnvelopeSource, KiwiPatch } from "../types/KiwiPatch";
+import { EnvelopeSource, isEnvelopeSource } from "../types/KiwiPatch";
 import { kiwiPatchLabel } from "../utils/kiwiPatchLabel";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
-import { isMidiCcValue, MidiCcValue } from "../types/Midi";
 import _ from "lodash";
 
 interface EnvelopeSelectorButtonProps {
-  property: keyof KiwiPatch;
+  property: "dcoEnvelopeSource" | "vcfEnvelopeSource";
   label?: string;
 }
-
-const envelopeSelectRanges: Record<EnvelopeSource, MidiCcValue[]> = {
-  env1: [0, 31],
-  env2: [64, 95],
-  "env1-inverted": [32, 63],
-  "env2-inverted": [96, 127],
-};
 
 export const EnvelopeSelector = ({
   property,
   label,
 }: EnvelopeSelectorButtonProps) => {
   const { kiwiPatch, setKiwiPatchProperty } = useKiwiPatchStore();
-  const envSelectValue = kiwiPatch[property];
+  const envelopeSource = kiwiPatch[property];
 
-  if (!isMidiCcValue(envSelectValue)) {
-    throw new Error("Woah! can't set string from WaveformSelector");
+  if (!isEnvelopeSource(envelopeSource)) {
+    throw new Error(`Woah! EnvelopSelector cannot handle ${envelopeSource}`);
   }
 
-  const ccValueToEnvelopeSource = (ccValue: MidiCcValue): EnvelopeSource => {
-    for (const [envSelectValue, [min, max]] of Object.entries(
-      envelopeSelectRanges,
-    )) {
-      if (ccValue >= min && ccValue <= max) {
-        return envSelectValue as EnvelopeSource;
-      }
-    }
-    return "env1"; // Default fallback
-  };
-
-  const envelopeSource: EnvelopeSource =
-    ccValueToEnvelopeSource(envSelectValue);
-
-  const setEnvelopeSource = (waveform: EnvelopeSource) => {
-    const waveformToCcValue = (waveform: EnvelopeSource): MidiCcValue => {
-      const [min, _] = envelopeSelectRanges[waveform];
-      const midiCcValue = min;
-      if (!isMidiCcValue(midiCcValue)) {
-        throw new Error("Computed impossible Midi CC value");
-      }
-
-      return midiCcValue;
-    };
-
-    const envelopeSourceCcValue = waveformToCcValue(waveform);
-    setKiwiPatchProperty(property, envelopeSourceCcValue, {
+  const setEnvelopeSource = (source: EnvelopeSource) => {
+    setKiwiPatchProperty(property, source, {
       updatedBy: "Editor Change",
     });
   };

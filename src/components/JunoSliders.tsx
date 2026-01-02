@@ -7,13 +7,18 @@ import { LfoSelector } from "./LfoSelector";
 import { DcoRangeSelector } from "./DcoRangeSelector";
 import { PwmControlSelector } from "./PwmControlSelector";
 import { DcoWaveSelector } from "./DcoWaveSelector";
+import { LfoModeSelector } from "./LfoModeSelector";
+import { ChorusModeSelector } from "./ChorusModeSelector";
+import { VcaModeSelector } from "./VcaModeSelector";
+import { KeyModeSelector } from "./KeyModeSelector";
+import { DetuneModeSelector } from "./DetuneModeSelector";
 
 export const JunoSliders = () => {
   return (
     <Container size="xl">
-      <Group>
+      <Group align="flex-start">
         <Kiwi106Fieldset legend="BEND">
-          <Group>
+          <Group align="flex-start">
             <KiwiPatchPropertySlider label="DCO" property="dcoBendAmount" />
             <KiwiPatchPropertySlider label="VCF" property="vcfBendAmount" />
             <KiwiPatchPropertySlider label="LFO" property="lfoModWheelAmount" />
@@ -23,6 +28,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="LFO1">
           <Group align="flex-start">
+            <LfoModeSelector label="MODE" property="lfo1Mode" />
             <WaveformSelector label="WAVE" property="lfo1Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo1Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo1Delay" />
@@ -31,9 +37,24 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="LFO2">
           <Group align="flex-start">
+            <LfoModeSelector label="MODE" property="lfo2Mode" />
             <WaveformSelector label="WAVE" property="lfo2Wave" />
             <KiwiPatchPropertySlider label="RATE" property="lfo2Rate" />
             <KiwiPatchPropertySlider label="DELAY TIME" property="lfo2Delay" />
+          </Group>
+        </Kiwi106Fieldset>
+
+        <Kiwi106Fieldset legend="KEY MODE">
+          <Group align="flex-start">
+            <KeyModeSelector label="KEY MODE" property="keyMode" />
+            <DetuneModeSelector
+              label="DETUNE MODE"
+              property="keyAssignDetuneMode"
+            />
+            <KiwiPatchPropertySlider
+              label="DETUNE"
+              property="keyAssignDetune"
+            />
           </Group>
         </Kiwi106Fieldset>
 
@@ -79,6 +100,7 @@ export const JunoSliders = () => {
 
         <Kiwi106Fieldset legend="VCA">
           <Group align="flex-start">
+            <VcaModeSelector label="MODE" property="vcaMode" />
             <LfoSelector label="LFO Source" property="vcaLfoSource" />
             <KiwiPatchPropertySlider label="LFO" property="vcaLfoModAmount" />
             <KiwiPatchPropertySlider label="LEVEL" property="volume" />
@@ -100,6 +122,12 @@ export const JunoSliders = () => {
             <KiwiPatchPropertySlider label="D" property="env2Decay" />
             <KiwiPatchPropertySlider label="S" property="env2Sustain" />
             <KiwiPatchPropertySlider label="R" property="env2Release" />
+          </Group>
+        </Kiwi106Fieldset>
+
+        <Kiwi106Fieldset legend="CHORUS">
+          <Group align="flex-start">
+            <ChorusModeSelector property="chorusMode" />
           </Group>
         </Kiwi106Fieldset>
       </Group>
