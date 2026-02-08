@@ -7,9 +7,12 @@ Create a web interface for the Kiwi-106 synthesizer upgrade to:
 
 ## Key Reference Files
 - `docs/kiwi-106-sysex-reference.md` - Complete MIDI SysEx command reference
+- `docs/mantine-llms.txt` - Mantine component library reference
 
 ## Project Dependencies
-Frontend is built in React + Mantine.
+- React 18
+- Mantine 8 (reference docs here: https://mantine.dev/llms.txt)
+- WebMidi 
 
 ## Claude Instructions
 ### Communication Style
