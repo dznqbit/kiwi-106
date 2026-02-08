@@ -1,0 +1,24 @@
+.indicator {
+  transition: background-color 1s steps(1, jump-end);
+  background-color: #880000;
+
+  &.--active {
+    background-color: #44ff44;
+  }
+
+  &.--enabled {
+    background-color: #22bb22;
+  }
+
+  &.--error {
+    background-color: #ff2222;
+  }
+
+  &.--selected {
+    background-color: #ff2222;
+  }
+
+  &.--warning {
+    background-color: #ffff22;
+  }
+}

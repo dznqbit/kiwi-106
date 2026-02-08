@@ -1,5 +1,11 @@
 import { type Input, type Output } from "webmidi";
-import { type KiwiMidi } from "../types/KiwiMidi";
+import {
+  KiwiMidiEvent,
+  KiwiMidiEventListener,
+  type KiwiMidiReceiveMessageEvent,
+  type KiwiMidiSendMessageEvent,
+  type KiwiMidi,
+} from "../types/KiwiMidi";
 import {
   kiwi106Identifier,
   kiwiTechnicsSysexId,
@@ -143,7 +149,40 @@ export const buildKiwiMidi = ({
   input: Input;
   output: Output;
 }): KiwiMidi => {
+  const eventListeners: Record<number, KiwiMidiEventListener> = {};
+  const eventListenerIds: Record<KiwiMidiEvent, number[]> = {
+    receiveMessage: [],
+    sendMessage: [],
+  };
+  let nextListenerId = 0;
+
+  const emit = (
+    event: KiwiMidiReceiveMessageEvent | KiwiMidiSendMessageEvent,
+  ) => {
+    for (const id of eventListenerIds[event.name]) {
+      eventListeners[id](event);
+    }
+  };
+
   return {
+    addEventListener: (eventName, listener) => {
+      const eventListenerId = nextListenerId++;
+      eventListeners[eventListenerId] = listener;
+
+      eventListenerIds[eventName].push(eventListenerId);
+      return eventListenerId;
+    },
+
+    removeEventListener: (eventName, eventListenerId) => {
+      const listeners = eventListenerIds[eventName];
+      const idx = listeners.indexOf(eventListenerId);
+
+      if (idx > -1) {
+        listeners.splice(idx, 1);
+        delete eventListeners[eventListenerId];
+      }
+    },
+
     requestSysexDeviceEnquiry: () => {
       const universalNonRealtimeIdentification = [0x7e];
       const universalData: number[] = [
@@ -153,6 +192,7 @@ export const buildKiwiMidi = ({
       ];
 
       output.sendSysex(universalNonRealtimeIdentification, universalData);
+      emit({ name: "sendMessage" });
     },
 
     requestSysexEditBufferDump: () => {
@@ -161,6 +201,7 @@ export const buildKiwiMidi = ({
         0x00, // Required "Device ID"
         0x03, // Request Buffer Dump
       ]);
+      emit({ name: "sendMessage" });
     },
 
     requestSysexGlobalDump: () => {
@@ -169,6 +210,7 @@ export const buildKiwiMidi = ({
         0x00, // Required "Device ID"
         0x01, // Request Global Dump
       ]);
+      emit({ name: "sendMessage" });
     },
 
     requestSysexPatchName: () => {
@@ -177,6 +219,7 @@ export const buildKiwiMidi = ({
         0x00, // Required "Device ID"
         0x0b, // Request patch name
       ]);
+      emit({ name: "sendMessage" });
     },
 
     sendProgramChange: (patchAddress: KiwiPatchAddress | "manual") => {
@@ -197,6 +240,8 @@ export const buildKiwiMidi = ({
         output.sendControlChange(32, groupIndex);
         output.sendProgramChange(baseTenPatchNumber);
       }
+
+      emit({ name: "sendMessage" });
     },
 
     sendControlChange: <K extends keyof KiwiPatch>(
@@ -257,6 +302,7 @@ export const buildKiwiMidi = ({
 
       if (ccByte !== undefined) {
         output.sendControlChange(kiwiCcController(key), ccByte);
+        emit({ name: "sendMessage" });
       }
     },
 
@@ -271,6 +317,7 @@ export const buildKiwiMidi = ({
         0x00,
         ...dataBytes,
       ]);
+      emit({ name: "sendMessage" });
     },
 
     sendSysexGlobalDump: (kiwiGlobalData: KiwiGlobalData) => {
@@ -281,9 +328,16 @@ export const buildKiwiMidi = ({
 
         ...buildKiwi106GlobalDumpSysexData(kiwiGlobalData),
       ]);
+      emit({ name: "sendMessage" });
+    },
+
+    receivedMessage: () => {
+      emit({ name: "receiveMessage" });
     },
 
     parseSysex: (message: MidiMessage) => {
+      emit({ name: "receiveMessage" });
+
       if (!isAnyKiwi106SysexMessage(message)) {
         throw new Error(
           "[kiwiMidi] could not interpret non-Kiwi106 sysex message",

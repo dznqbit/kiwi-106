@@ -60,6 +60,8 @@ export const JunoProgrammer = () => {
     }
 
     const updatePatchFromControlChange = (e: ControlChangeMessageEvent) => {
+      kiwiMidi?.receivedMessage();
+
       // Seems like we can detect presses of the "Manual" button:
       // CC "All Notes Off"
       // CC vcaMode

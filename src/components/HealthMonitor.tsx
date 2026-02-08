@@ -1,28 +1,24 @@
-import { Box, Group, Tooltip } from "@mantine/core";
+import { Group, Tooltip } from "@mantine/core";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiContextStatus } from "../contexts/MidiContext";
-import { EventEmitter, WebMidi } from "webmidi";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { IndicatorLed } from "./IndicatorLed";
+import { flashIndicatorLed } from "../utils/flashIndicatorLed";
 
 type IndicatorStatus = "init" | "enabled" | "error" | "warning";
-
-const indicatorColors: Record<IndicatorStatus, string> = {
-  init: "grey",
-  enabled: "green",
-  error: "red",
-  warning: "yellow",
-};
 
 const Indicator = ({
   status,
   label,
+  ledRef,
 }: {
   status: IndicatorStatus;
   label: string;
+  ledRef?: React.Ref<HTMLDivElement>;
 }) => (
   <Tooltip label={label}>
-    <Box w={20} h={20} bg={indicatorColors[status]}></Box>
+    <IndicatorLed ref={ledRef} status={status} />
   </Tooltip>
 );
 
@@ -70,23 +66,44 @@ const KiwiContextIndicator = () => {
 };
 
 const MidiTrafficIndicators = () => {
+  const midiInputRef = useRef<null | HTMLDivElement>(null);
+  const midiOutputRef = useRef<null | HTMLDivElement>(null);
+
   const kiwi106Context = useKiwi106Context();
-  
-  if (kiwi106Context.active) {
-    return (
-      <>
-        <Indicator label="MIDI Out" status="init" />
-        <Indicator label="MIDI In" status="init" />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <Indicator label="MIDI Out" status="init" />
-        <Indicator label="MIDI In" status="init" />
-      </>
-    );
-  }
+
+  useEffect(() => {
+    if (kiwi106Context.active) {
+      const { kiwiMidi } = kiwi106Context;
+      const receiveMessageHandle = kiwiMidi.addEventListener(
+        "receiveMessage",
+        () => {
+          const currentInputRef = midiInputRef?.current;
+          if (currentInputRef != null) {
+            flashIndicatorLed(currentInputRef);
+          }
+        },
+      );
+
+      const sentMessageHandle = kiwiMidi.addEventListener("sendMessage", () => {
+        const currentOutputRef = midiOutputRef?.current;
+        if (currentOutputRef != null) {
+          flashIndicatorLed(currentOutputRef);
+        }
+      });
+
+      return () => {
+        kiwiMidi.removeEventListener("receiveMessage", receiveMessageHandle);
+        kiwiMidi.removeEventListener("sendMessage", sentMessageHandle);
+      };
+    }
+  }, [kiwi106Context]);
+
+  return (
+    <>
+      <Indicator ledRef={midiOutputRef} label="MIDI Out" status="init" />
+      <Indicator ledRef={midiInputRef} label="MIDI In" status="init" />
+    </>
+  );
 };
 
 export const HealthMonitor = () => {

@@ -1,5 +1,6 @@
 import { Box, Button, Stack, Text } from "@mantine/core";
 import { ReactNode } from "react";
+import { IndicatorLed } from "./IndicatorLed";
 
 interface JunoButtonProps {
   label: string | ReactNode;
@@ -36,16 +37,7 @@ export const JunoButton = ({
         <Box style={{ fontSize: "12px", fontWeight: "bold" }}>{label}</Box>
       )}
 
-      <Box
-        style={{
-          margin: "8px 0 4px 0",
-          width: ledSize,
-          height: ledSize,
-          borderRadius: "50%",
-          backgroundColor: isSelected ? "#ff0000" : "#880000",
-          transition: "all 0.15s ease",
-        }}
-      />
+      <IndicatorLed status={isSelected ? "selected" : "init"} />
 
       <Box bg="black" py={2} px={1}>
         <Button
