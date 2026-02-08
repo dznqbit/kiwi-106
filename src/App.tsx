@@ -7,7 +7,6 @@ import {
   Drawer,
   Stack,
   Divider,
-  Code,
 } from "@mantine/core";
 import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { JunoProgrammer } from "./components/JunoProgrammer";
@@ -26,6 +25,7 @@ import { NoteButton } from "./components/NoteButton";
 import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferDumpButton";
 import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
 import { ConfigModal } from "./components/ConfigModal";
+import { HealthMonitor } from "./components/HealthMonitor";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -49,16 +49,13 @@ function Kiwi106Programmer() {
               <H1 p={0} mb={-24}>
                 KIWI-106
               </H1>
+
+              <HealthMonitor />
               {!kiwi106Context.active && (
                 <Group>
                   <JunoButtonGroup>
                     <InitializeMidiContextButton />
                   </JunoButtonGroup>
-                  {kiwi106Context.midiError && (
-                    <Code color="red">
-                      Something went wrong. Try restarting your browser.
-                    </Code>
-                  )}
                 </Group>
               )}
             </Group>

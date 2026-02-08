@@ -4,12 +4,13 @@ import { KiwiGlobalData } from "../types/KiwiGlobalData";
 
 type DisabledKiwi106Context = {
   active: false;
-  midiError: string | null;
+  error: string | null;
 };
 
 type EnabledKiwi106Context = {
   active: true;
-  midiError: string | null;
+  error: string | null;
+  connected: boolean;
   programVersion: string;
   bootloaderVersion: string;
   buildNumber: string;
@@ -21,7 +22,7 @@ export type Kiwi106Context = EnabledKiwi106Context | DisabledKiwi106Context;
 
 const defaultKiwi106Context: Kiwi106Context = {
   active: false,
-  midiError: null,
+  error: null,
 };
 
 export const Kiwi106Context = createContext<Kiwi106Context>(

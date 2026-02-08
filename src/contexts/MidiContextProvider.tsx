@@ -19,6 +19,7 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
   const [enableData, setEnableData] = useState<MidiContextEnableData>({
     enabled: false,
     enableError: null,
+    status: 'uninitialized',
   });
 
   const initialize = useCallback(() => {
@@ -34,6 +35,7 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
 
         setEnableData({
           enabled: true,
+          status: 'enabled',
           enableError: null,
         });
       })
@@ -41,6 +43,7 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
         console.log("MidiContext Initialize Failure:", err);
         setEnableData({
           enabled: false,
+          status: 'error',
           enableError: err,
         });
       });
