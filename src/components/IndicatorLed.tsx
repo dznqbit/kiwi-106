@@ -1,17 +1,16 @@
 import { forwardRef } from "react";
-import { Box } from "@mantine/core";
+import { Box, Flex } from "@mantine/core";
 import classes from "./IndicatorLed.module.css";
 
 type IndicatorLedStatus = "init" | "enabled" | "error" | "selected" | "warning";
 
 interface IndicatorLedProps {
-  className?: string;
   size?: "sm" | "md" | "lg";
   status?: IndicatorLedStatus;
 }
 
 export const IndicatorLed = forwardRef<HTMLDivElement, IndicatorLedProps>(
-  ({ className, size = "md", status }, ref) => {
+  ({ size = "md", status }, ref) => {
     const ledSize = {
       sm: 6,
       md: 8,
@@ -19,13 +18,12 @@ export const IndicatorLed = forwardRef<HTMLDivElement, IndicatorLedProps>(
     }[size];
 
     const classNames: string = [
-      className,
       classes.indicator,
       status ? classes[`--${status}`] : "",
     ].join(" ");
 
     return (
-      <Box
+      <Flex
         ref={ref}
         className={classNames}
         style={{
@@ -35,7 +33,9 @@ export const IndicatorLed = forwardRef<HTMLDivElement, IndicatorLedProps>(
           borderRadius: "50%",
           transition: "all 0.15s ease",
         }}
-      />
+      >
+        <Box className={classes.twinkle} />
+      </Flex>
     );
   },
 );

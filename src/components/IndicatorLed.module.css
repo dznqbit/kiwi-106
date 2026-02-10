@@ -22,3 +22,12 @@
     background-color: #ffff22;
   }
 }
+
+.twinkle {
+  background-color: #FFFFFFAA;
+  width: 2px;
+  height: 2px;
+  border-radius: 1px;
+  margin-left: 45%;
+  margin-top: 25%;
+}

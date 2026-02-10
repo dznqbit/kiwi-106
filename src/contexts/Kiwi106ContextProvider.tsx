@@ -10,7 +10,7 @@ import { useConfigStore } from "../stores/configStore";
 import { Kiwi106Context } from "./Kiwi106Context";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
-import { KiwiMidi } from "../types/KiwiMidi";
+import { KiwiMidi, KiwiMidiFatalError } from "../types/KiwiMidi";
 import { buildKiwiMidi } from "../utils/kiwiMidi";
 import { type KiwiGlobalData } from "../types/KiwiGlobalData";
 
@@ -25,6 +25,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   const [active, setActive] = useState(false);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // const [fatalError, setFatalError] = useState<KiwiMidiFatalError | null>(null);
   const [kiwiMidi, setKiwiMidi] = useState<KiwiMidi | null>(null);
   const [programVersion, setProgramVersion] = useState<string | null>(null);
   const [bootloaderVersion, setBootloaderVersion] = useState<string | null>(
@@ -83,6 +84,9 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
 
     const input = WebMidi.getInputById(midiInputId);
     if (!input) {
+      for (const input of WebMidi.inputs) {
+        console.log("Input:", input.name)
+      }
       fail(`Could not select midiInput "${midiInputId}"`);
       return;
     }
