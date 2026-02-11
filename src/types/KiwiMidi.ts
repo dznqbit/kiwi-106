@@ -7,7 +7,7 @@ import {
 import { KiwiGlobalData } from "./KiwiGlobalData";
 import { MidiMessage } from "./Midi";
 
-export type KiwiMidiFatalError = 'fail';
+export type KiwiMidiFatalError = "fail";
 export type KiwiMidiEvent = "receiveMessage" | "sendMessage";
 export type KiwiMidiReceiveMessageEvent = {
   name: "receiveMessage";

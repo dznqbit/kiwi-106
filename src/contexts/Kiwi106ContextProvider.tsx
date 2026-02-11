@@ -85,7 +85,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     const input = WebMidi.getInputById(midiInputId);
     if (!input) {
       for (const input of WebMidi.inputs) {
-        console.log("Input:", input.name)
+        console.log("Input:", input.name);
       }
       fail(`Could not select midiInput "${midiInputId}"`);
       return;
