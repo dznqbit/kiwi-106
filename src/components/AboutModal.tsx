@@ -45,7 +45,8 @@ export const AboutModal = ({ opened, onClose }: AboutModalProps) => {
               >
                 Github Issues form
               </Anchor>
-              . You're also welcome to fork this and modify it for your own needs.
+              . You're also welcome to fork this and modify it for your own
+              needs.
             </Text>
 
             <Divider />

@@ -63,11 +63,7 @@ function Kiwi106Programmer() {
                 <MidiPanicButton title="Panic" />
                 <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
                 <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
-                <Button
-                  title="About"
-                  variant="juno"
-                  onClick={toggleAboutModal}
-                >
+                <Button title="About" variant="juno" onClick={toggleAboutModal}>
                   <IconInfoCircle color="black" />
                 </Button>
                 <Button
@@ -85,10 +81,7 @@ function Kiwi106Programmer() {
             <Divider color="blue" size="xl" />
           </Stack>
 
-          <AboutModal
-            opened={isAboutModalOpened}
-            onClose={closeAboutModal}
-          />
+          <AboutModal opened={isAboutModalOpened} onClose={closeAboutModal} />
           <ConfigModal
             opened={isConfigDrawerOpened}
             onClose={closeConfigDrawer}
