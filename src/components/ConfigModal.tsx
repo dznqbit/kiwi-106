@@ -8,7 +8,6 @@ import {
   Fieldset,
   Select,
   Text,
-  MantineStyleProp,
   Space,
 } from "@mantine/core";
 import { IconRefresh, IconWorldDown, IconWorldUp } from "@tabler/icons-react";
