@@ -7,18 +7,16 @@ import { useEffect } from "react";
 import { ControlChangeMessageEvent, MessageEvent, WebMidi } from "webmidi";
 import { useConfigStore } from "../stores/configStore";
 import { objectKeys } from "../utils/objectKeys";
-import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
+import { kiwiPatchKey } from "../utils/kiwiCcController";
 import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 import { PatchNameEditor } from "./PatchNameEditor";
-import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
   isAnyKiwi106SysexMessage,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { KiwiPatch } from "../types/KiwiPatch";
 import {
   chorusModeControlChangeValues,
   lfoSourceControlChangeValues,
@@ -32,6 +30,7 @@ import {
   vcaModeControlChangeValues,
 } from "../utils/kiwiMidi";
 import { controlChangeValue } from "../utils/controlChangeValue";
+import { FatalErrorAlert } from "./FatalErrorAlert";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -290,7 +289,15 @@ export const JunoProgrammer = () => {
 
   return (
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">
-      {!kiwi106Context.active && <Overlay backgroundOpacity={0.5} blur={3} />}
+      {!kiwi106Context.active && (
+        <Overlay backgroundOpacity={0.5} blur={3}>
+          {!kiwi106Context.active && kiwi106Context.fatalError && (
+            <Container size="xs" mt="xl">
+              <FatalErrorAlert fatalError={kiwi106Context.fatalError} />
+            </Container>
+          )}
+        </Overlay>
+      )}
       <JunoPatchSelector />
       <PatchNameEditor />
       <JunoSliders />

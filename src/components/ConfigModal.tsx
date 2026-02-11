@@ -184,26 +184,22 @@ interface VersionProps {
 }
 
 function Version({ kiwi106Context }: VersionProps) {
-  const style: MantineStyleProp = {
-    fontFamily: "RetroComputer, PokemonClassic, monospace",
-    fontSize: "0.6rem",
-  };
   if (kiwi106Context.active) {
     return (
       <Group gap="md">
         <Group gap="xs">
-          <Text style={style}>Program</Text>
-          <Text style={style}>v{kiwi106Context.programVersion}</Text>
+          <Text variant="retroLabel">Program</Text>
+          <Text variant="retroLabel">v{kiwi106Context.programVersion}</Text>
         </Group>
 
         <Group gap="xs">
-          <Text style={style}>Bootloader</Text>
-          <Text style={style}>v{kiwi106Context.bootloaderVersion}</Text>
+          <Text variant="retroLabel">Bootloader</Text>
+          <Text variant="retroLabel">v{kiwi106Context.bootloaderVersion}</Text>
         </Group>
 
         <Group gap="xs">
-          <Text style={style}>Build</Text>
-          <Text style={style}>v{kiwi106Context.buildNumber}</Text>
+          <Text variant="retroLabel">Build</Text>
+          <Text variant="retroLabel">v{kiwi106Context.buildNumber}</Text>
         </Group>
       </Group>
     );

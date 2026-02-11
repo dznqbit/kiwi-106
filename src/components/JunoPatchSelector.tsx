@@ -1,4 +1,4 @@
-import { Button, Center, Group, Stack, Title } from "@mantine/core";
+import { Button, Center, Group, Stack, Title, Tooltip } from "@mantine/core";
 import { JunoButtonContainer } from "./JunoButtonContainer";
 import { JunoButtonGroup } from "./JunoButtonGroup";
 import { KiwiPatchDisplay } from "./SevenSegmentDisplay";
@@ -148,12 +148,15 @@ export const JunoPatchSelector = () => {
 
       <Stack align="center" gap={4} pt={54.5}>
         <JunoButtonGroup>
-          <Button
-            variant="juno"
-            color="beige"
-            size="lg"
-            onClick={() => selectPatchAddress("manual")}
-          />
+          <Tooltip label="Sorry! Not yet">
+            <Button
+              disabled
+              variant="juno"
+              color="beige"
+              size="lg"
+              onClick={() => selectPatchAddress("manual")}
+            />
+          </Tooltip>
         </JunoButtonGroup>
         <Title order={5}>MANUAL</Title>
       </Stack>

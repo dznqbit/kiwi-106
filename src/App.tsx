@@ -4,16 +4,14 @@ import {
   Container,
   Button,
   Group,
-  Drawer,
   Stack,
   Divider,
 } from "@mantine/core";
 import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { JunoProgrammer } from "./components/JunoProgrammer";
 import { mantineTheme } from "./mantineTheme";
-import { MidiMessageTable } from "./components/MidiMessageTable";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
-import { IconLogs, IconSettings } from "@tabler/icons-react";
+import { IconSettings } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";
@@ -26,6 +24,7 @@ import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferD
 import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
 import { ConfigModal } from "./components/ConfigModal";
 import { HealthMonitor } from "./components/HealthMonitor";
+import { FatalErrorAlert } from "./components/FatalErrorAlert";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -33,11 +32,6 @@ function Kiwi106Programmer() {
   const [
     isConfigDrawerOpened,
     { toggle: toggleConfigDrawer, close: closeConfigDrawer },
-  ] = useDisclosure(false);
-
-  const [
-    isMessageLogOpened,
-    { toggle: toggleMessageLog, close: closeMessageLog },
   ] = useDisclosure(false);
 
   return (
@@ -51,7 +45,7 @@ function Kiwi106Programmer() {
               </H1>
 
               <HealthMonitor />
-              {!kiwi106Context.active && (
+              {!kiwi106Context.active && !kiwi106Context.fatalError && (
                 <Group>
                   <JunoButtonGroup>
                     <InitializeMidiContextButton />
@@ -65,14 +59,6 @@ function Kiwi106Programmer() {
               <MidiPanicButton title="Panic" />
               <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
               <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
-              <Button
-                title="Logs"
-                variant="juno"
-                color="orange"
-                onClick={toggleMessageLog}
-              >
-                <IconLogs color="black" />
-              </Button>
               <Button
                 title="Settings"
                 color="orange"
@@ -90,17 +76,6 @@ function Kiwi106Programmer() {
           opened={isConfigDrawerOpened}
           onClose={closeConfigDrawer}
         />
-
-        <Drawer
-          opened={isMessageLogOpened}
-          onClose={closeMessageLog}
-          position="bottom"
-          size="sm"
-        >
-          <Container>
-            <MidiMessageTable />
-          </Container>
-        </Drawer>
       </Container>
       <JunoProgrammer />
     </>

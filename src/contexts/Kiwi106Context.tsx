@@ -1,10 +1,11 @@
 import { createContext } from "react";
-import { KiwiMidi } from "../types/KiwiMidi";
+import { KiwiMidi, KiwiMidiFatalError } from "../types/KiwiMidi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 
 type DisabledKiwi106Context = {
   active: false;
   error: string | null;
+  fatalError: KiwiMidiFatalError | null;
 };
 
 type EnabledKiwi106Context = {
@@ -23,6 +24,7 @@ export type Kiwi106Context = EnabledKiwi106Context | DisabledKiwi106Context;
 const defaultKiwi106Context: Kiwi106Context = {
   active: false,
   error: null,
+  fatalError: null,
 };
 
 export const Kiwi106Context = createContext<Kiwi106Context>(

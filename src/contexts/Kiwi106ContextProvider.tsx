@@ -25,7 +25,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   const [active, setActive] = useState(false);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [fatalError, setFatalError] = useState<KiwiMidiFatalError | null>(null);
+  const [fatalError, setFatalError] = useState<KiwiMidiFatalError | null>(null);
   const [kiwiMidi, setKiwiMidi] = useState<KiwiMidi | null>(null);
   const [programVersion, setProgramVersion] = useState<string | null>(null);
   const [bootloaderVersion, setBootloaderVersion] = useState<string | null>(
@@ -61,8 +61,13 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
   }, [midiOutputId]);
 
   useEffect(() => {
-    const fail = (reason: string) => {
+    const fail = (reason: string, fatalError?: KiwiMidiFatalError) => {
       console.log(`[Kiwi106Context] FAIL ${reason}`);
+      
+      if (fatalError) {
+        setFatalError(fatalError);
+      }
+
       if (active) {
         setActive(false);
       }
@@ -82,11 +87,13 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
+    if (WebMidi.inputs.length === 0) {
+      fail("WebMidi could not find inputs", "webmidi-empty-inputs")
+      return
+    }
+
     const input = WebMidi.getInputById(midiInputId);
     if (!input) {
-      for (const input of WebMidi.inputs) {
-        console.log("Input:", input.name);
-      }
       fail(`Could not select midiInput "${midiInputId}"`);
       return;
     }
@@ -242,12 +249,14 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
       return {
         active: false,
         error,
+        fatalError,
       };
     }
   }, [
     active,
     connected,
     error,
+    fatalError,
     kiwiMidi,
     kiwiGlobalData,
     programVersion,
