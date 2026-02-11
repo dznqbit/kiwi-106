@@ -1,0 +1,15 @@
+.root {
+  &[data-variant='retroLabel'] {
+    .label {
+      font-family: RetroComputer, PokemonClassic, monospace;
+      font-size: 0.6rem;
+    }
+
+    .input {
+      border: 1px solid gray;
+      border-radius: 0;
+      font-family: RetroComputer, PokemonClassic, monospace;
+      font-size: 0.6rem;
+    }
+  }
+}

@@ -19,6 +19,7 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
   const [enableData, setEnableData] = useState<MidiContextEnableData>({
     enabled: false,
     enableError: null,
+    status: "uninitialized",
   });
 
   const initialize = useCallback(() => {
@@ -34,15 +35,25 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
 
         setEnableData({
           enabled: true,
+          status: "enabled",
           enableError: null,
         });
       })
       .catch((err) => {
         console.log("MidiContext Initialize Failure:", err);
-        setEnableData({
-          enabled: false,
-          enableError: err,
-        });
+        if (err instanceof TypeError) {
+          setEnableData({
+            enabled: false,
+            status: "error",
+            enableError: "WebMidi not supported by browser",
+          });
+        } else {
+          setEnableData({
+            enabled: false,
+            status: "error",
+            enableError: "Could not initialize MidiContext",
+          });
+        }
       });
   }, [configStore]);
 

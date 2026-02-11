@@ -14,7 +14,7 @@ export const PatchNameEditor = () => {
   return (
     <Group>
       <TextInput
-        label="Patch Name"
+        variant="retroLabel"
         value={patchName}
         onChange={(e) => setPatchName(e.currentTarget.value)}
         onBlur={() =>

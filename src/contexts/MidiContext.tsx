@@ -1,5 +1,6 @@
 import { createContext } from "react";
 
+export type MidiContextStatus = "uninitialized" | "error" | "enabled";
 export interface MidiPortData {
   id: string;
   name: string | null;
@@ -8,6 +9,7 @@ export interface MidiPortData {
 
 export interface MidiContextEnableData {
   enabled: boolean;
+  status: MidiContextStatus;
   enableError: string | null;
 }
 
@@ -18,6 +20,7 @@ export interface MidiContext extends MidiContextEnableData {
 const defaultMidiContext: MidiContext = {
   enabled: false,
   enableError: null,
+  status: "uninitialized",
 
   initialize: () => {},
 };

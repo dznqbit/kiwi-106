@@ -1,0 +1,7 @@
+.root {
+  &[data-variant='retroLabel'] {
+    font-family: RetroComputer, PokemonClassic, monospace;
+    font-size: 0.6rem;
+  }
+};
+  

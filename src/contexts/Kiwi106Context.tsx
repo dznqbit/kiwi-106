@@ -1,15 +1,17 @@
 import { createContext } from "react";
-import { KiwiMidi } from "../types/KiwiMidi";
+import { KiwiMidi, KiwiMidiFatalError } from "../types/KiwiMidi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 
-type DisabledKiwi106Context = {
+type BaseKiwi106Context = {
   active: false;
-  midiError: string | null;
+  error: string | null;
+  fatalError: KiwiMidiFatalError | null;
 };
 
-type EnabledKiwi106Context = {
+type ConnectedKiwi106Context = {
   active: true;
-  midiError: string | null;
+  error: string | null;
+  connected: boolean;
   programVersion: string;
   bootloaderVersion: string;
   buildNumber: string;
@@ -17,11 +19,12 @@ type EnabledKiwi106Context = {
   kiwiGlobalData: KiwiGlobalData;
 };
 
-export type Kiwi106Context = EnabledKiwi106Context | DisabledKiwi106Context;
+export type Kiwi106Context = ConnectedKiwi106Context | BaseKiwi106Context;
 
 const defaultKiwi106Context: Kiwi106Context = {
   active: false,
-  midiError: null,
+  error: null,
+  fatalError: null,
 };
 
 export const Kiwi106Context = createContext<Kiwi106Context>(

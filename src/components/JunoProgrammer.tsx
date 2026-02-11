@@ -1,4 +1,4 @@
-import { Container, Overlay } from "@mantine/core";
+import { Center, Container, Overlay } from "@mantine/core";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
@@ -7,18 +7,16 @@ import { useEffect } from "react";
 import { ControlChangeMessageEvent, MessageEvent, WebMidi } from "webmidi";
 import { useConfigStore } from "../stores/configStore";
 import { objectKeys } from "../utils/objectKeys";
-import { kiwiCcController, kiwiPatchKey } from "../utils/kiwiCcController";
+import { kiwiPatchKey } from "../utils/kiwiCcController";
 import { kiwiCcLabel } from "../utils/kiwiCcLabel";
 import { trimMidiCcValue } from "../utils/trimMidiCcValue";
 import { PatchNameEditor } from "./PatchNameEditor";
-import { isMidiCcValue } from "../types/Midi";
 import {
   isKiwi106UpdatePatchNameSysexMessage,
   isAnyKiwi106SysexMessage,
 } from "../utils/sysexUtils";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { JunoPatchSelector } from "./JunoPatchSelector";
-import { KiwiPatch } from "../types/KiwiPatch";
 import {
   chorusModeControlChangeValues,
   lfoSourceControlChangeValues,
@@ -32,6 +30,7 @@ import {
   vcaModeControlChangeValues,
 } from "../utils/kiwiMidi";
 import { controlChangeValue } from "../utils/controlChangeValue";
+import { FatalErrorAlert } from "./FatalErrorAlert";
 
 export const JunoProgrammer = () => {
   const midiContext = useMidiContext();
@@ -60,6 +59,8 @@ export const JunoProgrammer = () => {
     }
 
     const updatePatchFromControlChange = (e: ControlChangeMessageEvent) => {
+      kiwiMidi?.receivedMessage();
+
       // Seems like we can detect presses of the "Manual" button:
       // CC "All Notes Off"
       // CC vcaMode
@@ -273,38 +274,10 @@ export const JunoProgrammer = () => {
             return;
           }
 
-          const channel = output.channels[configStore.outputChannel];
-
           for (const k of objectKeys(diff)) {
             const value = diff[k];
             if (value !== undefined) {
-              const props: Array<keyof KiwiPatch> = [
-                "lfo1Mode",
-                "lfo2Mode",
-                "dcoRange",
-                "dcoWave",
-                "dcoLfoSource",
-                "vcfLfoSource",
-                "vcaLfoSource",
-                "chorusMode",
-                "vcaMode",
-                "keyMode",
-                "keyAssignDetuneMode",
-              ];
-
-              if (props.includes(k)) {
-                kiwiMidi?.sendControlChange(k, value);
-              } else if (isMidiCcValue(value)) {
-                if (k === "dcoPwmControl") {
-                  console.log("Update pwm control to", value);
-                }
-
-                if (k === "dcoPwmModAmount") {
-                  console.log("Update pwm amount to", value);
-                }
-
-                channel.sendControlChange(kiwiCcController(k), value);
-              }
+              kiwiMidi?.sendControlChange(k, value);
             }
           }
         }
@@ -316,9 +289,19 @@ export const JunoProgrammer = () => {
 
   return (
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">
-      {!kiwi106Context.active && <Overlay backgroundOpacity={0.5} blur={3} />}
+      {!kiwi106Context.active && (
+        <Overlay backgroundOpacity={0.5} blur={3}>
+          {kiwi106Context.fatalError && (
+            <Container size="xs" mt="xl">
+              <FatalErrorAlert fatalError={kiwi106Context.fatalError} />
+            </Container>
+          )}
+        </Overlay>
+      )}
       <JunoPatchSelector />
-      <PatchNameEditor />
+      <Center mt={-10} mb="lg">
+        <PatchNameEditor />
+      </Center>
       <JunoSliders />
     </Container>
   );

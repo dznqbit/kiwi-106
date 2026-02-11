@@ -7,7 +7,27 @@ import {
 import { KiwiGlobalData } from "./KiwiGlobalData";
 import { MidiMessage } from "./Midi";
 
+export type KiwiMidiFatalError =
+  | "webmidi-not-supported"
+  | "webmidi-empty-inputs";
+export type KiwiMidiEvent = "receiveMessage" | "sendMessage";
+export type KiwiMidiReceiveMessageEvent = {
+  name: "receiveMessage";
+};
+export type KiwiMidiSendMessageEvent = {
+  name: "sendMessage";
+};
+export type KiwiMidiEventListener = (
+  e: KiwiMidiReceiveMessageEvent | KiwiMidiSendMessageEvent,
+) => void;
+
 export interface KiwiMidi {
+  addEventListener(
+    eventName: KiwiMidiEvent,
+    listener: KiwiMidiEventListener,
+  ): number;
+  removeEventListener(eventName: KiwiMidiEvent, eventListenerId: number): void;
+
   requestSysexDeviceEnquiry(): void;
   requestSysexEditBufferDump(): void;
   requestSysexGlobalDump(): void;
@@ -21,6 +41,7 @@ export interface KiwiMidi {
   sendSysexPatchBufferDump(kiwiPatch: KiwiPatch): void;
   sendSysexGlobalDump(kiwiGlobalData: KiwiGlobalData): void;
 
+  receivedMessage(): void;
   parseSysex(
     message: MidiMessage,
   ):
