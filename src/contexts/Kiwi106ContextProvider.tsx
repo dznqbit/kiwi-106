@@ -13,6 +13,7 @@ import { kiwi106Identifier, kiwiTechnicsSysexId } from "../utils/sysexUtils";
 import { KiwiMidi, KiwiMidiFatalError } from "../types/KiwiMidi";
 import { buildKiwiMidi } from "../utils/kiwiMidi";
 import { type KiwiGlobalData } from "../types/KiwiGlobalData";
+import { checkBrowser } from "../utils/checkBrowser";
 
 const heartbeatIntervalMs = 5_000;
 
@@ -60,23 +61,41 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     output.sendSysex(universalNonRealtimeIdentification, universalData);
   }, [midiOutputId]);
 
-  useEffect(() => {
-    const fail = (reason: string, fatalError?: KiwiMidiFatalError) => {
+  const fail = useCallback(
+    (reason: string, myFatalError?: KiwiMidiFatalError) => {
       console.log(`[Kiwi106Context] FAIL ${reason}`);
-      
-      if (fatalError) {
-        setFatalError(fatalError);
+
+      if (myFatalError) {
+        setFatalError(myFatalError);
       }
 
       if (active) {
         setActive(false);
       }
 
+      if (connected) {
+        setConnected(false);
+      }
+
       if (kiwiMidi !== null) {
         setKiwiMidi(null);
       }
-    };
+    },
+    [active, connected, kiwiMidi],
+  );
 
+  useEffect(() => {
+    const browserCheck = checkBrowser();
+    if (!browserCheck.webMidiCapable) {
+      fail(
+        `${browserCheck.browserName} does not support WebMidi`,
+        "webmidi-not-supported",
+      );
+      return;
+    }
+  }, [fail]);
+
+  useEffect(() => {
     if (!midiContext.enabled) {
       fail("MidiContext not enabled");
       return;
@@ -88,8 +107,8 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     }
 
     if (WebMidi.inputs.length === 0) {
-      fail("WebMidi could not find inputs", "webmidi-empty-inputs")
-      return
+      fail("WebMidi could not find inputs", "webmidi-empty-inputs");
+      return;
     }
 
     const input = WebMidi.getInputById(midiInputId);
@@ -197,6 +216,8 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     configStore.input,
     configStore.output,
     active,
+    connected,
+    fail,
   ]);
 
   useEffect(() => {
@@ -248,6 +269,7 @@ export const Kiwi106ContextProvider = ({ children }: PropsWithChildren) => {
     } else {
       return {
         active: false,
+        connected,
         error,
         fatalError,
       };

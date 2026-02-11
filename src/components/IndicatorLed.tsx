@@ -27,7 +27,6 @@ export const IndicatorLed = forwardRef<HTMLDivElement, IndicatorLedProps>(
         ref={ref}
         className={classNames}
         style={{
-          margin: "8px 0 4px 0",
           width: ledSize,
           height: ledSize,
           borderRadius: "50%",

@@ -7,6 +7,20 @@ export const FatalErrorAlert = ({
 }: {
   fatalError: KiwiMidiFatalError;
 }) => {
+  if (fatalError === "webmidi-not-supported") {
+    return (
+      <Alert
+        variant="filled"
+        color="red"
+        title="Fatal Error"
+        icon={<IconExclamationCircle />}
+      >
+        Required Web MIDI API is not supported by your browser. Try Firefox or
+        Chrome!
+      </Alert>
+    );
+  }
+
   return (
     <Alert
       variant="filled"
@@ -14,8 +28,8 @@ export const FatalErrorAlert = ({
       title="Fatal Error"
       icon={<IconExclamationCircle />}
     >
-      Kiwi-106 encountered a fatal error <Code>{fatalError}</Code> and cannot recover. You
-      should restart your browser to try again.
+      Kiwi-106 encountered a fatal error <Code>{fatalError}</Code> and cannot
+      recover. You should restart your browser to try again.
     </Alert>
   );
 };

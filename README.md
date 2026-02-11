@@ -14,22 +14,27 @@ npm run dev
 ```
 
 ## Project Dependencies
-This entire project hinges on the [Web MIDI API spec](https://webaudio.github.io/web-midi-api/), which is [supported across a majority of browsers](https://caniuse.com/?search=webmidi).
+This entire project hinges on the [Web MIDI API spec](https://www.w3.org/TR/webmidi/) and these packages
 
 - [webmidi](https://webmidijs.org)
 - [React](https://react.dev)
 - [Mantine](https://mantine.dev)
 
-### Compatible Browsers
-- Firefox
-- Chrome
+### Browser Compatibility
+According to [caniuse.com](https://caniuse.com/?search=webmidi)
 
-### Incompatible Browsers
-- Safari, and this will likely never change
+| Browser | WebMidi | Tested |
+|-|-|-|
+| Firefox | ✅ | ✅ |
+| Chrome | ✅ | ❌ | 
+| Opera | ✅ | ❌ | 
+| Edge | ✅ | ❌ | 
+| Safari | ❌ | ❌ |
+| Internet Explorer | ❌ | ❌ |
 
 ### Fonts
 - [Retro Computer](https://www.dafont.com/retro-computer.font)
-- [Librestyle](https://github.com/ocelothe/Librestile)
+- [Librestile](https://github.com/ocelothe/Librestile)
 
 ## How to Contribute
 If you notice a bug, or want a feature implemented, you have three options.

@@ -15,12 +15,6 @@ export const JunoButton = ({
   onClick,
   size = "md",
 }: JunoButtonProps) => {
-  const ledSize = {
-    sm: 6,
-    md: 8,
-    lg: 10,
-  }[size];
-
   const buttonSize = {
     sm: 24,
     md: 36,
@@ -37,7 +31,9 @@ export const JunoButton = ({
         <Box style={{ fontSize: "12px", fontWeight: "bold" }}>{label}</Box>
       )}
 
-      <IndicatorLed status={isSelected ? "selected" : "init"} />
+      <Box style={{ margin: "8px 0 4px 0" }}>
+        <IndicatorLed size={size} status={isSelected ? "selected" : "init"} />
+      </Box>
 
       <Box bg="black" py={2} px={1}>
         <Button

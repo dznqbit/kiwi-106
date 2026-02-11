@@ -41,11 +41,19 @@ export const MidiContextProvider = ({ children }: PropsWithChildren) => {
       })
       .catch((err) => {
         console.log("MidiContext Initialize Failure:", err);
-        setEnableData({
-          enabled: false,
-          status: "error",
-          enableError: err,
-        });
+        if (err instanceof TypeError) {
+          setEnableData({
+            enabled: false,
+            status: "error",
+            enableError: "WebMidi not supported by browser",
+          });
+        } else {
+          setEnableData({
+            enabled: false,
+            status: "error",
+            enableError: "Could not initialize MidiContext",
+          });
+        }
       });
   }, [configStore]);
 

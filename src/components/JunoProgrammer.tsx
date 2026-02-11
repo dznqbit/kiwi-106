@@ -1,4 +1,4 @@
-import { Container, Overlay } from "@mantine/core";
+import { Center, Container, Overlay } from "@mantine/core";
 import { JunoSliders } from "./JunoSliders";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useMidiContext } from "../hooks/useMidiContext";
@@ -291,7 +291,7 @@ export const JunoProgrammer = () => {
     <Container size="xl" style={{ position: "relative" }} p={0} px="md">
       {!kiwi106Context.active && (
         <Overlay backgroundOpacity={0.5} blur={3}>
-          {!kiwi106Context.active && kiwi106Context.fatalError && (
+          {kiwi106Context.fatalError && (
             <Container size="xs" mt="xl">
               <FatalErrorAlert fatalError={kiwi106Context.fatalError} />
             </Container>
@@ -299,7 +299,9 @@ export const JunoProgrammer = () => {
         </Overlay>
       )}
       <JunoPatchSelector />
-      <PatchNameEditor />
+      <Center mt={-10} mb="lg">
+        <PatchNameEditor />
+      </Center>
       <JunoSliders />
     </Container>
   );

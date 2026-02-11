@@ -17,6 +17,7 @@ import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";
 import { InitializeMidiContextButton } from "./components/InitializeMidiContextButton";
 import { ReactNode } from "react";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useKiwi106Context } from "./hooks/useKiwi106Context";
 import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
@@ -24,7 +25,6 @@ import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferD
 import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
 import { ConfigModal } from "./components/ConfigModal";
 import { HealthMonitor } from "./components/HealthMonitor";
-import { FatalErrorAlert } from "./components/FatalErrorAlert";
 
 function Kiwi106Programmer() {
   const kiwi106Context = useKiwi106Context();
@@ -36,48 +36,49 @@ function Kiwi106Programmer() {
 
   return (
     <>
-      <Container size="xl" mt="sm" mb="lg">
-        <Stack>
-          <Group justify="space-between">
-            <Group>
-              <H1 p={0} mb={-24}>
-                KIWI-106
-              </H1>
+      <ErrorBoundary>
+        <Container size="xl" mt="sm" mb="lg">
+          <Stack>
+            <Group justify="space-between">
+              <Group>
+                <H1 p={0} mb={-24}>
+                  KIWI-106
+                </H1>
 
-              <HealthMonitor />
-              {!kiwi106Context.active && !kiwi106Context.fatalError && (
-                <Group>
-                  <JunoButtonGroup>
+                {!kiwi106Context.active && !kiwi106Context.fatalError && (
+                  <JunoButtonGroup mt="md">
                     <InitializeMidiContextButton />
                   </JunoButtonGroup>
-                </Group>
-              )}
+                )}
+              </Group>
+
+              <JunoButtonGroup mt="md">
+                <NoteButton title="Test Note" />
+                <MidiPanicButton title="Panic" />
+                <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
+                <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
+                <Button
+                  title="Settings"
+                  color="orange"
+                  variant="juno"
+                  onClick={toggleConfigDrawer}
+                >
+                  <IconSettings color="black" />
+                </Button>
+              </JunoButtonGroup>
             </Group>
 
-            <JunoButtonGroup>
-              <NoteButton title="Test Note" />
-              <MidiPanicButton title="Panic" />
-              <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
-              <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
-              <Button
-                title="Settings"
-                color="orange"
-                variant="juno"
-                onClick={toggleConfigDrawer}
-              >
-                <IconSettings color="black" />
-              </Button>
-            </JunoButtonGroup>
-          </Group>
-          <Divider color="blue" size="xl" />
-        </Stack>
+            <HealthMonitor />
+            <Divider color="blue" size="xl" />
+          </Stack>
 
-        <ConfigModal
-          opened={isConfigDrawerOpened}
-          onClose={closeConfigDrawer}
-        />
-      </Container>
-      <JunoProgrammer />
+          <ConfigModal
+            opened={isConfigDrawerOpened}
+            onClose={closeConfigDrawer}
+          />
+        </Container>
+        <JunoProgrammer />
+      </ErrorBoundary>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Group, TextInput } from "@mantine/core";
+  import { Group, TextInput } from "@mantine/core";
 import { useKiwiPatchStore } from "../stores/kiwiPatchStore";
 import { useEffect, useState } from "react";
 
@@ -14,7 +14,7 @@ export const PatchNameEditor = () => {
   return (
     <Group>
       <TextInput
-        label="Patch Name"
+        variant="retroLabel"
         value={patchName}
         onChange={(e) => setPatchName(e.currentTarget.value)}
         onBlur={() =>

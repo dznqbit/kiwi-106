@@ -7,7 +7,9 @@ import {
 import { KiwiGlobalData } from "./KiwiGlobalData";
 import { MidiMessage } from "./Midi";
 
-export type KiwiMidiFatalError = "webmidi-empty-inputs";
+export type KiwiMidiFatalError =
+  | "webmidi-not-supported"
+  | "webmidi-empty-inputs";
 export type KiwiMidiEvent = "receiveMessage" | "sendMessage";
 export type KiwiMidiReceiveMessageEvent = {
   name: "receiveMessage";

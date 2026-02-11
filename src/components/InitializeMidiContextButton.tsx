@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconPower } from "@tabler/icons-react";
 import { useMidiContext } from "../hooks/useMidiContext";
 
 export const InitializeMidiContextButton = () => {
@@ -12,7 +12,7 @@ export const InitializeMidiContextButton = () => {
       onClick={() => midiContext.initialize()}
       px="xs"
     >
-      <IconRefresh />
+      <IconPower />
     </Button>
   );
 };

@@ -1,14 +1,15 @@
-import cx from "clsx";
 import {
   Button,
   createTheme,
   defaultVariantColorsResolver,
   Modal,
   Text,
+  TextInput,
   parseThemeColor,
 } from "@mantine/core";
 import buttonStyles from "./theme/Button.module.css";
 import textStyles from "./theme/Text.module.css";
+import textInputStyles from "./theme/TextInput.module.css";
 
 // Base Red: #de2245
 const red = [
@@ -147,6 +148,10 @@ export const mantineTheme = createTheme({
 
     Text: Text.extend({
       classNames: textStyles,
+    }),
+
+    TextInput: TextInput.extend({
+      classNames: textInputStyles,
     }),
   },
 

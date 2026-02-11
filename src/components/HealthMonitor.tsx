@@ -1,4 +1,4 @@
-import { Group, Tooltip } from "@mantine/core";
+import { Group, Text, Tooltip } from "@mantine/core";
 import { useKiwi106Context } from "../hooks/useKiwi106Context";
 import { useMidiContext } from "../hooks/useMidiContext";
 import { MidiContextStatus } from "../contexts/MidiContext";
@@ -11,14 +11,19 @@ type IndicatorStatus = "init" | "enabled" | "error" | "warning";
 const Indicator = ({
   status,
   label,
+  tooltip,
   ledRef,
 }: {
-  status: IndicatorStatus;
-  label: string;
+  label?: string;
   ledRef?: React.Ref<HTMLDivElement>;
+  status: IndicatorStatus;
+  tooltip: string;
 }) => (
-  <Tooltip label={label}>
-    <IndicatorLed ref={ledRef} status={status} />
+  <Tooltip label={tooltip}>
+    <Group>
+      <Text variant="retroLabel">{label}</Text>
+      <IndicatorLed ref={ledRef} status={status} />
+    </Group>
   </Tooltip>
 );
 
@@ -36,31 +41,44 @@ const MidiContextIndicator = () => {
 
   return (
     <Indicator
-      label={midiContextTooltip}
+      label="WebMidi"
+      tooltip={midiContextTooltip}
       status={midiContextStatusMap[midiContext.status]}
     />
   );
 };
 
 const KiwiContextIndicator = () => {
+  const label = "Kiwi-106";
   const kiwi106Context = useKiwi106Context();
 
   if (kiwi106Context.active) {
     if (kiwi106Context.connected) {
-      return <Indicator label={`Kiwi106 connected`} status="enabled" />;
+      return (
+        <Indicator label={label} tooltip="Kiwi106 connected" status="enabled" />
+      );
     } else {
       return (
         <Indicator
-          label={kiwi106Context.error ?? "Kiwi106 not responding"}
+          label={label}
+          tooltip={kiwi106Context.error ?? "Kiwi106 not responding"}
           status="warning"
         />
       );
     }
   } else {
     if (kiwi106Context.error) {
-      return <Indicator label={kiwi106Context.error} status="error" />;
+      return (
+        <Indicator
+          label={label}
+          tooltip={kiwi106Context.error}
+          status="error"
+        />
+      );
     } else {
-      return <Indicator label="Kiwi106 not enabled" status="init" />;
+      return (
+        <Indicator label={label} tooltip="Kiwi106 not enabled" status="init" />
+      );
     }
   }
 };
@@ -100,8 +118,18 @@ const MidiTrafficIndicators = () => {
 
   return (
     <>
-      <Indicator ledRef={midiOutputRef} label="MIDI Out" status="init" />
-      <Indicator ledRef={midiInputRef} label="MIDI In" status="init" />
+      <Indicator
+        ledRef={midiOutputRef}
+        label="MIDI Out"
+        tooltip="MIDI Out"
+        status="init"
+      />
+      <Indicator
+        ledRef={midiInputRef}
+        label="MIDI In"
+        tooltip="MIDI In"
+        status="init"
+      />
     </>
   );
 };
