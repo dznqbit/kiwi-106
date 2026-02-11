@@ -11,7 +11,7 @@ import { MidiContextProvider } from "./contexts/MidiContextProvider";
 import { JunoProgrammer } from "./components/JunoProgrammer";
 import { mantineTheme } from "./mantineTheme";
 import { Kiwi106ContextProvider } from "./contexts/Kiwi106ContextProvider";
-import { IconSettings } from "@tabler/icons-react";
+import { IconInfoCircle, IconSettings } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { H1 } from "./components/H1";
 import { MidiPanicButton } from "./components/MidiPanicButton";
@@ -23,6 +23,7 @@ import { JunoButtonGroup } from "./components/JunoButtonGroup";
 import { NoteButton } from "./components/NoteButton";
 import { SendPatchBufferDumpButton } from "./components/Buttons/SendPatchBufferDumpButton";
 import { RequestPatchBufferDumpButton } from "./components/Buttons/RequestPatchBufferDumpButton";
+import { AboutModal } from "./components/AboutModal";
 import { ConfigModal } from "./components/ConfigModal";
 import { HealthMonitor } from "./components/HealthMonitor";
 
@@ -32,6 +33,11 @@ function Kiwi106Programmer() {
   const [
     isConfigDrawerOpened,
     { toggle: toggleConfigDrawer, close: closeConfigDrawer },
+  ] = useDisclosure(false);
+
+  const [
+    isAboutModalOpened,
+    { toggle: toggleAboutModal, close: closeAboutModal },
   ] = useDisclosure(false);
 
   return (
@@ -58,6 +64,13 @@ function Kiwi106Programmer() {
                 <RequestPatchBufferDumpButton title="Request Patch Buffer Dump" />
                 <SendPatchBufferDumpButton title="Send Patch Buffer Dump" />
                 <Button
+                  title="About"
+                  variant="juno"
+                  onClick={toggleAboutModal}
+                >
+                  <IconInfoCircle color="black" />
+                </Button>
+                <Button
                   title="Settings"
                   color="orange"
                   variant="juno"
@@ -72,6 +85,10 @@ function Kiwi106Programmer() {
             <Divider color="blue" size="xl" />
           </Stack>
 
+          <AboutModal
+            opened={isAboutModalOpened}
+            onClose={closeAboutModal}
+          />
           <ConfigModal
             opened={isConfigDrawerOpened}
             onClose={closeConfigDrawer}
