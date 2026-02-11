@@ -40,7 +40,7 @@ import {
   PwmControlSource,
   VcaMode,
 } from "../types/KiwiPatch";
-import { MidiCcValue, MidiMessage } from "../types/Midi";
+import { isMidiCcValue, MidiCcValue, MidiMessage } from "../types/Midi";
 import { KiwiGlobalData } from "../types/KiwiGlobalData";
 import {
   buildKiwi106GlobalDumpSysexData,
@@ -248,7 +248,7 @@ export const buildKiwiMidi = ({
       key: K,
       value: KiwiPatch[K],
     ) => {
-      let ccByte = undefined;
+      let ccByte;
 
       if (key === "dcoRange" && isDcoRange(value)) {
         ccByte = dcoRangeControlChangeValues[value][0];
@@ -298,6 +298,10 @@ export const buildKiwiMidi = ({
 
       if (key === "keyAssignDetuneMode" && isKeyAssignDetuneMode(value)) {
         ccByte = keyAssignDetuneModeControlChangeValues[value][0];
+      }
+
+      if (isMidiCcValue(value)) {
+        ccByte = value;
       }
 
       if (ccByte !== undefined) {

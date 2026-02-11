@@ -275,38 +275,10 @@ export const JunoProgrammer = () => {
             return;
           }
 
-          const channel = output.channels[configStore.outputChannel];
-
           for (const k of objectKeys(diff)) {
             const value = diff[k];
             if (value !== undefined) {
-              const props: Array<keyof KiwiPatch> = [
-                "lfo1Mode",
-                "lfo2Mode",
-                "dcoRange",
-                "dcoWave",
-                "dcoLfoSource",
-                "vcfLfoSource",
-                "vcaLfoSource",
-                "chorusMode",
-                "vcaMode",
-                "keyMode",
-                "keyAssignDetuneMode",
-              ];
-
-              if (props.includes(k)) {
-                kiwiMidi?.sendControlChange(k, value);
-              } else if (isMidiCcValue(value)) {
-                if (k === "dcoPwmControl") {
-                  console.log("Update pwm control to", value);
-                }
-
-                if (k === "dcoPwmModAmount") {
-                  console.log("Update pwm amount to", value);
-                }
-
-                channel.sendControlChange(kiwiCcController(k), value);
-              }
+              kiwiMidi?.sendControlChange(k, value);
             }
           }
         }
